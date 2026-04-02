@@ -1,0 +1,2358 @@
+{
+  "projectId": "69cc2966001e99b0aa94",
+  "projectName": "Mina Operativa",
+  "endpoint": "https://appwrite.racoondevs.com/v1",
+  "functions": [
+    {
+      "$id": "create-user",
+      "name": "Create User",
+      "runtime": "node-18.0",
+      "execute": ["label:admin", "label:owner"],
+      "events": [],
+      "schedule": "",
+      "timeout": 15,
+      "enabled": true,
+      "logging": true,
+      "entrypoint": "src/index.js",
+      "commands": "npm install",
+      "scopes": [
+        "users.read",
+        "users.write",
+        "databases.read",
+        "databases.write"
+      ],
+      "vars": [
+        {
+          "name": "APPWRITE_DATABASE_ID",
+          "value": "mina_db"
+        }
+      ],
+      "ignore": ["node_modules", ".npm"],
+      "path": "functions/create-user"
+    }
+  ],
+  "databases": [
+    {
+      "$id": "mina_db",
+      "name": "Mina Operativa DB",
+      "enabled": true
+    }
+  ],
+  "collections": [
+    {
+      "$id": "users_profile",
+      "$permissions": [
+        "create(\"users\")",
+        "read(\"label:owner\")",
+        "read(\"label:admin\")",
+        "read(\"label:user\")",
+        "update(\"label:owner\")",
+        "update(\"label:admin\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Usuarios",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "userId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 128
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 320
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "phone",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 20
+        },
+        {
+          "key": "employeeCode",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "role",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "roleId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 16,
+          "default": "active"
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_userId",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["userId"]
+        },
+        {
+          "key": "idx_roleId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["roleId"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "attributes": ["status"]
+        }
+      ]
+    },
+    {
+      "$id": "material_categories",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Categorias de Materiales",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "code",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 200
+        },
+        {
+          "key": "sortOrder",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_code",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["code"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        }
+      ]
+    },
+    {
+      "$id": "materials",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Materiales",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "code",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 60
+        },
+        {
+          "key": "categoryId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "referenceImageFileId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        },
+        {
+          "key": "defaultCommercialUnit",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": "viaje"
+        },
+        {
+          "key": "sortOrder",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_code",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["code"]
+        },
+        {
+          "key": "idx_category",
+          "type": "key",
+          "status": "available",
+          "attributes": ["categoryId"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        }
+      ]
+    },
+    {
+      "$id": "clients",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Clientes",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 10
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 200
+        },
+        {
+          "key": "tradeName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 200,
+          "default": ""
+        },
+        {
+          "key": "contactName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 150,
+          "default": ""
+        },
+        {
+          "key": "rfc",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": ""
+        },
+        {
+          "key": "phone",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 150,
+          "default": ""
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 400,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_rfc",
+          "type": "key",
+          "status": "available",
+          "attributes": ["rfc"]
+        },
+        {
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "attributes": ["type"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        }
+      ]
+    },
+    {
+      "$id": "drivers",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Choferes",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "firstName",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "fullName",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 200
+        },
+        {
+          "key": "phone",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 150,
+          "default": ""
+        },
+        {
+          "key": "licenseNumber",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "clientId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_fullName",
+          "type": "key",
+          "status": "available",
+          "attributes": ["fullName"]
+        },
+        {
+          "key": "idx_clientId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["clientId"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        },
+        {
+          "key": "idx_licenseNumber",
+          "type": "key",
+          "status": "available",
+          "attributes": ["licenseNumber"]
+        }
+      ]
+    },
+    {
+      "$id": "trucks",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Camiones",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "plateNumber",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 20
+        },
+        {
+          "key": "secondaryPlateNumber",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": ""
+        },
+        {
+          "key": "economicNumber",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "truckType",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 50,
+          "default": ""
+        },
+        {
+          "key": "brand",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 50,
+          "default": ""
+        },
+        {
+          "key": "model",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 50,
+          "default": ""
+        },
+        {
+          "key": "year",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "color",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "axleType",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 30,
+          "default": ""
+        },
+        {
+          "key": "referenceCapacity",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "clientId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "habitualDriverId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "default": true
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_plateNumber",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["plateNumber"]
+        },
+        {
+          "key": "idx_economicNumber",
+          "type": "key",
+          "status": "available",
+          "attributes": ["economicNumber"]
+        },
+        {
+          "key": "idx_clientId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["clientId"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        },
+        {
+          "key": "idx_habitualDriverId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["habitualDriverId"]
+        }
+      ]
+    },
+    {
+      "$id": "plants",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Plantas / Origenes",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "code",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": ""
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 50,
+          "default": ""
+        },
+        {
+          "key": "locationReference",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 300,
+          "default": ""
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "contactName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 100,
+          "default": ""
+        },
+        {
+          "key": "contactPhone",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "sortOrder",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "active",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "default": true
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_name",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["name"]
+        },
+        {
+          "key": "idx_code",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["code"]
+        },
+        {
+          "key": "idx_active",
+          "type": "key",
+          "status": "available",
+          "attributes": ["active"]
+        },
+        {
+          "key": "idx_sortOrder",
+          "type": "key",
+          "status": "available",
+          "attributes": ["sortOrder"]
+        }
+      ]
+    },
+    {
+      "$id": "vouchers",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Vales",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "internalFolio",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 30
+        },
+        {
+          "key": "externalReference",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 100,
+          "default": ""
+        },
+        {
+          "key": "clientId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "driverId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "truckId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "materialId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "plantId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "commercialQty",
+          "type": "double",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "commercialUnit",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 20
+        },
+        {
+          "key": "usedQty",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "cancelReason",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "ticketId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_internalFolio",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["internalFolio"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "attributes": ["status"]
+        },
+        {
+          "key": "idx_clientId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["clientId"]
+        },
+        {
+          "key": "idx_materialId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["materialId"]
+        },
+        {
+          "key": "idx_plantId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["plantId"]
+        },
+        {
+          "key": "idx_ticketId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["ticketId"]
+        }
+      ]
+    },
+    {
+      "$id": "tickets",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Tickets / Salidas",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "ticketNumber",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 30
+        },
+        {
+          "key": "voucherId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "counterSaleId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "clientId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "driverId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "truckId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "materialId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "plantId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "commercialQty",
+          "type": "double",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "commercialUnit",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 20
+        },
+        {
+          "key": "qrData",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 256
+        },
+        {
+          "key": "printCount",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "reprintCount",
+          "type": "integer",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "firstPrintedAt",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "lastPrintedAt",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "lastPrintedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000
+        },
+        {
+          "key": "cancelReason",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500
+        },
+        {
+          "key": "weightIn",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "weightOut",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "tare",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "netWeight",
+          "type": "double",
+          "status": "available",
+          "required": false,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "tara",
+          "type": "float",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "default": 0
+        },
+        {
+          "key": "weightUnit",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 8,
+          "default": "ton"
+        },
+        {
+          "key": "scaleOperatorId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "scaleNotes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "validatedAt",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 32,
+          "default": ""
+        },
+        {
+          "key": "validatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_ticketNumber",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["ticketNumber"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_voucherId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["voucherId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "attributes": ["status"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_clientId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["clientId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_qrData",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["qrData"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_materialId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["materialId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_counterSaleId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["counterSaleId"]
+        }
+      ]
+    },
+    {
+      "$id": "print_logs",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Print Logs",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "ticketId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "ticketNumber",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 30
+        },
+        {
+          "key": "printType",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "copiesCount",
+          "type": "integer",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "default": 3
+        },
+        {
+          "key": "reason",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500
+        },
+        {
+          "key": "printedBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "printedByName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "metadata",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 2048
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_ticketId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["ticketId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_printType",
+          "type": "key",
+          "status": "available",
+          "attributes": ["printType"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_printedBy",
+          "type": "key",
+          "status": "available",
+          "attributes": ["printedBy"],
+          "orders": ["ASC"]
+        }
+      ]
+    },
+    {
+      "$id": "audit_logs",
+      "$permissions": [
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Bitacora",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "action",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "collection",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "docId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "userId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "details",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 2048
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_docid",
+          "type": "key",
+          "status": "available",
+          "attributes": ["docId"]
+        },
+        {
+          "key": "idx_action",
+          "type": "key",
+          "status": "available",
+          "attributes": ["action"]
+        },
+        {
+          "key": "idx_collection",
+          "type": "key",
+          "status": "available",
+          "attributes": ["collection"]
+        },
+        {
+          "key": "idx_userId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["userId"]
+        }
+      ]
+    },
+    {
+      "$id": "system_config",
+      "$permissions": [
+        "read(\"any\")",
+        "create(\"users\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "General App Settings",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "isInitialized",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "$id": "roles",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Roles",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 100
+        },
+        {
+          "key": "code",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 200
+        },
+        {
+          "key": "enabled",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "isSystem",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_code",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["code"]
+        }
+      ]
+    },
+    {
+      "$id": "permissions_catalog",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Catálogo de Permisos",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "module",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "action",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "code",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 128
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 200
+        },
+        {
+          "key": "enabled",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_code",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["code"]
+        },
+        {
+          "key": "idx_module",
+          "type": "key",
+          "status": "available",
+          "attributes": ["module"]
+        }
+      ]
+    },
+    {
+      "$id": "role_permissions",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:admin\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Permisos por Rol",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "roleId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 64
+        },
+        {
+          "key": "permissionCode",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 128
+        },
+        {
+          "key": "enabled",
+          "type": "boolean",
+          "status": "available",
+          "required": true,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_roleId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["roleId"]
+        },
+        {
+          "key": "idx_permCode",
+          "type": "key",
+          "status": "available",
+          "attributes": ["permissionCode"]
+        }
+      ]
+    },
+    {
+      "$id": "counter_sales",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Ventas Mostrador",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "internalNumber",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 30
+        },
+        {
+          "key": "clientId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "clientName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 100,
+          "default": ""
+        },
+        {
+          "key": "driverId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "truckId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "materialId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "plantId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "commercialQty",
+          "type": "float",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "commercialUnit",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 20
+        },
+        {
+          "key": "paymentMethod",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32
+        },
+        {
+          "key": "paymentReference",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 200,
+          "default": ""
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 32,
+          "default": "confirmed"
+        },
+        {
+          "key": "ticketId",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 1000,
+          "default": ""
+        },
+        {
+          "key": "cancelReason",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "updatedBy",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 36,
+          "default": ""
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_internalNumber",
+          "type": "unique",
+          "status": "available",
+          "attributes": ["internalNumber"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "attributes": ["status"]
+        },
+        {
+          "key": "idx_clientId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["clientId"]
+        },
+        {
+          "key": "idx_materialId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["materialId"]
+        },
+        {
+          "key": "idx_ticketId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["ticketId"]
+        }
+      ]
+    },
+    {
+      "$id": "weight_logs",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Registros de Peso",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "ticketId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 8
+        },
+        {
+          "key": "weight",
+          "type": "float",
+          "status": "available",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "unit",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 8
+        },
+        {
+          "key": "operatorId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        },
+        {
+          "key": "operatorName",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 100,
+          "default": ""
+        },
+        {
+          "key": "notes",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_ticketId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["ticketId"]
+        },
+        {
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "attributes": ["type"]
+        }
+      ]
+    },
+    {
+      "$id": "scan_logs",
+      "$permissions": [
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:user\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")"
+      ],
+      "databaseId": "mina_db",
+      "name": "Scan Logs",
+      "enabled": true,
+      "documentSecurity": false,
+      "attributes": [
+        {
+          "key": "ticketId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36,
+          "default": null
+        },
+        {
+          "key": "validatorId",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36,
+          "default": null
+        },
+        {
+          "key": "result",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 16,
+          "default": null
+        },
+        {
+          "key": "reason",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 500,
+          "default": ""
+        },
+        {
+          "key": "method",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 16,
+          "default": null
+        },
+        {
+          "key": "ticketNumber",
+          "type": "string",
+          "status": "available",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": ""
+        },
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "required": true,
+          "array": false,
+          "size": 36,
+          "default": null
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_ticketId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["ticketId"]
+        },
+        {
+          "key": "idx_result",
+          "type": "key",
+          "status": "available",
+          "attributes": ["result"]
+        },
+        {
+          "key": "idx_validatorId",
+          "type": "key",
+          "status": "available",
+          "attributes": ["validatorId"]
+        }
+      ]
+    }
+  ],
+  "tablesDB": [],
+  "tables": [],
+  "buckets": [
+    {
+      "$id": "material_images",
+      "$permissions": [
+        "read(\"label:user\")",
+        "read(\"label:admin\")",
+        "read(\"label:owner\")",
+        "create(\"label:admin\")",
+        "create(\"label:owner\")",
+        "update(\"label:admin\")",
+        "update(\"label:owner\")",
+        "delete(\"label:admin\")",
+        "delete(\"label:owner\")"
+      ],
+      "fileSecurity": false,
+      "name": "Imágenes de Materiales",
+      "enabled": true,
+      "maximumFileSize": 5242880,
+      "allowedFileExtensions": ["jpg", "jpeg", "png", "webp"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": false
+    }
+  ],
+  "teams": []
+}

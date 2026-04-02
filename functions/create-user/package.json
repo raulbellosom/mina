@@ -1,0 +1,9 @@
+{
+  "name": "create-user",
+  "version": "1.0.0",
+  "description": "Crea un usuario en Appwrite Auth con label y perfil extendido",
+  "main": "src/index.js",
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  }
+}

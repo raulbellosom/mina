@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f hooks/useAuth.jsx)",
+      "Bash(rmdir hooks:*)",
+      "Bash(rm -f components/PasswordInput.jsx components/ProtectedRoute.jsx)",
+      "Bash(rmdir components:*)",
+      "Bash(rm -f lib/appwrite.js)",
+      "Bash(node -e 'const d=JSON.parse\\(require\\('\\\\''fs'\\\\''\\).readFileSync\\('\\\\''c:/Users/raulb/Documentos/racoondevs/mine/appwrite.json'\\\\'','\\\\''utf8'\\\\''\\)\\); console.log\\('\\\\''Colecciones \\('\\\\''+d.collections.length+'\\\\''\\):'\\\\''\\); d.collections.forEach\\(c=>console.log\\('\\\\'' -'\\\\'',c['\\\\''$id'\\\\'']\\)\\)')",
+      "Bash(node -e ':*)",
+      "Bash(grep -o '\"$key\"' 'c:\\\\Users\\\\raulb\\\\Documentos\\\\racoondevs\\\\mine\\\\appwrite.json')",
+      "Bash(grep -c '\"$id\":' 'c:\\\\Users\\\\raulb\\\\Documentos\\\\racoondevs\\\\mine\\\\appwrite.json')",
+      "Bash(grep -c '\"$id\":')"
+    ]
+  }
+}
