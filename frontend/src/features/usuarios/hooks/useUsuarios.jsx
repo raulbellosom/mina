@@ -16,9 +16,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 export function useUsuarios() {
     const { user } = useAuth();
     const [users, setUsers] = useState([]);
-    const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingRoles, setLoadingRoles] = useState(true);
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'active' | 'inactive'
 
@@ -36,22 +34,6 @@ export function useUsuarios() {
             console.warn('Audit log failed:', err.message);
         }
     };
-
-    const fetchRoles = useCallback(async () => {
-        try {
-            setLoadingRoles(true);
-            const res = await databases.listDocuments(DATABASE_ID, 'roles', [
-                Query.equal('enabled', true),
-                Query.orderAsc('name'),
-                Query.limit(100)
-            ]);
-            setRoles(res.documents);
-        } catch (err) {
-            console.error('Error cargando roles:', err);
-        } finally {
-            setLoadingRoles(false);
-        }
-    }, []);
 
     const fetchUsers = useCallback(async () => {
         try {
@@ -115,7 +97,7 @@ export function useUsuarios() {
      * Edita datos operativos del perfil (no toca Appwrite Auth).
      */
     const updateUser = async (id, data) => {
-        const allowed = ['firstName', 'lastName', 'phone', 'employeeCode', 'roleId', 'notes', 'name'];
+        const allowed = ['firstName', 'lastName', 'phone', 'employeeCode', 'notes', 'name'];
         const payload = {};
         for (const key of allowed) {
             if (data[key] !== undefined) payload[key] = data[key];
@@ -144,18 +126,12 @@ export function useUsuarios() {
     };
 
     useEffect(() => {
-        fetchRoles();
-    }, [fetchRoles]);
-
-    useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
 
     return {
         users,
-        roles,
         loading,
-        loadingRoles,
         search,
         setSearch,
         filterStatus,

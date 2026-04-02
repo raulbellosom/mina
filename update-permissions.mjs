@@ -1,7 +1,8 @@
 /**
  * update-permissions.mjs
  * Actualiza los permisos de las colecciones existentes en Appwrite
- * a la nueva arquitectura basada en Labels (owner, admin, user).
+ * a la arquitectura de labels actual: owner, root, admin, operador, capturista.
+ * El label 'user' fue reemplazado por 'operador' y 'capturista'.
  * Los atributos/índices ya existen, solo actualizamos las colecciones.
  */
 import fs from 'fs';

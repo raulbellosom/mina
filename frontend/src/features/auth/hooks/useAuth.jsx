@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { account, databases, DATABASE_ID } from '../../../shared/lib/appwrite';
+import { account, databases, functions, DATABASE_ID } from '../../../shared/lib/appwrite';
 import { ID, Permission, Role } from 'appwrite';
 
 
@@ -17,9 +17,12 @@ export const AuthProvider = ({ children }) => {
      */
     const getRoleFromLabels = (labels = []) => {
         if (labels.includes('owner')) return 'owner';
+        if (labels.includes('root')) return 'root';
         if (labels.includes('admin')) return 'admin';
-        if (labels.includes('user')) return 'user';
-        return 'pending'; // usuario sin label asignada aún
+        if (labels.includes('operador')) return 'operador';
+        if (labels.includes('capturista')) return 'capturista';
+        if (labels.includes('user')) return 'operador'; // fallback legacy
+        return 'pending';
     };
 
     const loadUser = async () => {
@@ -78,18 +81,29 @@ export const AuthProvider = ({ children }) => {
 
     const registerAdmin = async (name, email, password) => {
         // 1. Crear cuenta en Appwrite Auth
-        const newAccount = await account.create(ID.unique(), email, password, name);
+        await account.create(ID.unique(), email, password, name);
         // 2. Iniciar sesión inmediatamente
         await account.createEmailPasswordSession(email, password);
         // 3. Obtener datos frescos de la cuenta (con $id definitivo)
         const currentAccount = await account.get();
 
-        // 4. Crear el documento de perfil.
-        //    REGLA DE APPWRITE: un usuario solo puede asignar permisos que él mismo tiene.
-        //    El usuario recién registrado no tiene labels aún, por lo que solo puede
-        //    asignarse a sí mismo. El acceso administrativo (label:owner, label:admin)
-        //    lo manejan los permisos de COLECCIÓN automáticamente una vez que se
-        //    asignen las labels via assign-owner.mjs o Appwrite Console.
+        // 4. Asignar labels owner + admin via Function setup-owner
+        //    La Function verifica que el sistema no esté inicializado y luego
+        //    llama users.updateLabels(['owner', 'admin']) server-side.
+        try {
+            await functions.createExecution(
+                'setup-owner',
+                JSON.stringify({ userId: currentAccount.$id }),
+                false,
+                '/',
+                'POST',
+                { 'Content-Type': 'application/json' }
+            );
+        } catch (e) {
+            console.warn('setup-owner execution error:', e.message);
+        }
+
+        // 5. Crear el documento de perfil.
         const newProfile = await databases.createDocument(
             DATABASE_ID,
             'users_profile',
@@ -97,19 +111,16 @@ export const AuthProvider = ({ children }) => {
             {
                 userId: currentAccount.$id,
                 name: name,
-                role: 'owner', // campo informativo; la label en Auth es la fuente real
+                role: 'owner',
                 active: true
             },
             [
-                // Solo permisos que el usuario REALMENTE tiene en este momento
                 Permission.read(Role.user(currentAccount.$id)),
                 Permission.update(Role.user(currentAccount.$id))
             ]
         );
 
-        // 5. Sellar el sistema (marcar como inicializado)
-        //    system_config tiene create("users") en la colección → cualquier usuario auth puede crear
-        //    Solo pasamos permisos que el usuario actual tiene (users = cualquier autenticado)
+        // 6. Sellar el sistema (marcar como inicializado)
         try {
             await databases.createDocument(
                 DATABASE_ID,
@@ -123,16 +134,11 @@ export const AuthProvider = ({ children }) => {
                 ]
             );
         } catch(e) {
-            // Ya existe o fallo menor — no es crítico
             console.warn('Could not seal system_config:', e.message);
         }
 
-        // 6. Actualizar estado — el rol se deriva de labels (aún vacías hasta assign-owner)
-        setUser(currentAccount);
-        setProfile({
-            ...newProfile,
-            role: getRoleFromLabels(currentAccount.labels) || 'owner'
-        });
+        // 7. Recargar usuario para obtener labels frescas asignadas por la Function
+        await loadUser();
     };
 
     const sendRecovery = async (email, redirectUrl) => {

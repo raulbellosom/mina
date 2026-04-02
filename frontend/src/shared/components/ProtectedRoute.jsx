@@ -5,17 +5,16 @@ import { ShieldOff } from 'lucide-react';
 
 /**
  * Protege rutas requiriendo autenticación y, opcionalmente, un permiso específico.
+ * Los permisos se evalúan solo por labels de Appwrite — sin queries a DB.
  *
  * Props:
- *   allowedRoles      {string[]} — roles permitidos (legacy, basado en label)
- *   requiredPermission {string}  — código de permiso requerido, ej: "users.view"
+ *   requiredPermission {string} — código de permiso requerido, ej: "users.view"
  */
-export default function ProtectedRoute({ allowedRoles, requiredPermission }) {
-    const { user, profile, loading } = useAuth();
-    const { can, loadingPermissions } = usePermissions();
+export default function ProtectedRoute({ requiredPermission }) {
+    const { user, loading } = useAuth();
+    const { can } = usePermissions();
 
-    // Esperando sesión o permisos
-    if (loading || (requiredPermission && loadingPermissions)) {
+    if (loading) {
         return (
             <div className="h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
                 <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">Cargando sesión...</p>
@@ -23,17 +22,10 @@ export default function ProtectedRoute({ allowedRoles, requiredPermission }) {
         );
     }
 
-    // No autenticado
     if (!user) {
         return <Navigate to="/login" replace />;
     }
 
-    // Chequeo legacy por rol (label)
-    if (allowedRoles && profile && !allowedRoles.includes(profile.role) && profile.role !== 'admin') {
-        return <AccessDenied />;
-    }
-
-    // Chequeo por permiso específico
     if (requiredPermission && !can(requiredPermission)) {
         return <AccessDenied />;
     }

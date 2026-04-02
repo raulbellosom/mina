@@ -10,7 +10,22 @@
       "Bash(node -e ':*)",
       "Bash(grep -o '\"$key\"' 'c:\\\\Users\\\\raulb\\\\Documentos\\\\racoondevs\\\\mine\\\\appwrite.json')",
       "Bash(grep -c '\"$id\":' 'c:\\\\Users\\\\raulb\\\\Documentos\\\\racoondevs\\\\mine\\\\appwrite.json')",
-      "Bash(grep -c '\"$id\":')"
+      "Bash(grep -c '\"$id\":')",
+      "Bash(grep -E \"\\\\.mjs$|\\\\.json$\")",
+      "Bash(xargs grep:*)",
+      "Bash(appwrite client:*)",
+      "Bash(node seed-roles.mjs)",
+      "Bash(node update-permissions.mjs)",
+      "Bash(appwrite databases:*)",
+      "Bash(npm install:*)",
+      "Bash(appwrite deploy:*)",
+      "Bash(appwrite push:*)",
+      "Bash(printf \"YES\\\\ny\\\\n\")",
+      "Bash(printf \"YES\\\\nY\\\\n\")",
+      "Bash(appwrite functions:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(printf \"YES\\\\ny\\\\ny\\\\ny\\\\n\")",
+      "Bash(appwrite users:*)"
     ]
   }
 }

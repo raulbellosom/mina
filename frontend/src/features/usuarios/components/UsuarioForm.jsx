@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 
-const LABEL_OPTIONS = [
-    { value: 'user', label: 'Usuario operativo' },
+const BASE_LABEL_OPTIONS = [
     { value: 'admin', label: 'Administrador' },
+    { value: 'operador', label: 'Operador' },
+    { value: 'capturista', label: 'Capturista' },
 ];
+
+// Solo usuarios con label 'owner' pueden crear usuarios 'root'
+const ROOT_OPTION = { value: 'root', label: 'Root (acceso total)' };
 
 const EMPTY_FORM = {
     name: '',
     email: '',
     password: '',
-    label: 'user',
-    roleId: '',
+    label: 'admin',
     firstName: '',
     lastName: '',
     phone: '',
@@ -27,16 +30,17 @@ const EMPTY_FORM = {
  *   open         {boolean}
  *   onOpenChange {fn}
  *   editing      {object|null}  — perfil existente para edición, null para creación
- *   roles        {array}        — lista de roles funcionales disponibles
+ *   isOwner      {boolean}      — true si el usuario autenticado tiene label 'owner' (puede crear root)
  *   onSubmit     {fn(data)}     — recibe los datos a guardar (puede ser async)
  */
-export default function UsuarioForm({ open, onOpenChange, editing, roles, onSubmit }) {
+export default function UsuarioForm({ open, onOpenChange, editing, isOwner, onSubmit }) {
     const [form, setForm] = useState(EMPTY_FORM);
     const [showPassword, setShowPassword] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
     const isEditing = Boolean(editing);
+    const labelOptions = isOwner ? [ROOT_OPTION, ...BASE_LABEL_OPTIONS] : BASE_LABEL_OPTIONS;
 
     useEffect(() => {
         if (open) {
@@ -47,8 +51,7 @@ export default function UsuarioForm({ open, onOpenChange, editing, roles, onSubm
                     name: editing.name || '',
                     email: editing.email || '',
                     password: '',
-                    label: editing.role || 'user',
-                    roleId: editing.roleId || '',
+                    label: editing.role || 'admin',
                     firstName: editing.firstName || '',
                     lastName: editing.lastName || '',
                     phone: editing.phone || '',
@@ -172,40 +175,25 @@ export default function UsuarioForm({ open, onOpenChange, editing, roles, onSubm
                             </>
                         )}
 
-                        {/* Acceso y rol */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    Nivel de acceso <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={form.label}
-                                    onChange={set('label')}
-                                    required
-                                    disabled={isEditing}
-                                    className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white disabled:opacity-50"
-                                >
-                                    {LABEL_OPTIONS.map(o => (
-                                        <option key={o.value} value={o.value}>{o.label}</option>
-                                    ))}
-                                </select>
-                                {isEditing && (
-                                    <p className="text-xs text-slate-400 mt-1">El nivel de acceso no se puede cambiar desde aquí.</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Rol funcional</label>
-                                <select
-                                    value={form.roleId}
-                                    onChange={set('roleId')}
-                                    className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
-                                >
-                                    <option value="">Sin rol asignado</option>
-                                    {roles.map(r => (
-                                        <option key={r.$id} value={r.$id}>{r.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                        {/* Nivel de acceso */}
+                        <div>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                Nivel de acceso <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={form.label}
+                                onChange={set('label')}
+                                required
+                                disabled={isEditing}
+                                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white disabled:opacity-50"
+                            >
+                                {labelOptions.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
+                            {isEditing && (
+                                <p className="text-xs text-slate-400 mt-1">El nivel de acceso no se puede cambiar desde aquí.</p>
+                            )}
                         </div>
 
                         {/* Datos operativos */}

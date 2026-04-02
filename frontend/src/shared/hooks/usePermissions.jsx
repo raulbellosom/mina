@@ -1,85 +1,44 @@
-import { useState, useEffect, useMemo } from 'react';
-import { databases, DATABASE_ID } from '../lib/appwrite';
-import { Query } from 'appwrite';
+import { useMemo } from 'react';
 import { useAuth } from '../../features/auth/hooks/useAuth';
+import { PERMISSIONS_BY_LABEL } from '../config/permissions-config';
 
 /**
- * Evalúa los permisos del usuario autenticado.
+ * Permisos basados exclusivamente en labels de Appwrite Auth.
  *
- * Lógica de evaluación:
- *   owner  → acceso total, can() siempre true
- *   admin  → carga role_permissions por roleId del perfil
- *   user   → carga role_permissions por roleId del perfil
- *   pending → sin permisos, can() siempre false
+ * Jerarquía:
+ *   owner, root  → bypass total (can() siempre true, sin DB)
+ *   admin        → permisos según PERMISSIONS_BY_LABEL.admin
+ *   operador     → permisos según PERMISSIONS_BY_LABEL.operador
+ *   capturista   → permisos según PERMISSIONS_BY_LABEL.capturista
+ *   pending      → sin acceso
  *
- * Uso:
- *   const { can, loadingPermissions } = usePermissions();
- *   if (can('users.create')) { ... }
+ * Sin queries a base de datos. Sin role_permissions. Solo labels.
  */
 export function usePermissions() {
-    const { user, profile } = useAuth();
-    const [permissions, setPermissions] = useState([]);
-    const [loadingPermissions, setLoadingPermissions] = useState(true);
+    const { user } = useAuth();
 
     const role = useMemo(() => {
         if (!user) return 'pending';
         const labels = user.labels || [];
-        if (labels.includes('owner')) return 'owner';
-        if (labels.includes('admin')) return 'admin';
-        if (labels.includes('user')) return 'user';
+        if (labels.includes('owner'))      return 'owner';
+        if (labels.includes('root'))       return 'root';
+        if (labels.includes('admin'))      return 'admin';
+        if (labels.includes('operador'))   return 'operador';
+        if (labels.includes('capturista')) return 'capturista';
+        if (labels.includes('user'))       return 'operador'; // legacy
         return 'pending';
     }, [user]);
 
-    useEffect(() => {
-        // owner siempre tiene acceso total — no necesitamos cargar nada
-        if (role === 'owner') {
-            setLoadingPermissions(false);
-            return;
-        }
+    const permissions = useMemo(() => {
+        return PERMISSIONS_BY_LABEL[role] || [];
+    }, [role]);
 
-        // pending no tiene acceso
-        if (role === 'pending' || !profile?.roleId) {
-            setPermissions([]);
-            setLoadingPermissions(false);
-            return;
-        }
-
-        // admin y user: cargar permisos asignados al rol funcional
-        const loadPermissions = async () => {
-            try {
-                setLoadingPermissions(true);
-                const res = await databases.listDocuments(
-                    DATABASE_ID,
-                    'role_permissions',
-                    [
-                        Query.equal('roleId', profile.roleId),
-                        Query.equal('enabled', true),
-                        Query.limit(200)
-                    ]
-                );
-                setPermissions(res.documents.map(doc => doc.permissionCode));
-            } catch (err) {
-                console.error('Error cargando permisos:', err);
-                setPermissions([]);
-            } finally {
-                setLoadingPermissions(false);
-            }
-        };
-
-        loadPermissions();
-    }, [role, profile?.roleId]);
-
-    /**
-     * Verifica si el usuario puede ejecutar una acción.
-     * @param {string} code - Código del permiso: 'users.create', 'tickets.print', etc.
-     * @returns {boolean}
-     */
     const can = (code) => {
         if (!code) return true;
-        if (role === 'owner') return true;
+        if (role === 'owner' || role === 'root') return true;
         if (role === 'pending') return false;
         return permissions.includes(code);
     };
 
-    return { can, permissions, loadingPermissions };
+    return { can, permissions, role, loadingPermissions: false };
 }

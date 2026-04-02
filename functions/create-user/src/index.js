@@ -39,15 +39,28 @@ module.exports = async ({ req, res, log, error }) => {
         return res.json({ success: false, error: 'Invalid JSON body' }, 400);
     }
 
-    const { name, email, password, label, roleId, firstName, lastName, phone, employeeCode, notes, createdBy } = body || {};
+    const { name, email, password, label, firstName, lastName, phone, employeeCode, notes, createdBy } = body || {};
 
     // Validaciones mínimas
     if (!name || !email || !password || !label || !createdBy) {
         return res.json({ success: false, error: 'Faltan campos requeridos: name, email, password, label, createdBy' }, 400);
     }
 
-    if (!['user', 'admin'].includes(label)) {
-        return res.json({ success: false, error: 'Label inválida. Valores permitidos: user, admin' }, 400);
+    const ALLOWED_LABELS = ['root', 'admin', 'operador', 'capturista'];
+    if (!ALLOWED_LABELS.includes(label)) {
+        return res.json({ success: false, error: `Label inválida. Valores permitidos: ${ALLOWED_LABELS.join(', ')}` }, 400);
+    }
+
+    // Solo un usuario con label 'owner' puede crear usuarios 'root'
+    if (label === 'root') {
+        try {
+            const creator = await users.get(createdBy);
+            if (!creator.labels || !creator.labels.includes('owner')) {
+                return res.json({ success: false, error: 'Solo un usuario owner puede crear usuarios root' }, 403);
+            }
+        } catch (err) {
+            return res.json({ success: false, error: 'No se pudo verificar al creador' }, 500);
+        }
     }
 
     let newUserId;
@@ -76,7 +89,6 @@ module.exports = async ({ req, res, log, error }) => {
         if (lastName) profileData.lastName = lastName;
         if (phone) profileData.phone = phone;
         if (employeeCode) profileData.employeeCode = employeeCode;
-        if (roleId) profileData.roleId = roleId;
         if (notes) profileData.notes = notes;
 
         await databases.createDocument(DATABASE_ID, 'users_profile', newUserId, profileData);
@@ -88,7 +100,7 @@ module.exports = async ({ req, res, log, error }) => {
             collection: 'users_profile',
             docId: newUserId,
             userId: createdBy,
-            details: JSON.stringify({ name, email, label, employeeCode: employeeCode || null })
+            details: JSON.stringify({ name, email, label, employeeCode: employeeCode || null, createdBy })
         });
 
         return res.json({ success: true, userId: newUserId });

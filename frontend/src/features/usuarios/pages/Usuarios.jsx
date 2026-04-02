@@ -3,13 +3,16 @@ import { Users2, Plus, Search, Filter, Pencil, PowerOff, Power, ChevronRight, Lo
 import * as Dialog from '@radix-ui/react-dialog';
 import { useUsuarios } from '../hooks/useUsuarios';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import UsuarioForm from '../components/UsuarioForm';
 
 const LABEL_BADGE = {
-    owner: { label: 'Owner', classes: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-    admin: { label: 'Admin', classes: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    user: { label: 'Usuario', classes: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
-    pending: { label: 'Pendiente', classes: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+    owner:      { label: 'Owner',      classes: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    root:       { label: 'Root',       classes: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+    admin:      { label: 'Admin',      classes: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    operador:   { label: 'Operador',   classes: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' },
+    capturista: { label: 'Capturista', classes: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
+    pending:    { label: 'Pendiente',  classes: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
 };
 
 const STATUS_BADGE = {
@@ -19,10 +22,10 @@ const STATUS_BADGE = {
 };
 
 export default function Usuarios() {
-    const { can } = usePermissions();
+    const { can, role } = usePermissions();
+    const { user: authUser } = useAuth();
     const {
         users,
-        roles,
         loading,
         search,
         setSearch,
@@ -32,6 +35,8 @@ export default function Usuarios() {
         updateUser,
         toggleActive,
     } = useUsuarios();
+
+    const isOwner = authUser?.labels?.includes('owner') || false;
 
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -82,12 +87,6 @@ export default function Usuarios() {
     const displayName = (u) => {
         if (u.firstName || u.lastName) return `${u.firstName || ''} ${u.lastName || ''}`.trim();
         return u.name || '—';
-    };
-
-    const roleName = (u) => {
-        if (!roles.length || !u.roleId) return null;
-        const r = roles.find(r => r.$id === u.roleId);
-        return r?.name || null;
     };
 
     return (
@@ -145,8 +144,7 @@ export default function Usuarios() {
                             <tr>
                                 <th className="px-4 sm:px-6 py-3 font-semibold">Usuario</th>
                                 <th className="px-4 sm:px-6 py-3 font-semibold hidden md:table-cell">Email</th>
-                                <th className="px-4 sm:px-6 py-3 font-semibold hidden sm:table-cell">Acceso</th>
-                                <th className="px-4 sm:px-6 py-3 font-semibold hidden lg:table-cell">Rol funcional</th>
+                                <th className="px-4 sm:px-6 py-3 font-semibold hidden sm:table-cell">Perfil</th>
                                 <th className="px-4 sm:px-6 py-3 font-semibold">Estado</th>
                                 <th className="px-4 sm:px-6 py-3 font-semibold text-right">Acciones</th>
                             </tr>
@@ -154,14 +152,14 @@ export default function Usuarios() {
                         <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-10 text-center text-slate-500">
+                                    <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                         <Loader2 className="mx-auto h-6 w-6 animate-spin mb-2" />
                                         Cargando usuarios...
                                     </td>
                                 </tr>
                             ) : users.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-10 text-center text-slate-500">
+                                    <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                         <Users2 className="mx-auto h-8 w-8 opacity-30 mb-2" />
                                         {search ? 'Sin resultados para la búsqueda.' : 'No hay usuarios registrados.'}
                                     </td>
@@ -170,7 +168,6 @@ export default function Usuarios() {
                                 users.map(u => {
                                     const badge = LABEL_BADGE[u.role] || LABEL_BADGE.pending;
                                     const statusClass = STATUS_BADGE[u.status] || STATUS_BADGE.inactive;
-                                    const rName = roleName(u);
                                     return (
                                         <tr key={u.$id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                             {/* Nombre */}
@@ -188,15 +185,11 @@ export default function Usuarios() {
                                             <td className="px-4 sm:px-6 py-4 hidden md:table-cell text-slate-600 dark:text-slate-400">
                                                 {u.email || '—'}
                                             </td>
-                                            {/* Label */}
+                                            {/* Perfil / Label */}
                                             <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
                                                 <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${badge.classes}`}>
                                                     {badge.label}
                                                 </span>
-                                            </td>
-                                            {/* Rol funcional */}
-                                            <td className="px-4 sm:px-6 py-4 hidden lg:table-cell text-slate-600 dark:text-slate-400 text-xs">
-                                                {rName || <span className="italic text-slate-400">Sin rol</span>}
                                             </td>
                                             {/* Status */}
                                             <td className="px-4 sm:px-6 py-4">
@@ -255,14 +248,13 @@ export default function Usuarios() {
                 open={formOpen}
                 onOpenChange={setFormOpen}
                 editing={editing}
-                roles={roles}
+                isOwner={isOwner}
                 onSubmit={handleSubmit}
             />
 
             {/* Panel de detalle */}
             <UsuarioDetalle
                 user={detailUser}
-                roles={roles}
                 open={Boolean(detailUser)}
                 onClose={() => setDetailUser(null)}
                 onEdit={can('users.update') ? (u) => { setDetailUser(null); openEdit(u); } : null}
@@ -301,14 +293,8 @@ export default function Usuarios() {
 }
 
 /* ─── Panel de detalle de usuario ─── */
-function UsuarioDetalle({ user: u, roles, open, onClose, onEdit }) {
+function UsuarioDetalle({ user: u, open, onClose, onEdit }) {
     if (!u) return null;
-
-    const roleName = () => {
-        if (!roles.length || !u.roleId) return 'Sin rol asignado';
-        const r = roles.find(r => r.$id === u.roleId);
-        return r?.name || 'Sin rol asignado';
-    };
 
     const badge = LABEL_BADGE[u.role] || LABEL_BADGE.pending;
 
@@ -374,8 +360,7 @@ function UsuarioDetalle({ user: u, roles, open, onClose, onEdit }) {
                         <DetailSection title="Información de acceso">
                             <DetailRow label="Nombre en sistema" value={u.name} />
                             <DetailRow label="Email" value={u.email} />
-                            <DetailRow label="Nivel de acceso" value={badge.label} />
-                            <DetailRow label="Rol funcional" value={roleName()} />
+                            <DetailRow label="Perfil de acceso" value={badge.label} />
                         </DetailSection>
 
                         <DetailSection title="Datos operativos">
