@@ -3,6 +3,7 @@ import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
+import { verifyQrToken } from "../../tickets/hooks/useTickets";
 
 const TICKETS = "tickets";
 const SCAN_LOGS = "scan_logs";
@@ -111,15 +112,32 @@ export function useValidacion() {
     const q = query.trim();
 
     let ticket = null;
+    let qrTokenValid = true;
 
-    // QR format: MF:{ticketId}:{verifyToken}
+    // QR format: MF:{ticketId}:{hmacToken}
     if (q.startsWith("MF:")) {
       const parts = q.split(":");
-      if (parts.length >= 2) {
+      if (parts.length >= 3) {
+        const ticketId = parts[1];
+        const token = parts[2];
+        try {
+          ticket = await databases.getDocument(DATABASE_ID, TICKETS, ticketId);
+          method = "qr_scan";
+          // Verify HMAC token
+          qrTokenValid = await verifyQrToken(
+            ticketId,
+            ticket.ticketNumber,
+            token,
+          );
+        } catch {
+          // ticketId not found — fall through
+        }
+      } else if (parts.length === 2) {
         const ticketId = parts[1];
         try {
           ticket = await databases.getDocument(DATABASE_ID, TICKETS, ticketId);
           method = "qr_scan";
+          qrTokenValid = false; // Missing token
         } catch {
           // ticketId not found — fall through
         }
@@ -141,6 +159,17 @@ export function useValidacion() {
         valid: false,
         blocked: false,
         reason: "Ticket no encontrado con ese folio o QR",
+      };
+    }
+
+    // Verify HMAC integrity for QR scans
+    if (method === "qr_scan" && !qrTokenValid) {
+      return {
+        ticket,
+        valid: false,
+        blocked: true,
+        reason:
+          "El código QR no pasó la verificación de integridad. Posible QR falsificado.",
       };
     }
 

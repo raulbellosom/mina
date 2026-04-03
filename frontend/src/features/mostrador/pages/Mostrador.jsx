@@ -21,6 +21,7 @@ import MostradorForm from "../components/MostradorForm";
 import TicketPrintView from "../../tickets/components/TicketPrintView";
 import { usePrintTicket } from "../../tickets/hooks/usePrintTicket";
 import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { useToast } from "../../../shared/components/Toast";
 
 const SALE_STATUSES = {
   confirmed: {
@@ -61,6 +62,7 @@ const UNIT_LABELS = {
 
 export default function Mostrador() {
   const { can } = usePermissions();
+  const toast = useToast();
   const {
     items,
     loading,
@@ -151,9 +153,11 @@ export default function Mostrador() {
       setActionError(null);
       // Show a temporary success message for offline
       setFormOpen(false);
-      alert(
-        "⚠️ Venta guardada localmente. El ticket se generará al restaurar conexión.",
-      );
+      toast({
+        type: "warning",
+        message:
+          "Venta guardada localmente. El ticket se generará al restaurar conexión.",
+      });
       return;
     }
     // Auto-open print view after creation

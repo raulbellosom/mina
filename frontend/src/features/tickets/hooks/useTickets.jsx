@@ -47,24 +47,48 @@ function generateTicketNumber() {
 }
 
 /**
- * Generates the QR payload: a compact reference that resolves server-side.
- * Format: "MF:<ticketId>:<verifyToken>"
- *   - MF prefix identifies MinaFlow tickets
- *   - ticketId is the Appwrite document ID
- *   - verifyToken is 8 hex chars derived from the ticket number for basic integrity
+ * QR secret for HMAC — from env or fallback
  */
-function generateQrData(ticketId, ticketNumber) {
-  let hash = 0;
-  const str = ticketId + ticketNumber + Date.now().toString(36);
-  for (let i = 0; i < str.length; i++) {
-    const ch = str.charCodeAt(i);
-    hash = ((hash << 5) - hash + ch) | 0;
-  }
-  const token = Math.abs(hash)
-    .toString(16)
-    .padStart(8, "0")
-    .slice(0, 8)
+const QR_SECRET = import.meta.env.VITE_QR_SECRET || "MF_DEFAULT_QR_KEY_2024";
+
+/**
+ * Generates an HMAC-SHA256 token for the QR payload.
+ * Uses the Web Crypto API for proper cryptographic integrity.
+ */
+async function generateHmacToken(ticketId, ticketNumber) {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(QR_SECRET);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const message = encoder.encode(`${ticketId}|${ticketNumber}`);
+  const signature = await crypto.subtle.sign("HMAC", key, message);
+  const hashArray = Array.from(new Uint8Array(signature));
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 16)
     .toUpperCase();
+}
+
+/**
+ * Verifies the HMAC token in a QR payload.
+ */
+export async function verifyQrToken(ticketId, ticketNumber, token) {
+  const expected = await generateHmacToken(ticketId, ticketNumber);
+  return expected === token;
+}
+
+/**
+ * Generates the QR payload with HMAC integrity.
+ * Format: "MF:<ticketId>:<hmacToken>"
+ */
+async function generateQrData(ticketId, ticketNumber) {
+  const token = await generateHmacToken(ticketId, ticketNumber);
   return `MF:${ticketId}:${token}`;
 }
 
@@ -224,7 +248,7 @@ export function useTickets() {
     // Generate unique identifiers
     const ticketId = ID.unique();
     const ticketNumber = generateTicketNumber();
-    const qrData = generateQrData(ticketId, ticketNumber);
+    const qrData = await generateQrData(ticketId, ticketNumber);
 
     // Create ticket document
     const payload = {
@@ -253,7 +277,7 @@ export function useTickets() {
       payload,
     );
 
-    // Transition voucher to consumed
+    // Transition voucher to consumed and update usedQty
     await databases.updateDocument(
       DATABASE_ID,
       VOUCHERS_COLLECTION,
@@ -261,6 +285,7 @@ export function useTickets() {
       {
         status: "consumed",
         ticketId: doc.$id,
+        usedQty: voucher.commercialQty,
         updatedBy: user.$id,
       },
     );

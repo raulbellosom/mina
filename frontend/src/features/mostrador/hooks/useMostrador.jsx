@@ -43,11 +43,32 @@ function generateTicketNumber() {
 }
 
 /**
- * Genera el payload del QR para un ticket de mostrador.
- * Formato: MF:{ticketId}:{verifyToken}
+ * QR secret for HMAC — from env or fallback
  */
-function generateQrPayload(ticketId) {
-  const token = Math.random().toString(36).slice(2, 10).toUpperCase();
+const QR_SECRET = import.meta.env.VITE_QR_SECRET || "MF_DEFAULT_QR_KEY_2024";
+
+/**
+ * Genera el payload del QR para un ticket de mostrador con HMAC-SHA256.
+ * Formato: MF:{ticketId}:{hmacToken}
+ */
+async function generateQrPayload(ticketId, ticketNumber) {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(QR_SECRET);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const message = encoder.encode(`${ticketId}|${ticketNumber}`);
+  const signature = await crypto.subtle.sign("HMAC", key, message);
+  const hashArray = Array.from(new Uint8Array(signature));
+  const token = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 16)
+    .toUpperCase();
   return `MF:${ticketId}:${token}`;
 }
 
@@ -185,7 +206,7 @@ export function useMostrador() {
     const internalNumber = generateSaleNumber();
     const ticketId = ID.unique();
     const ticketNumber = generateTicketNumber();
-    const qrData = generateQrPayload(ticketId);
+    const qrData = await generateQrPayload(ticketId, ticketNumber);
 
     // 1. Crear counter_sale
     const salePayload = {
@@ -298,7 +319,7 @@ export function useMostrador() {
             ticketNumber,
           },
         });
-        return { ticketId: null, ticketNumber, offline: true };
+        return { ticketId, ticketNumber, offline: true };
       }
       throw err;
     }

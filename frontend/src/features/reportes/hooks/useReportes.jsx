@@ -7,21 +7,23 @@ const TICKETS = "tickets";
 
 /**
  * Fetches ALL tickets matching date range in batches of 100 (Appwrite limit).
- * Returns full array of documents.
+ * Returns full array of documents. Max 10,000 to prevent runaway queries.
  */
+const MAX_REPORT_ROWS = 10000;
+
 async function fetchAllTickets(dateFrom, dateTo, extraQueries = []) {
   const batchSize = 100;
   let allDocs = [];
-  let offset = 0;
+  let lastId = null;
   let hasMore = true;
 
-  while (hasMore) {
+  while (hasMore && allDocs.length < MAX_REPORT_ROWS) {
     const queries = [
       Query.orderDesc("$createdAt"),
       Query.limit(batchSize),
-      Query.offset(offset),
       ...extraQueries,
     ];
+    if (lastId) queries.push(Query.cursorAfter(lastId));
 
     if (dateFrom)
       queries.push(
@@ -34,11 +36,15 @@ async function fetchAllTickets(dateFrom, dateTo, extraQueries = []) {
 
     const res = await databases.listDocuments(DATABASE_ID, TICKETS, queries);
     allDocs = allDocs.concat(res.documents);
-    offset += batchSize;
-    hasMore = res.documents.length === batchSize && allDocs.length < res.total;
+
+    if (res.documents.length < batchSize || allDocs.length >= res.total) {
+      hasMore = false;
+    } else {
+      lastId = res.documents[res.documents.length - 1].$id;
+    }
   }
 
-  return allDocs;
+  return { documents: allDocs, truncated: allDocs.length >= MAX_REPORT_ROWS };
 }
 
 export function useReportes() {
@@ -147,7 +153,7 @@ export function useReportes() {
         if (f.plantId) extraQueries.push(Query.equal("plantId", f.plantId));
         if (f.type) extraQueries.push(Query.equal("type", f.type));
 
-        const tickets = await fetchAllTickets(
+        const { documents: tickets, truncated } = await fetchAllTickets(
           f.dateFrom,
           f.dateTo,
           extraQueries,
@@ -180,6 +186,8 @@ export function useReportes() {
             result = buildOperationsReport(tickets);
         }
 
+        result.truncated = truncated;
+        result.maxRows = MAX_REPORT_ROWS;
         setData(result);
       } catch (err) {
         console.error("Error generando reporte:", err);
@@ -507,6 +515,8 @@ export function useReportes() {
       filename: `reporte_${reportData.type}`,
       headers: headersArr,
       rows: rowsArr,
+      truncated: reportData.truncated || false,
+      maxRows: reportData.maxRows || 10000,
       audit: resolvers.userId
         ? {
             action: "export.reports_csv",

@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./features/auth/hooks/useAuth";
 import ProtectedRoute from "./shared/components/ProtectedRoute";
+import ErrorBoundary from "./shared/components/ErrorBoundary";
+import NotFound from "./shared/components/NotFound";
+import { ToastProvider } from "./shared/components/Toast";
 import MainLayout from "./layouts/MainLayout";
 import { Loader2 } from "lucide-react";
 
@@ -230,18 +233,22 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <ToastProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
 

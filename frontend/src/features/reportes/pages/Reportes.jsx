@@ -920,6 +920,15 @@ export default function Reportes() {
         </div>
       ) : data ? (
         <>
+          {/* Truncation warning */}
+          {data.truncated && (
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+              ⚠️ El reporte está limitado a {data.maxRows?.toLocaleString()}{" "}
+              registros. Ajusta los filtros de fecha o categoría para obtener
+              datos más específicos.
+            </div>
+          )}
+
           {/* Totals */}
           <TotalsBar totals={data.totals} type={data.type} />
 

@@ -20,6 +20,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useTickets, TICKET_STATUSES } from "../hooks/useTickets";
 import { usePrintTicket } from "../hooks/usePrintTicket";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
+import { useToast } from "../../../shared/components/Toast";
 import TicketDetail, { STATUS_COLORS } from "../components/TicketDetail";
 import TicketPrintView from "../components/TicketPrintView";
 
@@ -33,6 +34,7 @@ const UNIT_LABELS = {
 
 export default function Tickets() {
   const { can } = usePermissions();
+  const toast = useToast();
   const { user } = useAuth();
   const {
     items,
@@ -167,7 +169,7 @@ export default function Tickets() {
       }
     } catch (err) {
       console.error("Error al imprimir:", err);
-      alert(err.message);
+      toast({ type: "error", message: err.message || "Error al imprimir" });
     }
   };
 
@@ -196,7 +198,7 @@ export default function Tickets() {
       window.print();
     } catch (err) {
       console.error("Error al reimprimir:", err);
-      alert(err.message);
+      toast({ type: "error", message: err.message || "Error al reimprimir" });
     }
   };
 

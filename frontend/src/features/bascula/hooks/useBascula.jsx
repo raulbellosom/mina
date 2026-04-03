@@ -21,7 +21,12 @@ function isNetworkError(err) {
 }
 
 // States that can receive weight operations
-const ENTRY_ALLOWED_STATES = ["issued", "ready_to_print", "printed"];
+const ENTRY_ALLOWED_STATES = [
+  "generated",
+  "issued",
+  "ready_to_print",
+  "printed",
+];
 const EXIT_ALLOWED_STATES = ["loading"];
 
 /**

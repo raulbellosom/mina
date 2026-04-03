@@ -22,6 +22,7 @@ export async function exportToCsv({
   rows,
   audit,
   maxRows = 5000,
+  truncated = false,
 }) {
   try {
     const limited = rows.slice(0, maxRows);
@@ -35,7 +36,24 @@ export async function exportToCsv({
 
     const headerLine = headers.map(escape).join(",");
     const dataLines = limited.map((row) => row.map(escape).join(","));
-    const csv = "\uFEFF" + headerLine + "\n" + dataLines.join("\n");
+
+    // Add metadata footer
+    const footerLines = [];
+    footerLines.push("");
+    footerLines.push(`Total registros:,${limited.length}`);
+    if (truncated) {
+      footerLines.push(
+        `AVISO:,Exportación limitada a ${maxRows} registros. Ajuste los filtros para datos más específicos.`,
+      );
+    }
+
+    const csv =
+      "\uFEFF" +
+      headerLine +
+      "\n" +
+      dataLines.join("\n") +
+      "\n" +
+      footerLines.join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

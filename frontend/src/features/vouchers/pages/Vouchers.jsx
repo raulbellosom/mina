@@ -18,6 +18,7 @@ import {
   MapPin,
   Package,
   TicketPlus,
+  ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -29,6 +30,7 @@ import {
 } from "../hooks/useVouchers";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useTickets } from "../../tickets/hooks/useTickets";
+import { useToast } from "../../../shared/components/Toast";
 import VoucherForm from "../components/VoucherForm";
 
 const TICKET_GENERATABLE_STATUSES = ["issued", "ready_for_ticket"];
@@ -56,6 +58,7 @@ const UNIT_LABELS = {
 
 export default function Vouchers() {
   const { can } = usePermissions();
+  const toast = useToast();
   const navigate = useNavigate();
   const {
     items,
@@ -157,7 +160,10 @@ export default function Vouchers() {
       setDetailItem(null);
       navigate("/tickets");
     } catch (err) {
-      alert(err.message || "Error al generar ticket");
+      toast({
+        type: "error",
+        message: err.message || "Error al generar ticket",
+      });
     } finally {
       setGenerating(null);
     }
@@ -168,6 +174,17 @@ export default function Vouchers() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+        <span>Inicio</span>
+        <ChevronRight size={14} />
+        <span>Operaciones</span>
+        <ChevronRight size={14} />
+        <span className="text-slate-900 dark:text-white font-medium">
+          Vouchers
+        </span>
+      </nav>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <header>

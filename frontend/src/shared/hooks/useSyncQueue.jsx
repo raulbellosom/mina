@@ -13,6 +13,36 @@ import { useOnlineStatus } from "./useOnlineStatus";
 
 const MAX_RETRIES = 3;
 const BACKOFF_BASE = 1000; // 1s, 2s, 4s
+const SYNC_TIMEOUT = 15000; // 15s per operation
+
+/**
+ * Wrap a promise with a timeout.
+ */
+function withTimeout(promise, ms = SYNC_TIMEOUT) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("SYNC_TIMEOUT")), ms),
+    ),
+  ]);
+}
+
+/**
+ * Classify error to decide retry strategy.
+ * Returns: 'permanent' | 'retryable'
+ */
+function classifyError(err) {
+  const code = err?.code || err?.status;
+  // 4xx (except 429 Too Many Requests) are permanent
+  if (code >= 400 && code < 500 && code !== 429 && code !== 409)
+    return "permanent";
+  // Network errors and timeouts are retryable
+  if (err?.message?.includes("SYNC_TIMEOUT")) return "retryable";
+  if (err?.message?.includes("Failed to fetch")) return "retryable";
+  if (err?.message?.includes("NetworkError")) return "retryable";
+  // 5xx and 429 are retryable
+  return "retryable";
+}
 
 /**
  * Hook para gestionar la cola de sincronización offline.
@@ -84,7 +114,8 @@ export function useSyncQueue() {
           ID.unique(),
           salePayload,
         );
-        const ticketId = ID.unique();
+        // Use pre-generated ticketId from offline data if available
+        const ticketId = data.ticketId || ID.unique();
         const ticketPayload = {
           ticketNumber: data.ticketNumber || "",
           voucherId: "",
@@ -178,6 +209,8 @@ export function useSyncQueue() {
   const syncOne = useCallback(
     async (id) => {
       if (!navigator.onLine) return { success: false, error: "Sin conexión" };
+      if (syncingRef.current)
+        return { success: false, error: "Sincronización en curso" };
 
       const entry = entries.find((e) => e.id === id);
       if (!entry) return { success: false, error: "Operación no encontrada" };
@@ -186,7 +219,7 @@ export function useSyncQueue() {
       await refreshQueue();
 
       try {
-        await processEntry(entry);
+        await withTimeout(processEntry(entry));
         await updateQueueEntry(id, {
           status: "synced",
           syncedAt: new Date().toISOString(),
@@ -203,9 +236,12 @@ export function useSyncQueue() {
           await refreshQueue();
           return { success: true };
         }
+        const errorType = classifyError(err);
         const newAttempts = (entry.attempts || 0) + 1;
+        const isPermanent = errorType === "permanent";
         await updateQueueEntry(id, {
-          status: newAttempts >= MAX_RETRIES ? "error" : "pending",
+          status:
+            isPermanent || newAttempts >= MAX_RETRIES ? "error" : "pending",
           attempts: newAttempts,
           lastError: err.message || "Error desconocido",
         });
@@ -244,7 +280,7 @@ export function useSyncQueue() {
       await updateQueueEntry(entry.id, { status: "syncing" });
 
       try {
-        await processEntry(entry);
+        await withTimeout(processEntry(entry));
         await updateQueueEntry(entry.id, {
           status: "synced",
           syncedAt: new Date().toISOString(),
@@ -259,9 +295,12 @@ export function useSyncQueue() {
           });
           synced++;
         } else {
+          const errorType = classifyError(err);
+          const isPermanent = errorType === "permanent";
           const newAttempts = (entry.attempts || 0) + 1;
           await updateQueueEntry(entry.id, {
-            status: newAttempts >= MAX_RETRIES ? "error" : "pending",
+            status:
+              isPermanent || newAttempts >= MAX_RETRIES ? "error" : "pending",
             attempts: newAttempts,
             lastError: err.message || "Error desconocido",
           });

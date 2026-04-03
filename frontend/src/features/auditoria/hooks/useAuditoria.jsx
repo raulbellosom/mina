@@ -147,33 +147,56 @@ export function useAuditoria() {
   const exportCSV = useCallback(
     async (userId) => {
       try {
-        // Fetch all results matching current filters (up to 5000)
-        const queries = [Query.orderDesc("$createdAt"), Query.limit(5000)];
+        // Fetch all results matching current filters with pagination (max 10000)
+        const MAX_EXPORT = 10000;
+        const batchSize = 100;
+        let allDocs = [];
+        let lastId = null;
+        let hasMore = true;
 
-        if (filters.action) queries.push(Query.equal("action", filters.action));
-        if (filters.collection)
-          queries.push(Query.equal("collection", filters.collection));
-        if (filters.userId) queries.push(Query.equal("userId", filters.userId));
-        if (filters.dateFrom)
-          queries.push(
-            Query.greaterThanEqual(
-              "$createdAt",
-              filters.dateFrom + "T00:00:00.000Z",
-            ),
-          );
-        if (filters.dateTo)
-          queries.push(
-            Query.lessThanEqual(
-              "$createdAt",
-              filters.dateTo + "T23:59:59.999Z",
-            ),
-          );
+        while (hasMore && allDocs.length < MAX_EXPORT) {
+          const queries = [
+            Query.orderDesc("$createdAt"),
+            Query.limit(batchSize),
+          ];
+          if (lastId) queries.push(Query.cursorAfter(lastId));
+          if (filters.action)
+            queries.push(Query.equal("action", filters.action));
+          if (filters.collection)
+            queries.push(Query.equal("collection", filters.collection));
+          if (filters.userId)
+            queries.push(Query.equal("userId", filters.userId));
+          if (filters.dateFrom)
+            queries.push(
+              Query.greaterThanEqual(
+                "$createdAt",
+                filters.dateFrom + "T00:00:00.000Z",
+              ),
+            );
+          if (filters.dateTo)
+            queries.push(
+              Query.lessThanEqual(
+                "$createdAt",
+                filters.dateTo + "T23:59:59.999Z",
+              ),
+            );
 
-        const res = await databases.listDocuments(
-          DATABASE_ID,
-          COLLECTION,
-          queries,
-        );
+          const res = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTION,
+            queries,
+          );
+          allDocs = allDocs.concat(res.documents);
+
+          if (res.documents.length < batchSize || allDocs.length >= res.total) {
+            hasMore = false;
+          } else {
+            lastId = res.documents[res.documents.length - 1].$id;
+          }
+        }
+
+        const truncated = allDocs.length >= MAX_EXPORT;
+        await loadUsersMap(allDocs);
 
         return await exportToCsv({
           filename: "auditoria",
@@ -185,7 +208,7 @@ export function useAuditoria() {
             "Usuario",
             "Detalles",
           ],
-          rows: res.documents.map((d) => [
+          rows: allDocs.map((d) => [
             new Date(d.$createdAt).toLocaleString("es-MX"),
             d.action,
             d.collection,
@@ -193,6 +216,8 @@ export function useAuditoria() {
             usersMap[d.userId] || d.userId,
             d.details || "",
           ]),
+          truncated,
+          maxRows: MAX_EXPORT,
           audit: userId
             ? {
                 action: "export.audit_csv",

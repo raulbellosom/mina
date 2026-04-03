@@ -60,6 +60,14 @@ export async function addToQueue({
   data,
   meta,
 }) {
+  // BUG-21-001: Validate required fields before persisting
+  if (!collection || typeof collection !== "string") {
+    throw new Error("offlineStorage: collection es requerido");
+  }
+  if (!data || typeof data !== "object") {
+    throw new Error("offlineStorage: data es requerido y debe ser un objeto");
+  }
+
   const entry = {
     id: crypto.randomUUID(),
     collection,
@@ -78,7 +86,19 @@ export async function addToQueue({
     const t = db.transaction(STORE_NAME, "readwrite");
     t.objectStore(STORE_NAME).add(entry);
     t.oncomplete = () => resolve(entry);
-    t.onerror = () => reject(t.error);
+    t.onerror = () => {
+      // BUG-21-002: Handle QuotaExceededError
+      const err = t.error;
+      if (err?.name === "QuotaExceededError") {
+        reject(
+          new Error(
+            "QUOTA_EXCEEDED: Almacenamiento local lleno. Conecte a internet para sincronizar datos pendientes.",
+          ),
+        );
+      } else {
+        reject(err);
+      }
+    };
   });
 }
 
@@ -184,6 +204,19 @@ export async function clearSynced() {
     const store = t.objectStore(STORE_NAME);
     synced.forEach((e) => store.delete(e.id));
     t.oncomplete = () => resolve(synced.length);
+    t.onerror = () => reject(t.error);
+  });
+}
+
+/**
+ * Clear ALL entries from the queue (used on logout).
+ */
+export async function clearAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(STORE_NAME, "readwrite");
+    t.objectStore(STORE_NAME).clear();
+    t.oncomplete = () => resolve(true);
     t.onerror = () => reject(t.error);
   });
 }

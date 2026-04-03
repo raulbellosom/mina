@@ -152,9 +152,37 @@ function QrScannerCamera({ onResult, active }) {
 // ─── Ticket Result Card ───────────────────────────────────────────────────────
 
 function TicketResultCard({ ticket, valid, reason }) {
+  const isAlreadyCompleted = !valid && ticket?.status === "completed";
+
   const statusColor = valid
     ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-    : "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20";
+    : isAlreadyCompleted
+      ? "border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20"
+      : "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20";
+
+  const StatusIcon = valid
+    ? CheckCircle2
+    : isAlreadyCompleted
+      ? AlertTriangle
+      : XCircle;
+
+  const iconColor = valid
+    ? "text-green-500"
+    : isAlreadyCompleted
+      ? "text-amber-500"
+      : "text-red-500";
+
+  const textColor = valid
+    ? "text-green-700 dark:text-green-400"
+    : isAlreadyCompleted
+      ? "text-amber-700 dark:text-amber-400"
+      : "text-red-700 dark:text-red-400";
+
+  const statusLabel = valid
+    ? "Salida válida"
+    : isAlreadyCompleted
+      ? "Ticket ya utilizado"
+      : "Salida no válida";
 
   return (
     <div className={`rounded-xl border-2 p-5 ${statusColor}`}>
@@ -162,19 +190,15 @@ function TicketResultCard({ ticket, valid, reason }) {
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            {valid ? (
-              <CheckCircle2 size={20} className="text-green-500 shrink-0" />
-            ) : (
-              <XCircle size={20} className="text-red-500 shrink-0" />
-            )}
-            <span
-              className={`text-base font-bold ${valid ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}
-            >
-              {valid ? "Salida válida" : "Salida no válida"}
+            <StatusIcon size={20} className={`${iconColor} shrink-0`} />
+            <span className={`text-base font-bold ${textColor}`}>
+              {statusLabel}
             </span>
           </div>
           {reason && (
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1 ml-7">
+            <p
+              className={`text-sm mt-1 ml-7 ${isAlreadyCompleted ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}
+            >
               {reason}
             </p>
           )}
