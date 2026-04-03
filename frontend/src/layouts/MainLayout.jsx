@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -28,56 +28,59 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import OfflineBanner from "../shared/components/OfflineBanner";
 
 const navGroups = [
   {
     label: "OPERACIÓN",
     items: [
-      { name: "Dashboard",            path: "/",            icon: LayoutDashboard, end: true },
-      { name: "Báscula",              path: "/bascula",     icon: Scale },
-      { name: "Venta en Mostrador",   path: "/mostrador",   icon: ShoppingBag },
-      { name: "Validación de Salida", path: "/validacion",  icon: ShieldCheck },
+      { name: "Dashboard", path: "/", icon: LayoutDashboard, end: true },
+      { name: "Báscula", path: "/bascula", icon: Scale },
+      { name: "Venta en Mostrador", path: "/mostrador", icon: ShoppingBag },
+      { name: "Validación de Salida", path: "/validacion", icon: ShieldCheck },
     ],
   },
   {
     label: "DOCUMENTOS",
     items: [
       { name: "Vouchers / Referencias", path: "/vouchers", icon: Ticket },
-      { name: "Tickets",               path: "/tickets",   icon: FileText },
+      { name: "Tickets", path: "/tickets", icon: FileText },
     ],
   },
   {
     label: "CATÁLOGOS",
     items: [
-      { name: "Materiales",  path: "/catalogos/materiales", icon: Pickaxe },
-      { name: "Categorías",  path: "/catalogos/categorias", icon: Tag },
-      { name: "Clientes",    path: "/catalogos/clientes",   icon: Users },
-      { name: "Choferes",    path: "/catalogos/choferes",   icon: UserSquare2 },
-      { name: "Camiones",    path: "/catalogos/camiones",   icon: Truck },
-      { name: "Plantas",     path: "/catalogos/plantas",    icon: Droplet },
+      { name: "Materiales", path: "/catalogos/materiales", icon: Pickaxe },
+      { name: "Categorías", path: "/catalogos/categorias", icon: Tag },
+      { name: "Clientes", path: "/catalogos/clientes", icon: Users },
+      { name: "Choferes", path: "/catalogos/choferes", icon: UserSquare2 },
+      { name: "Camiones", path: "/catalogos/camiones", icon: Truck },
+      { name: "Plantas", path: "/catalogos/plantas", icon: Droplet },
     ],
   },
   {
     label: "ADMINISTRACIÓN",
     items: [
-      { name: "Usuarios",        path: "/usuarios",      icon: Users2 },
-      { name: "Perfiles",        path: "/roles",         icon: KeyRound },
-      { name: "Auditoría",       path: "/auditoria",     icon: ClipboardList },
-      { name: "Configuración",   path: "/configuracion", icon: Settings },
+      { name: "Usuarios", path: "/usuarios", icon: Users2 },
+      { name: "Perfiles", path: "/roles", icon: KeyRound },
+      { name: "Auditoría", path: "/auditoria", icon: ClipboardList },
+      { name: "Configuración", path: "/configuracion", icon: Settings },
     ],
   },
   {
     label: "REPORTES",
-    items: [
-      { name: "Reportes", path: "/reportes", icon: BarChart2 },
-    ],
+    items: [{ name: "Reportes", path: "/reportes", icon: BarChart2 }],
   },
   {
     label: "SISTEMA",
     items: [
-      { name: "Operaciones Pendientes", path: "/operaciones-pendientes", icon: CloudOff },
+      {
+        name: "Operaciones Pendientes",
+        path: "/operaciones-pendientes",
+        icon: CloudOff,
+      },
     ],
   },
 ];
@@ -85,10 +88,11 @@ const navGroups = [
 export default function MainLayout() {
   const { logout, profile, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // dark theme
   const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains("dark")
+    document.documentElement.classList.contains("dark"),
   );
 
   // desktop: sidebar collapsed (icon-only)
@@ -108,7 +112,24 @@ export default function MainLayout() {
   }, [isDark]);
 
   // Close mobile drawer when route changes
-  const closeMobile = () => setMobileOpen(false);
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  // Auto-close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -119,20 +140,23 @@ export default function MainLayout() {
   const SidebarContent = ({ isCollapsed = false, onNavClick }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className={`h-16 flex items-center gap-3 px-4 border-b border-slate-200 dark:border-slate-800 shrink-0 ${isCollapsed ? "justify-center px-0" : ""}`}>
+      <div
+        className={`h-16 flex items-center gap-3 px-4 border-b border-slate-200 dark:border-slate-800 shrink-0 ${isCollapsed ? "justify-center px-0" : ""}`}
+      >
         <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
           <Scale size={16} className="text-white" />
         </div>
         {!isCollapsed && (
           <span className="font-bold text-slate-900 dark:text-white text-sm leading-tight">
-            Mina<br />
+            Mina
+            <br />
             <span className="text-blue-600 font-semibold">Operativa</span>
           </span>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+      <nav className="sidebar-nav flex-1 p-2 space-y-0.5 overflow-y-auto">
         {navGroups.map((group) => (
           <div key={group.label}>
             {!isCollapsed && (
@@ -151,14 +175,17 @@ export default function MainLayout() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-lg transition-all duration-150 group
                   ${isCollapsed ? "justify-center px-0 py-2.5 mx-1" : "px-3 py-2.5 text-sm font-medium"}
-                  ${isActive
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                  ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
                   }`
                 }
               >
                 <item.icon size={18} className="shrink-0" />
-                {!isCollapsed && <span className="flex-1 truncate">{item.name}</span>}
+                {!isCollapsed && (
+                  <span className="flex-1 truncate">{item.name}</span>
+                )}
               </NavLink>
             ))}
           </div>
@@ -166,7 +193,9 @@ export default function MainLayout() {
       </nav>
 
       {/* Footer */}
-      <div className={`p-2 border-t border-slate-200 dark:border-slate-800 space-y-0.5 shrink-0 ${isCollapsed ? "flex flex-col items-center" : ""}`}>
+      <div
+        className={`p-2 border-t border-slate-200 dark:border-slate-800 space-y-0.5 shrink-0 ${isCollapsed ? "flex flex-col items-center" : ""}`}
+      >
         {/* User info */}
         {!isCollapsed && (
           <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
@@ -184,7 +213,10 @@ export default function MainLayout() {
           </div>
         )}
         {isCollapsed && (
-          <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-1" title={user?.name}>
+          <div
+            className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-1"
+            title={user?.name}
+          >
             <User size={14} className="text-slate-500 dark:text-slate-400" />
           </div>
         )}
@@ -196,7 +228,11 @@ export default function MainLayout() {
           className={`flex items-center gap-3 w-full rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 transition-colors
             ${isCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5 text-sm font-medium"}`}
         >
-          {isDark ? <Sun size={18} className="shrink-0" /> : <Moon size={18} className="shrink-0" />}
+          {isDark ? (
+            <Sun size={18} className="shrink-0" />
+          ) : (
+            <Moon size={18} className="shrink-0" />
+          )}
           {!isCollapsed && (isDark ? "Modo Claro" : "Modo Oscuro")}
         </button>
 
@@ -215,8 +251,7 @@ export default function MainLayout() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
-
+    <div className="flex h-dvh h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
       <aside
         className={`hidden lg:flex flex-col shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 relative
@@ -230,39 +265,55 @@ export default function MainLayout() {
           title={collapsed ? "Expandir menú" : "Colapsar menú"}
           className="absolute -right-3 top-18 z-10 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 shadow-sm transition-colors"
         >
-          {collapsed
-            ? <PanelLeftOpen size={12} />
-            : <PanelLeftClose size={12} />}
+          {collapsed ? (
+            <PanelLeftOpen size={12} />
+          ) : (
+            <PanelLeftClose size={12} />
+          )}
         </button>
       </aside>
 
-      {/* ── MOBILE OVERLAY ──────────────────────────────── */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={closeMobile}
-        />
-      )}
+      {/* ── MOBILE OVERLAY + DRAWER (animated) ──────────── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="sidebar-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={closeMobile}
+            />
 
-      {/* ── MOBILE DRAWER ───────────────────────────────── */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col lg:hidden transition-transform duration-200
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        {/* Close button */}
-        <button
-          onClick={closeMobile}
-          className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <X size={18} />
-        </button>
-        <SidebarContent isCollapsed={false} onNavClick={closeMobile} />
-      </aside>
+            {/* Drawer */}
+            <motion.aside
+              key="sidebar-drawer"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col lg:hidden shadow-2xl"
+            >
+              {/* Close button */}
+              <button
+                onClick={closeMobile}
+                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+              <SidebarContent isCollapsed={false} onNavClick={closeMobile} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── MAIN CONTENT ────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Mobile top bar */}
-        <header className="lg:hidden h-14 shrink-0 flex items-center gap-3 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <header className="lg:hidden h-14 shrink-0 sticky top-0 z-30 flex items-center gap-3 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setMobileOpen(true)}
             className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -279,7 +330,9 @@ export default function MainLayout() {
           </div>
         </header>
 
-        <OfflineBanner />
+        <div className="shrink-0">
+          <OfflineBanner />
+        </div>
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
           <Outlet />
