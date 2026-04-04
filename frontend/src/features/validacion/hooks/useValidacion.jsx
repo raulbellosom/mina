@@ -9,6 +9,24 @@ const TICKETS = APP_IDS.collections.TICKETS;
 const SCAN_LOGS = APP_IDS.collections.SCAN_LOGS;
 const AUDIT = APP_IDS.collections.AUDIT_LOGS;
 
+// Map technical status → user-friendly Spanish label
+const STATUS_LABELS = {
+  draft: "Borrador",
+  issued: "Emitido",
+  printed: "Impreso (sin pesar)",
+  loading: "En carga",
+  loaded: "Cargado",
+  pending_exit_validation: "Pendiente de salida",
+  completed: "Completado",
+  cancelled: "Cancelado",
+  rejected: "Rechazado",
+  blocked: "Bloqueado",
+};
+
+function getStatusLabel(status) {
+  return STATUS_LABELS[status] || status;
+}
+
 function isNetworkError(err) {
   return (
     !navigator.onLine ||
@@ -197,7 +215,7 @@ export function useValidacion() {
         ticket,
         valid: false,
         blocked: false,
-        reason: `El ticket aún no completó el proceso de báscula (estado: ${ticket.status}). Debe estar en 'pending_exit_validation'.`,
+        reason: `El ticket aún no completó el proceso de báscula. Estado actual: ${getStatusLabel(ticket.status)}.`,
       };
     }
 
@@ -210,7 +228,7 @@ export function useValidacion() {
 
     if (ticket.status !== "pending_exit_validation") {
       throw new Error(
-        "Solo se pueden aprobar tickets en estado pending_exit_validation",
+        "Solo se pueden aprobar tickets que estén pendientes de salida",
       );
     }
 
