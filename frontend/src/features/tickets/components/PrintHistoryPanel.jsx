@@ -5,8 +5,8 @@ const TYPE_CONFIG = {
   initial_print: {
     label: "Impresión inicial",
     icon: Printer,
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
+    color: "text-primary-600 dark:text-primary-400",
+    bg: "bg-primary-50 dark:bg-primary-900/20",
   },
   reprint: {
     label: "Reimpresión",

@@ -128,7 +128,7 @@ function QrScannerCamera({ onResult, active }) {
               <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg" />
               {/* Scan line animation */}
               <div
-                className="absolute top-0 left-0 right-0 h-0.5 bg-blue-400 opacity-80 animate-bounce"
+                className="absolute top-0 left-0 right-0 h-0.5 bg-primary-400 opacity-80 animate-bounce"
                 style={{ animationDuration: "1.5s" }}
               />
             </div>
@@ -459,7 +459,7 @@ export default function Validacion() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <QrCode size={24} className="text-blue-500" />
+            <QrCode size={24} className="text-primary-500" />
             Validación de Salida
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
@@ -470,7 +470,7 @@ export default function Validacion() {
           onClick={() => setShowHistory((h) => !h)}
           className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors self-start sm:self-auto ${
             showHistory
-              ? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+              ? "border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
               : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
           }`}
         >
@@ -516,7 +516,7 @@ export default function Validacion() {
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
                 mode === "scan"
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-b-2 border-primary-500"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
@@ -530,7 +530,7 @@ export default function Validacion() {
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
                 mode === "manual"
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-b-2 border-primary-500"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
@@ -571,13 +571,13 @@ export default function Validacion() {
                       value={manualInput}
                       onChange={(e) => setManualInput(e.target.value)}
                       placeholder="Ej: T-260101-ABCD o CT-260101-ABCD"
-                      className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono"
+                      className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono"
                       autoFocus
                     />
                     <button
                       type="submit"
                       disabled={!manualInput.trim() || lookupLoading}
-                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      className="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
                     >
                       {lookupLoading ? (
                         <Loader2 size={16} className="animate-spin" />
@@ -593,7 +593,7 @@ export default function Validacion() {
             {/* Loading */}
             {lookupLoading && (
               <div className="flex items-center justify-center py-8 gap-3">
-                <Loader2 size={20} className="animate-spin text-blue-500" />
+                <Loader2 size={20} className="animate-spin text-primary-500" />
                 <span className="text-sm text-slate-500 dark:text-slate-400">
                   Buscando ticket...
                 </span>
@@ -738,7 +738,7 @@ export default function Validacion() {
                   onClick={() => setFilterResult(opt.value)}
                   className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                     filterResult === opt.value
-                      ? "bg-blue-600 text-white"
+                      ? "bg-primary-600 text-white"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >

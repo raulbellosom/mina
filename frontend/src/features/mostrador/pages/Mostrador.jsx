@@ -26,7 +26,7 @@ import { useToast } from "../../../shared/components/Toast";
 const SALE_STATUSES = {
   confirmed: {
     label: "Confirmada",
-    classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    classes: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   },
   ticket_generated: {
     label: "Ticket generado",
@@ -245,7 +245,7 @@ export default function Mostrador() {
         {can("counter_sales.create") && (
           <button
             onClick={() => setFormOpen(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
           >
             <Plus size={16} /> Nueva venta
           </button>
@@ -279,7 +279,7 @@ export default function Mostrador() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por folio o nombre de cliente..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -287,7 +287,7 @@ export default function Mostrador() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           >
             <option value="all">Todos</option>
             {Object.entries(SALE_STATUSES).map(([k, v]) => (

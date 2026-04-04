@@ -24,14 +24,14 @@ const STYLES = {
     "bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-800 dark:text-red-300",
   warning:
     "bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300",
-  info: "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300",
+  info: "bg-primary-50 dark:bg-primary-900/30 border-primary-300 dark:border-primary-700 text-primary-800 dark:text-primary-300",
 };
 
 const ICON_STYLES = {
   success: "text-green-500",
   error: "text-red-500",
   warning: "text-amber-500",
-  info: "text-blue-500",
+  info: "text-primary-500",
 };
 
 let toastId = 0;

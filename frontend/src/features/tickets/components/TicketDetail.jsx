@@ -22,7 +22,7 @@ const STATUS_COLORS = {
   generated:
     "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
   ready_to_print:
-    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   printed: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
   loading:
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -291,7 +291,7 @@ export default function TicketDetail({
               onMarkReadyToPrint && (
                 <button
                   onClick={() => onMarkReadyToPrint(ticket.$id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
                 >
                   <ArrowRightCircle size={14} /> Marcar listo para imprimir
                 </button>

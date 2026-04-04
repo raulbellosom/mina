@@ -231,7 +231,7 @@ export default function TicketPrintView({
               <button
                 onClick={handlePrintClick}
                 disabled={isPrinting}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
               >
                 <Printer size={16} />
                 {isPrinting

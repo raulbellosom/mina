@@ -36,7 +36,7 @@ export default function OfflineBanner() {
   // Syncing in progress
   if (syncing) {
     return (
-      <div className="bg-blue-500 text-white px-4 py-2 flex items-center justify-between gap-3 text-sm font-medium">
+      <div className="bg-primary-500 text-white px-4 py-2 flex items-center justify-between gap-3 text-sm font-medium">
         <div className="flex items-center gap-2">
           <Loader2 size={16} className="shrink-0 animate-spin" />
           <span>
@@ -75,7 +75,7 @@ export default function OfflineBanner() {
   // Reconnected with pending operations
   if (wasOffline && pendingCount > 0) {
     return (
-      <div className="bg-blue-500 text-white px-4 py-2 flex items-center justify-between gap-3 text-sm font-medium">
+      <div className="bg-primary-500 text-white px-4 py-2 flex items-center justify-between gap-3 text-sm font-medium">
         <div className="flex items-center gap-2">
           <Wifi size={16} className="shrink-0" />
           <span>

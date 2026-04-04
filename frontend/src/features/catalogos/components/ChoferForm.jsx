@@ -99,7 +99,7 @@ export default function ChoferForm({
                   onChange={set("firstName")}
                   required
                   placeholder="Ej: Juan Carlos"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
               <div>
@@ -111,7 +111,7 @@ export default function ChoferForm({
                   onChange={set("lastName")}
                   required
                   placeholder="Ej: Pérez López"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function ChoferForm({
                   value={form.phone}
                   onChange={set("phone")}
                   placeholder="Ej: 614 123 4567"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
               <div>
@@ -137,7 +137,7 @@ export default function ChoferForm({
                   value={form.licenseNumber}
                   onChange={set("licenseNumber")}
                   placeholder="Licencia de conducir"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono uppercase"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono uppercase"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function ChoferForm({
                 value={form.email}
                 onChange={set("email")}
                 placeholder="correo@ejemplo.com"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -164,7 +164,7 @@ export default function ChoferForm({
               <select
                 value={form.clientId}
                 onChange={set("clientId")}
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               >
                 <option value="">Sin asociar</option>
                 {(clients || []).map((c) => (
@@ -189,7 +189,7 @@ export default function ChoferForm({
                 onChange={set("notes")}
                 rows={3}
                 placeholder="Notas internas sobre el chofer..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -209,7 +209,7 @@ export default function ChoferForm({
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear chofer"}

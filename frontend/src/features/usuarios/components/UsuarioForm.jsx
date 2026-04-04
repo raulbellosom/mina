@@ -125,7 +125,7 @@ export default function UsuarioForm({
                   onChange={set("firstName")}
                   required
                   placeholder="Nombre de pila"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
               <div>
@@ -137,7 +137,7 @@ export default function UsuarioForm({
                   onChange={set("lastName")}
                   required
                   placeholder="Apellido(s)"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function UsuarioForm({
                     onChange={set("email")}
                     required
                     placeholder="usuario@empresa.com"
-                    className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                    className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -170,7 +170,7 @@ export default function UsuarioForm({
                       required
                       minLength={8}
                       placeholder="Mínimo 8 caracteres"
-                      className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                      className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                     />
                     <button
                       type="button"
@@ -194,7 +194,7 @@ export default function UsuarioForm({
                 onChange={set("label")}
                 required
                 disabled={isEditing}
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white disabled:opacity-50"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white disabled:opacity-50"
               >
                 {labelOptions.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -219,7 +219,7 @@ export default function UsuarioForm({
                   value={form.phone}
                   onChange={set("phone")}
                   placeholder="+52 555 000 0000"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
               <div>
@@ -230,7 +230,7 @@ export default function UsuarioForm({
                   value={form.employeeCode}
                   onChange={set("employeeCode")}
                   placeholder="EMP-001"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function UsuarioForm({
                 onChange={set("notes")}
                 rows={3}
                 placeholder="Observaciones sobre este usuario..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -266,7 +266,7 @@ export default function UsuarioForm({
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-60"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear usuario"}

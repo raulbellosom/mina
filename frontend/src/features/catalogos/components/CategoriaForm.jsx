@@ -117,7 +117,7 @@ export default function CategoriaForm({
                 onChange={handleNameChange}
                 required
                 placeholder="Ej: Gravas, Arenas, Bases hidráulicas"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -130,7 +130,7 @@ export default function CategoriaForm({
                 onChange={set("code")}
                 required
                 placeholder="gravas"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono"
               />
             </div>
 
@@ -143,7 +143,7 @@ export default function CategoriaForm({
                 onChange={set("description")}
                 rows={3}
                 placeholder="Descripción breve de la categoría..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -157,7 +157,7 @@ export default function CategoriaForm({
                 onChange={set("sortOrder")}
                 min="0"
                 placeholder="0"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
               <p className="text-xs text-slate-400 mt-1">
                 Las categorías se ordenan ascendentemente por este valor.
@@ -180,7 +180,7 @@ export default function CategoriaForm({
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear categoría"}

@@ -43,7 +43,7 @@ function AccessDenied() {
             <p className="text-slate-500 dark:text-slate-400 text-sm text-center max-w-sm">
                 No tienes permisos para acceder a esta sección. Contacta al administrador si crees que esto es un error.
             </p>
-            <a href="/" className="mt-6 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+            <a href="/" className="mt-6 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
                 Volver al inicio
             </a>
         </div>

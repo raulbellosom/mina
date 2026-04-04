@@ -98,7 +98,7 @@ export default function VoucherForm({
   };
 
   const inputCls =
-    "mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white disabled:opacity-60 disabled:cursor-not-allowed";
+    "mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white disabled:opacity-60 disabled:cursor-not-allowed";
   const labelCls = "text-sm font-medium text-slate-700 dark:text-slate-300";
   const selectCls = `${inputCls} appearance-none`;
 
@@ -303,7 +303,7 @@ export default function VoucherForm({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium disabled:opacity-50"
                 >
                   {submitting && <Loader2 size={14} className="animate-spin" />}
                   {isEditing ? "Guardar cambios" : "Crear voucher"}

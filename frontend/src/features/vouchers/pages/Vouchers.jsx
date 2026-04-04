@@ -38,7 +38,7 @@ const TICKET_GENERATABLE_STATUSES = ["issued", "ready_for_ticket"];
 /* ─── Status badges ─── */
 const STATUS_COLORS = {
   draft: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  issued: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  issued: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   ready_for_ticket:
     "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
   consumed:
@@ -199,7 +199,7 @@ export default function Vouchers() {
         {can("vouchers.create") && (
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
           >
             <Plus size={16} /> Nuevo voucher
           </button>
@@ -217,7 +217,7 @@ export default function Vouchers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por folio interno o referencia externa..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -225,7 +225,7 @@ export default function Vouchers() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           >
             <option value="all">Todos los estados</option>
             {Object.entries(VOUCHER_STATUSES).map(([key, val]) => (
@@ -341,7 +341,7 @@ export default function Vouchers() {
                         <button
                           title="Ver detalle"
                           onClick={() => setDetailItem(v)}
-                          className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-blue-600"
+                          className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600"
                         >
                           <Eye size={15} />
                         </button>
@@ -359,7 +359,7 @@ export default function Vouchers() {
                           <button
                             title="Emitir voucher"
                             onClick={() => handleIssue(v)}
-                            className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-blue-600"
+                            className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600"
                           >
                             <ArrowRightCircle size={15} />
                           </button>
@@ -565,7 +565,7 @@ export default function Vouchers() {
                 {can("vouchers.update") && detailItem.status === "draft" && (
                   <button
                     onClick={() => handleIssue(detailItem)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
                   >
                     <ArrowRightCircle size={14} /> Emitir
                   </button>

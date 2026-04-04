@@ -15,7 +15,7 @@ export default function Dashboard() {
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-1">
                     Bienvenido, <span className="font-medium text-slate-700 dark:text-slate-300">{user?.name || 'Operador'}</span>.
-                    &nbsp;Rol: <span className="font-semibold text-blue-600 dark:text-blue-400">{roleLabel}</span>
+                    &nbsp;Rol: <span className="font-semibold text-primary-600 dark:text-primary-400">{roleLabel}</span>
                 </p>
             </header>
 

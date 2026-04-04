@@ -4,8 +4,18 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  /* Dynamic palette — values injected by ThemeContext via --th-* CSS vars */
+  --color-primary-50: var(--th-50, #eff6ff);
+  --color-primary-100: var(--th-100, #dbeafe);
+  --color-primary-200: var(--th-200, #bfdbfe);
+  --color-primary-300: var(--th-300, #93c5fd);
+  --color-primary-400: var(--th-400, #60a5fa);
+  --color-primary-500: var(--th-500, #3b82f6);
+  --color-primary-600: var(--th-600, #2563eb);
+  --color-primary-700: var(--th-700, #1d4ed8);
+  --color-primary-800: var(--th-800, #1e40af);
+  --color-primary-900: var(--th-900, #1e3a8a);
+  --color-primary-950: var(--th-950, #172554);
 }
 
 /* Base */

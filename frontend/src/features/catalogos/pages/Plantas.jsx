@@ -233,7 +233,7 @@ export default function Plantas() {
           <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
             <Link
               to="/catalogos"
-              className="hover:text-blue-600 dark:hover:text-blue-400"
+              className="hover:text-primary-600 dark:hover:text-primary-400"
             >
               Catálogos
             </Link>
@@ -250,7 +250,7 @@ export default function Plantas() {
         {can("plants.create") && (
           <button
             onClick={openNew}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 shrink-0"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 h-10 px-4 shrink-0"
           >
             <Plus className="mr-2 h-4 w-4" />
             Nuevo origen
@@ -269,7 +269,7 @@ export default function Plantas() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, código, tipo o ubicación..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex rounded-md border border-slate-300 dark:border-slate-700 overflow-hidden text-sm shrink-0">
@@ -277,7 +277,7 @@ export default function Plantas() {
             <button
               key={t.key}
               onClick={() => setFilterStatus(t.key)}
-              className={`px-3 py-2 transition-colors ${filterStatus === t.key ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}
+              className={`px-3 py-2 transition-colors ${filterStatus === t.key ? "bg-primary-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}
             >
               {t.label}
             </button>
@@ -310,7 +310,7 @@ export default function Plantas() {
               {loading ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500 mb-2" />
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary-500 mb-2" />
                     <p className="text-sm text-slate-500">
                       Cargando plantas...
                     </p>
@@ -328,7 +328,7 @@ export default function Plantas() {
                     {!search && can("plants.create") && (
                       <button
                         onClick={openNew}
-                        className="mt-3 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+                        className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
                       >
                         + Registrar primer origen
                       </button>
@@ -401,7 +401,7 @@ export default function Plantas() {
                               openEdit(item);
                             }}
                             title="Editar"
-                            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400"
+                            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-primary-600 dark:text-primary-400"
                           >
                             <Pencil size={15} />
                           </button>

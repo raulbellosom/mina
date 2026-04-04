@@ -106,7 +106,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                     onClick={() => setForm((f) => ({ ...f, type: opt.value }))}
                     className={`flex-1 px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
                       form.type === opt.value
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                        ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
                         : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
@@ -131,7 +131,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                     ? "Ej: Materiales del Norte S.A. de C.V."
                     : "Ej: Juan Pérez López"
                 }
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -145,7 +145,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                   value={form.tradeName}
                   onChange={set("tradeName")}
                   placeholder="Nombre comercial o abreviado"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             )}
@@ -160,7 +160,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                   value={form.contactName}
                   onChange={set("contactName")}
                   placeholder="Nombre del contacto principal"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             )}
@@ -176,7 +176,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                   onChange={set("rfc")}
                   placeholder={isCompany ? "XXX000000XX0" : "XXXX000000XX0"}
                   maxLength={13}
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono uppercase"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono uppercase"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                   value={form.phone}
                   onChange={set("phone")}
                   placeholder="Ej: 614 123 4567"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                 value={form.email}
                 onChange={set("email")}
                 placeholder="correo@ejemplo.com"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                 onChange={set("address")}
                 rows={2}
                 placeholder="Calle, número, colonia, ciudad..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -230,7 +230,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
                 onChange={set("notes")}
                 rows={3}
                 placeholder="Notas internas sobre el cliente..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function ClienteForm({ open, onOpenChange, editing, onSubmit }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear cliente"}

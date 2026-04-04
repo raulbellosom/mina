@@ -230,7 +230,7 @@ export default function Tickets() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por número de ticket..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -238,7 +238,7 @@ export default function Tickets() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           >
             <option value="all">Todos los estados</option>
             {Object.entries(TICKET_STATUSES).map(([key, val]) => (
@@ -305,10 +305,10 @@ export default function Tickets() {
                     {/* Ticket number */}
                     <td className="px-4 sm:px-6 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center shrink-0">
                           <QrCode
                             size={14}
-                            className="text-blue-600 dark:text-blue-400"
+                            className="text-primary-600 dark:text-primary-400"
                           />
                         </div>
                         <div>
@@ -362,7 +362,7 @@ export default function Tickets() {
                         <button
                           title="Ver detalle"
                           onClick={() => setDetailItem(t)}
-                          className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-blue-600"
+                          className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600"
                         >
                           <Eye size={15} />
                         </button>
@@ -392,7 +392,7 @@ export default function Tickets() {
                             <button
                               title="Marcar listo para imprimir"
                               onClick={() => handleMarkReadyToPrint(t.$id)}
-                              className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-blue-600"
+                              className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600"
                             >
                               <ArrowRightCircle size={15} />
                             </button>

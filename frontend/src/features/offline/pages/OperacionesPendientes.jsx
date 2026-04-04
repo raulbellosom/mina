@@ -38,7 +38,7 @@ const STATUS_CONFIG = {
   },
   syncing: {
     label: "Sincronizando...",
-    classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    classes: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
     icon: RefreshCw,
   },
   synced: {
@@ -139,7 +139,7 @@ function OperationCard({ entry, onRemove, onRetry, retrying }) {
                     onRetry(entry.id);
                   }}
                   disabled={retrying}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw size={12} /> Reintentar
                 </button>
@@ -237,7 +237,7 @@ export default function OperacionesPendientes() {
             <button
               onClick={syncAll}
               disabled={syncing}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors disabled:opacity-50"
             >
               {syncing ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -279,7 +279,7 @@ export default function OperacionesPendientes() {
             onClick={() => setFilter(opt.value)}
             className={`flex-1 py-2 text-xs font-medium transition-colors ${
               filter === opt.value
-                ? "bg-blue-600 text-white"
+                ? "bg-primary-600 text-white"
                 : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >

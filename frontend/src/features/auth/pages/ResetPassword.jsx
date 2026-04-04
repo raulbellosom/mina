@@ -55,7 +55,7 @@ export default function ResetPassword() {
                     <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Enlace Inválido</h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Faltan los parámetros de seguridad en este enlace, o está mal formado.</p>
-                    <Link to="/login" className="text-blue-600 hover:text-blue-500 text-sm font-medium">Volver a intentar</Link>
+                    <Link to="/login" className="text-primary-600 hover:text-primary-500 text-sm font-medium">Volver a intentar</Link>
                 </div>
             </div>
         );
@@ -110,7 +110,7 @@ export default function ResetPassword() {
                             <button
                                 type="submit"
                                 disabled={status === 'loading'}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 h-10 py-2 px-4 w-full mt-6"
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50 bg-primary-600 text-white hover:bg-primary-700 h-10 py-2 px-4 w-full mt-6"
                             >
                                 {status === 'loading' ? <Loader2 className="animate-spin h-5 w-5" /> : 'Guardar nueva contraseña'}
                             </button>

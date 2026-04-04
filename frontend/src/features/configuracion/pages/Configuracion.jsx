@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Settings, Save, Loader2 } from "lucide-react";
+import { Settings, Save, Loader2, Palette, Check } from "lucide-react";
 import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
+import { useTheme } from "../../../shared/context/ThemeContext";
+import PALETTES from "../../../shared/config/palettes";
 
 const COLLECTION = "system_config";
 const DOC_ID = "singleton";
@@ -12,10 +14,12 @@ const DEFAULTS = {
   companyPhone: "",
   defaultWeightUnit: "ton",
   ticketPrefix: "MF",
+  colorTheme: "",
 };
 
 export default function Configuracion() {
   const toast = useToast();
+  const { paletteId, setPaletteId } = useTheme();
   const [form, setForm] = useState(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,6 +39,7 @@ export default function Configuracion() {
         companyPhone: doc.companyPhone || "",
         defaultWeightUnit: doc.defaultWeightUnit || "ton",
         ticketPrefix: doc.ticketPrefix || "MF",
+        colorTheme: doc.colorTheme || "",
       });
     } catch (err) {
       if (err.code === 404) {
@@ -62,7 +67,12 @@ export default function Configuracion() {
         companyPhone: form.companyPhone,
         defaultWeightUnit: form.defaultWeightUnit,
         ticketPrefix: form.ticketPrefix,
+        colorTheme: form.colorTheme || null,
       });
+      // Apply palette globally
+      if (form.colorTheme) {
+        setPaletteId(form.colorTheme);
+      }
       setSaved(true);
     } catch (err) {
       console.error("Error saving config:", err);
@@ -96,7 +106,7 @@ export default function Configuracion() {
         className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-6"
       >
         <div className="flex items-center gap-2 mb-4">
-          <Settings size={20} className="text-blue-600" />
+          <Settings size={20} className="text-primary-600" />
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
             Datos de la empresa
           </h2>
@@ -111,7 +121,7 @@ export default function Configuracion() {
               type="text"
               value={form.companyName}
               onChange={(e) => handleChange("companyName", e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Ej. Mina El Progreso"
             />
           </div>
@@ -123,7 +133,7 @@ export default function Configuracion() {
               type="text"
               value={form.companyPhone}
               onChange={(e) => handleChange("companyPhone", e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Ej. (614) 555-0123"
             />
           </div>
@@ -137,7 +147,7 @@ export default function Configuracion() {
             type="text"
             value={form.companyAddress}
             onChange={(e) => handleChange("companyAddress", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             placeholder="Dirección completa"
           />
         </div>
@@ -145,7 +155,7 @@ export default function Configuracion() {
         <hr className="border-slate-200 dark:border-slate-700" />
 
         <div className="flex items-center gap-2 mb-4">
-          <Settings size={20} className="text-blue-600" />
+          <Settings size={20} className="text-primary-600" />
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
             Operación
           </h2>
@@ -161,7 +171,7 @@ export default function Configuracion() {
               onChange={(e) =>
                 handleChange("defaultWeightUnit", e.target.value)
               }
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="kg">Kilogramos (kg)</option>
               <option value="ton">Toneladas (ton)</option>
@@ -178,17 +188,72 @@ export default function Configuracion() {
                 handleChange("ticketPrefix", e.target.value.toUpperCase())
               }
               maxLength={10}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="MF"
             />
           </div>
+        </div>
+
+        <hr className="border-slate-200 dark:border-slate-700" />
+
+        <div className="flex items-center gap-2 mb-4">
+          <Palette size={20} className="text-primary-600" />
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            Tema de color
+          </h2>
+        </div>
+
+        <p className="text-sm text-slate-500 dark:text-slate-400 -mt-2 mb-4">
+          Selecciona la paleta de colores para toda la plataforma. El cambio se
+          aplica para todos los usuarios.
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {PALETTES.map((p) => {
+            const selected = form.colorTheme === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  handleChange("colorTheme", p.id);
+                  // Live preview
+                  setPaletteId(p.id);
+                }}
+                className={`relative rounded-xl border-2 p-3 transition-all text-left ${
+                  selected
+                    ? "border-primary-500 bg-primary-50/50 dark:bg-primary-950/30 ring-1 ring-primary-500/30"
+                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                }`}
+              >
+                {selected && (
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+                    <Check size={12} className="text-white" />
+                  </div>
+                )}
+                {/* Color swatches */}
+                <div className="flex gap-1 mb-2.5">
+                  {[400, 500, 600, 700].map((shade) => (
+                    <div
+                      key={shade}
+                      className="w-6 h-6 rounded-md first:rounded-l-lg last:rounded-r-lg"
+                      style={{ backgroundColor: p.colors[shade] }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  {p.name}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-3 pt-4">
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
             {saving ? (
               <Loader2 size={16} className="animate-spin" />

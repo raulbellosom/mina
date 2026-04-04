@@ -276,7 +276,7 @@ function FiltersPanel({
       <div className="flex items-center gap-2 mt-3">
         <button
           type="submit"
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
         >
           <Search size={14} />
           Generar Reporte
@@ -833,7 +833,7 @@ export default function Reportes() {
   if (loadingPermissions) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 size={24} className="animate-spin text-blue-600" />
+        <Loader2 size={24} className="animate-spin text-primary-600" />
       </div>
     );
   }
@@ -889,7 +889,7 @@ export default function Reportes() {
               onClick={() => setReportType(rt.key)}
               className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-sm transition-all ${
                 isActive
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm"
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm"
                   : "border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-zinc-700"
               }`}
             >
@@ -913,7 +913,7 @@ export default function Reportes() {
       {/* Results */}
       {loading ? (
         <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center py-16">
-          <Loader2 size={24} className="animate-spin text-blue-600" />
+          <Loader2 size={24} className="animate-spin text-primary-600" />
           <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
             Generando reporte...
           </span>

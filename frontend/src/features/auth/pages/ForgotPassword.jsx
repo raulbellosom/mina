@@ -36,7 +36,7 @@ export default function ForgotPassword() {
                 </div>
 
                 <div className="flex flex-col items-center mb-8 text-center">
-                    <div className="p-3 bg-blue-100 text-blue-600 rounded-xl mb-4 dark:bg-blue-900/40 dark:text-blue-400">
+                    <div className="p-3 bg-primary-100 text-primary-600 rounded-xl mb-4 dark:bg-primary-900/40 dark:text-primary-400">
                         <HardHat size={32} />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight">Recuperar Acceso</h1>
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 disabled:opacity-50"
+                                    className="flex h-10 w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-700 disabled:opacity-50"
                                     placeholder="operador@mina.com"
                                 />
                             </div>
@@ -78,7 +78,7 @@ export default function ForgotPassword() {
                             <button
                                 type="submit"
                                 disabled={status === 'loading'}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 h-10 py-2 px-4 w-full mt-6"
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 bg-primary-600 text-white hover:bg-primary-700 h-10 py-2 px-4 w-full mt-6"
                             >
                                 {status === 'loading' ? 'Enviando enlace...' : 'Enviar instrucciones'}
                             </button>

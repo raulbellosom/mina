@@ -166,20 +166,20 @@ export default function PermisosMatrix({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar permiso..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="w-full pl-8 pr-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
             <div className="flex items-center gap-2 text-xs">
               <button
                 onClick={selectAll}
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Marcar todos
               </button>
               <span className="text-slate-300 dark:text-slate-700">|</span>
               <button
                 onClick={clearAll}
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Desmarcar todos
               </button>
@@ -228,9 +228,9 @@ export default function PermisosMatrix({
                         <div
                           className={`h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
                             allChecked
-                              ? "bg-blue-600 border-blue-600"
+                              ? "bg-primary-600 border-primary-600"
                               : someChecked
-                                ? "bg-blue-200 border-blue-400 dark:bg-blue-900/40 dark:border-blue-600"
+                                ? "bg-primary-200 border-primary-400 dark:bg-primary-900/40 dark:border-primary-600"
                                 : "border-slate-300 dark:border-slate-600"
                           }`}
                         >
@@ -238,7 +238,7 @@ export default function PermisosMatrix({
                             <Check size={12} className="text-white" />
                           )}
                           {someChecked && !allChecked && (
-                            <div className="h-2 w-2 rounded-sm bg-blue-600" />
+                            <div className="h-2 w-2 rounded-sm bg-primary-600" />
                           )}
                         </div>
                         <span className="font-semibold text-sm text-slate-900 dark:text-white">
@@ -261,7 +261,7 @@ export default function PermisosMatrix({
                               type="checkbox"
                               checked={selected.has(perm.code)}
                               onChange={() => toggle(perm.code)}
-                              className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500"
                             />
                             <div className="flex-1 min-w-0">
                               <span className="text-xs text-slate-900 dark:text-slate-100 font-mono">
@@ -313,7 +313,7 @@ export default function PermisosMatrix({
               <button
                 onClick={handleSave}
                 disabled={saving || !changesCount.hasChanges}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
                 Guardar permisos

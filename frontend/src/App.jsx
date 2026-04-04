@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./features/auth/hooks/useAuth";
+import { ThemeProvider } from "./shared/context/ThemeContext";
 import ProtectedRoute from "./shared/components/ProtectedRoute";
 import ErrorBoundary from "./shared/components/ErrorBoundary";
 import NotFound from "./shared/components/NotFound";
@@ -241,13 +242,15 @@ function AppRoutes() {
 function App() {
   return (
     <ErrorBoundary>
-      <ToastProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </BrowserRouter>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </BrowserRouter>
+        </ToastProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

@@ -189,7 +189,7 @@ export default function MaterialForm({
                 onChange={handleNameChange}
                 required
                 placeholder="Ej: Grava 3/4, Arena fina, Base hidráulica"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function MaterialForm({
                 onChange={set("code")}
                 required
                 placeholder="grava_3_4"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default function MaterialForm({
                 value={form.categoryId}
                 onChange={set("categoryId")}
                 required
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               >
                 <option value="">Seleccionar categoría...</option>
                 {categories.map((cat) => (
@@ -237,7 +237,7 @@ export default function MaterialForm({
                 onChange={set("description")}
                 rows={2}
                 placeholder="Descripción breve del material..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function MaterialForm({
                 <select
                   value={form.defaultCommercialUnit}
                   onChange={set("defaultCommercialUnit")}
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 >
                   {COMMERCIAL_UNITS.map((u) => (
                     <option key={u.value} value={u.value}>
@@ -268,7 +268,7 @@ export default function MaterialForm({
                   value={form.sortOrder}
                   onChange={set("sortOrder")}
                   min="0"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function MaterialForm({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-3 w-full p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
+                  className="flex items-center gap-3 w-full p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 transition-colors text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
                 >
                   <ImageIcon size={24} className="shrink-0" />
                   <div className="text-left">
@@ -313,7 +313,7 @@ export default function MaterialForm({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   <Upload size={12} /> Cambiar imagen
                 </button>
@@ -343,7 +343,7 @@ export default function MaterialForm({
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear material"}

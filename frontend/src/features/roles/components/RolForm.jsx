@@ -101,7 +101,7 @@ export default function RolForm({ open, onOpenChange, editing, onSubmit }) {
                 onChange={handleNameChange}
                 required
                 placeholder="Ej: Capturista de báscula"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
             </div>
 
@@ -115,7 +115,7 @@ export default function RolForm({ open, onOpenChange, editing, onSubmit }) {
                 required
                 placeholder="capturista_bascula"
                 disabled={isEditing && editing?.isSystem}
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white font-mono disabled:opacity-50"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono disabled:opacity-50"
               />
               {isEditing && editing?.isSystem && (
                 <p className="text-xs text-slate-400 mt-1">
@@ -133,7 +133,7 @@ export default function RolForm({ open, onOpenChange, editing, onSubmit }) {
                 onChange={set("description")}
                 rows={3}
                 placeholder="Descripción breve del rol y sus responsabilidades..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white resize-none"
+                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
               />
             </div>
 
@@ -153,7 +153,7 @@ export default function RolForm({ open, onOpenChange, editing, onSubmit }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isEditing ? "Guardar cambios" : "Crear rol"}

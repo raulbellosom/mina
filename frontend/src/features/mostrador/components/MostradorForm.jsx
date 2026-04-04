@@ -84,8 +84,8 @@ export default function MostradorForm({ open, onOpenChange, clients, drivers, tr
         }
     };
 
-    const inputCls = 'mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white';
-    const selectCls = 'mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white';
+    const inputCls = 'mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white';
+    const selectCls = 'mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white';
     const labelCls = 'text-sm font-medium text-slate-700 dark:text-slate-300';
 
     return (
@@ -114,7 +114,7 @@ export default function MostradorForm({ open, onOpenChange, clients, drivers, tr
                                         type="radio"
                                         checked={useRegisteredClient}
                                         onChange={() => setUseRegisteredClient(true)}
-                                        className="accent-blue-600"
+                                        className="accent-primary-600"
                                     />
                                     Cliente registrado
                                 </label>
@@ -123,7 +123,7 @@ export default function MostradorForm({ open, onOpenChange, clients, drivers, tr
                                         type="radio"
                                         checked={!useRegisteredClient}
                                         onChange={() => setUseRegisteredClient(false)}
-                                        className="accent-blue-600"
+                                        className="accent-primary-600"
                                     />
                                     Cliente ocasional
                                 </label>
@@ -279,7 +279,7 @@ export default function MostradorForm({ open, onOpenChange, clients, drivers, tr
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-60"
                             >
                                 {submitting && <Loader2 size={14} className="animate-spin" />}
                                 Registrar venta

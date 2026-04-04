@@ -94,7 +94,7 @@ export default function Categorias() {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <header>
           <div className="flex items-center space-x-2 text-sm text-slate-500 mb-2">
-            <Link to="/catalogos" className="hover:text-blue-600">
+            <Link to="/catalogos" className="hover:text-primary-600">
               Catálogos
             </Link>
             <span>/</span>
@@ -112,7 +112,7 @@ export default function Categorias() {
         {can("categories.create") && (
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 h-10 px-4 text-sm font-medium transition-colors shrink-0"
           >
             <Plus size={16} /> Nueva categoría
           </button>
@@ -130,7 +130,7 @@ export default function Categorias() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, código o descripción..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -138,7 +138,7 @@ export default function Categorias() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           >
             <option value="all">Todas</option>
             <option value="active">Activas</option>
@@ -248,7 +248,7 @@ export default function Categorias() {
                           <button
                             onClick={() => openEdit(c)}
                             title="Editar"
-                            className="p-1.5 rounded text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="p-1.5 rounded text-primary-500 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
                           >
                             <Pencil size={16} />
                           </button>
@@ -378,7 +378,7 @@ function CategoriaDetalle({ item: c, open, onClose, onEdit }) {
               {onEdit && (
                 <button
                   onClick={() => onEdit(c)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
                 >
                   <Pencil size={13} /> Editar
                 </button>

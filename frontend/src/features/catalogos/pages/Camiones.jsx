@@ -75,8 +75,8 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
       <div className="p-6 space-y-1">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <Truck size={24} className="text-blue-600 dark:text-blue-400" />
+          <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <Truck size={24} className="text-primary-600 dark:text-primary-400" />
           </div>
           <div>
             <p className="font-bold text-slate-900 dark:text-white font-mono text-lg">
@@ -263,7 +263,7 @@ export default function Camiones() {
           <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
             <Link
               to="/catalogos"
-              className="hover:text-blue-600 dark:hover:text-blue-400"
+              className="hover:text-primary-600 dark:hover:text-primary-400"
             >
               Catálogos
             </Link>
@@ -278,7 +278,7 @@ export default function Camiones() {
         {can("trucks.create") && (
           <button
             onClick={openNew}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 shrink-0"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 h-10 px-4 shrink-0"
           >
             <Plus className="mr-2 h-4 w-4" />
             Nuevo camión
@@ -297,7 +297,7 @@ export default function Camiones() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por placa, económico, marca, modelo o tipo..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
         <div className="flex rounded-md border border-slate-300 dark:border-slate-700 overflow-hidden text-sm shrink-0">
@@ -305,7 +305,7 @@ export default function Camiones() {
             <button
               key={t.key}
               onClick={() => setFilterStatus(t.key)}
-              className={`px-3 py-2 transition-colors ${filterStatus === t.key ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}
+              className={`px-3 py-2 transition-colors ${filterStatus === t.key ? "bg-primary-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}
             >
               {t.label}
             </button>
@@ -339,7 +339,7 @@ export default function Camiones() {
               {loading ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-500 mb-2" />
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary-500 mb-2" />
                     <p className="text-sm text-slate-500">
                       Cargando camiones...
                     </p>
@@ -357,7 +357,7 @@ export default function Camiones() {
                     {!search && can("trucks.create") && (
                       <button
                         onClick={openNew}
-                        className="mt-3 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+                        className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
                       >
                         + Registrar primer camión
                       </button>
@@ -374,10 +374,10 @@ export default function Camiones() {
                     {/* Camión */}
                     <td className="px-4 sm:px-6 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
                           <Truck
                             size={18}
-                            className="text-blue-600 dark:text-blue-400"
+                            className="text-primary-600 dark:text-primary-400"
                           />
                         </div>
                         <div className="min-w-0">
@@ -443,7 +443,7 @@ export default function Camiones() {
                               openEdit(item);
                             }}
                             title="Editar"
-                            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400"
+                            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-primary-600 dark:text-primary-400"
                           >
                             <Pencil size={15} />
                           </button>

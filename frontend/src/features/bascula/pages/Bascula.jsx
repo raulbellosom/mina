@@ -38,7 +38,7 @@ const STATUS_COLORS = {
   issued: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
   ready_to_print:
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  printed: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  printed: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   loading:
     "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
   loaded:
@@ -76,16 +76,16 @@ function WeightLogEntry({ log }) {
   const isEntry = log.type === "entry";
   return (
     <div
-      className={`flex items-start gap-3 p-3 rounded-lg ${isEntry ? "bg-blue-50 dark:bg-blue-900/20" : "bg-green-50 dark:bg-green-900/20"}`}
+      className={`flex items-start gap-3 p-3 rounded-lg ${isEntry ? "bg-primary-50 dark:bg-primary-900/20" : "bg-green-50 dark:bg-green-900/20"}`}
     >
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isEntry ? "bg-blue-100 dark:bg-blue-900/40" : "bg-green-100 dark:bg-green-900/40"}`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isEntry ? "bg-primary-100 dark:bg-primary-900/40" : "bg-green-100 dark:bg-green-900/40"}`}
       >
         <Scale
           size={14}
           className={
             isEntry
-              ? "text-blue-600 dark:text-blue-400"
+              ? "text-primary-600 dark:text-primary-400"
               : "text-green-600 dark:text-green-400"
           }
         />
@@ -93,7 +93,7 @@ function WeightLogEntry({ log }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span
-            className={`text-sm font-semibold ${isEntry ? "text-blue-700 dark:text-blue-300" : "text-green-700 dark:text-green-300"}`}
+            className={`text-sm font-semibold ${isEntry ? "text-primary-700 dark:text-primary-300" : "text-green-700 dark:text-green-300"}`}
           >
             {isEntry ? "Peso de entrada" : "Peso de salida"}
           </span>
@@ -132,9 +132,9 @@ function TicketCard({ ticket, onClick, selected }) {
       disabled={!canWork}
       className={`w-full text-left p-4 rounded-xl border transition-all ${
         selected
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500"
+          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-500"
           : canWork
-            ? "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer"
+            ? "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 cursor-pointer"
             : "border-slate-100 dark:border-slate-800/50 bg-slate-50 dark:bg-slate-900/50 opacity-60 cursor-default"
       }`}
     >
@@ -183,7 +183,7 @@ function WeightForm({ type, onSubmit, submitting, disabled }) {
   const labelCls =
     "block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1";
   const inputCls =
-    "w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white disabled:opacity-50";
+    "w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white disabled:opacity-50";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -233,7 +233,7 @@ function WeightForm({ type, onSubmit, submitting, disabled }) {
         disabled={submitting || disabled || !weight}
         className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
           isEntry
-            ? "bg-blue-600 hover:bg-blue-700 text-white"
+            ? "bg-primary-600 hover:bg-primary-700 text-white"
             : "bg-green-600 hover:bg-green-700 text-white"
         }`}
       >
@@ -442,7 +442,7 @@ export default function Bascula() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <Scale size={24} className="text-blue-500" />
+            <Scale size={24} className="text-primary-500" />
             Báscula
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
@@ -490,12 +490,12 @@ export default function Bascula() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Folio de ticket o placas..."
-                className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
               />
               <button
                 type="submit"
                 disabled={searchLoading || !searchQuery.trim()}
-                className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {searchLoading ? (
                   <Loader2 size={15} className="animate-spin" />
@@ -519,7 +519,7 @@ export default function Bascula() {
                 onClick={() => setFilterStatus(opt.value)}
                 className={`flex-1 py-2 text-xs font-medium transition-colors ${
                   filterStatus === opt.value
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary-600 text-white"
                     : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                 }`}
               >
@@ -623,13 +623,13 @@ export default function Bascula() {
                     <div className="flex items-start gap-2">
                       <Scale
                         size={14}
-                        className="text-blue-400 mt-0.5 shrink-0"
+                        className="text-primary-400 mt-0.5 shrink-0"
                       />
                       <div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           Peso entrada
                         </p>
-                        <p className="font-medium text-blue-700 dark:text-blue-400">
+                        <p className="font-medium text-primary-700 dark:text-primary-400">
                           {entryWeight} {selectedTicket.weightUnit || "ton"}
                         </p>
                       </div>
@@ -699,14 +699,14 @@ export default function Bascula() {
                 <div
                   className={`bg-white dark:bg-slate-900 rounded-xl border p-5 ${
                     showEntryForm
-                      ? "border-blue-200 dark:border-blue-800"
+                      ? "border-primary-200 dark:border-primary-800"
                       : "border-green-200 dark:border-green-800"
                   }`}
                 >
                   <h3
                     className={`text-sm font-semibold mb-4 flex items-center gap-2 ${
                       showEntryForm
-                        ? "text-blue-700 dark:text-blue-400"
+                        ? "text-primary-700 dark:text-primary-400"
                         : "text-green-700 dark:text-green-400"
                     }`}
                   >

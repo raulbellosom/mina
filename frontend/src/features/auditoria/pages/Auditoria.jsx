@@ -23,8 +23,8 @@ import ExportButton from "../../../shared/components/ExportButton";
 /* ─── Action category → color mapping ─── */
 const ACTION_COLORS = {
   user: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-700 dark:text-blue-300",
+    bg: "bg-primary-100 dark:bg-primary-900/30",
+    text: "text-primary-700 dark:text-primary-300",
   },
   role: {
     bg: "bg-purple-100 dark:bg-purple-900/30",
@@ -334,7 +334,7 @@ function FiltersBar({
       <div className="flex items-center gap-2 mt-3">
         <button
           type="submit"
-          className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
         >
           <Search size={14} />
           Buscar
@@ -414,7 +414,7 @@ function Pagination({
               onClick={() => onPageChange(pageNum)}
               className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                 pageNum === page
-                  ? "bg-blue-600 text-white"
+                  ? "bg-primary-600 text-white"
                   : "hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-slate-300"
               }`}
             >
@@ -475,7 +475,7 @@ export default function Auditoria() {
   if (loadingPermissions) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 size={24} className="animate-spin text-blue-600" />
+        <Loader2 size={24} className="animate-spin text-primary-600" />
       </div>
     );
   }
@@ -536,7 +536,7 @@ export default function Auditoria() {
       <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-blue-600" />
+            <Loader2 size={24} className="animate-spin text-primary-600" />
             <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
               Cargando eventos...
             </span>
@@ -618,7 +618,7 @@ export default function Auditoria() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => setSelectedLog(log)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                           title="Ver detalle"
                         >
                           <Eye size={16} />

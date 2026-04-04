@@ -4,7 +4,7 @@ import { usePermissions } from '../../../shared/hooks/usePermissions';
 import { PERMISSIONS_BY_LABEL, MODULE_LABELS, SYSTEM_LABELS } from '../../../shared/config/permissions-config';
 
 const LABEL_STYLE = {
-    admin:      { icon: Shield,      bg: 'bg-blue-50 dark:bg-blue-900/20',   border: 'border-blue-200 dark:border-blue-800',   badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',   title: 'text-blue-700 dark:text-blue-400' },
+    admin:      { icon: Shield,      bg: 'bg-primary-50 dark:bg-primary-900/20',   border: 'border-primary-200 dark:border-primary-800',   badge: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',   title: 'text-primary-700 dark:text-primary-400' },
     operador:   { icon: ShieldCheck, bg: 'bg-teal-50 dark:bg-teal-900/20',   border: 'border-teal-200 dark:border-teal-800',   badge: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',   title: 'text-teal-700 dark:text-teal-400' },
     capturista: { icon: Shield,      bg: 'bg-slate-50 dark:bg-slate-800/50', border: 'border-slate-200 dark:border-slate-700', badge: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',   title: 'text-slate-700 dark:text-slate-300' },
 };
