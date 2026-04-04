@@ -153,6 +153,16 @@ export const AuthProvider = ({ children }) => {
       console.warn("setup-owner execution error:", e.message);
     }
 
+    // 4b. Renovar sesión para que refleje las labels recién asignadas.
+    //     Sin esto, la sesión creada en paso 2 no tiene labels y todo
+    //     da 401 "user_unauthorized".
+    try {
+      await account.deleteSession("current");
+      await account.createEmailPasswordSession(email, password);
+    } catch (e) {
+      console.warn("Session renewal error:", e.message);
+    }
+
     // 5. Crear el documento de perfil.
     const newProfile = await databases.createDocument(
       DATABASE_ID,
