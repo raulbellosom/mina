@@ -1,24 +1,32 @@
+import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { X, Printer, RotateCcw } from "lucide-react";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { DEFAULT_COPIES } from "../hooks/usePrintTicket";
 
 const UNIT_LABELS = {
   viaje: "Viaje",
   tonelada: "Tonelada",
-  m3: "Metro cúbico (m³)",
+  m3: "m³",
   kg: "Kilogramo",
   pieza: "Pieza",
 };
 
+/* 80mm thermal paper — Epson TM-m30III */
+const PAPER_WIDTH_MM = 80;
+const PAPER_WIDTH_PX = 302; // 80mm at 96 CSS dpi
+
 /**
- * Full-screen print preview for a ticket.
- * Contains:
- *   - On-screen header with Print / Reprint / Close buttons
- *   - 3 copies of the ticket laid out for @media print
- *   - Each copy has QR, ticket data, and copy label
+ * Professional ticket print view optimized for Epson TM-m30III
+ * thermal receipt printer (80mm paper rolls).
  *
- * The component renders N copies (default 3) within a hidden-on-screen
- * but visible-in-print container. The screen preview shows one copy.
+ * Renders 3 labeled copies:
+ *   1. Báscula / Caseta
+ *   2. Operador de Grúa
+ *   3. Cliente
+ *
+ * Screen: shows 1:1 preview at real paper width.
+ * Print:  outputs 3 copies with page breaks, sized for 80mm paper.
  */
 export default function TicketPrintView({
   ticket,
@@ -35,12 +43,38 @@ export default function TicketPrintView({
   isReprinted = false,
   can,
 }) {
+  const [config, setConfig] = useState({
+    companyName: "",
+    companyAddress: "",
+    companyPhone: "",
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const doc = await databases.getDocument(
+          DATABASE_ID,
+          APP_IDS.collections.SYSTEM_CONFIG,
+          APP_IDS.docs.SYSTEM_CONFIG_SINGLETON,
+        );
+        setConfig({
+          companyName: doc.companyName || "",
+          companyAddress: doc.companyAddress || "",
+          companyPhone: doc.companyPhone || "",
+        });
+      } catch (_) {
+        /* keep defaults */
+      }
+    })();
+  }, []);
+
   if (!ticket) return null;
 
   const resolveName = (map, id, field = "name") => map[id]?.[field] || "—";
 
   const isFirstPrint = !ticket.firstPrintedAt && ticket.printCount === 0;
   const hasBeenPrinted = ticket.printCount > 0;
+  const showReprint = isReprinted || ticket.reprintCount > 0;
 
   const handlePrintClick = async () => {
     if (isFirstPrint && onPrint) {
@@ -49,184 +83,171 @@ export default function TicketPrintView({
     window.print();
   };
 
-  const copyLabels = [
-    "Copia Báscula / Mostrador",
-    "Copia Operador de Carga",
-    "Copia Chofer",
-  ];
+  const formatDate = (iso) => {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleString("es-MX", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
+  const truckDisplay =
+    ticket.truckId && truckMap[ticket.truckId]
+      ? `${truckMap[ticket.truckId].plateNumber}${truckMap[ticket.truckId].economicNumber ? ` / ${truckMap[ticket.truckId].economicNumber}` : ""}`
+      : null;
+
+  const copyLabels = ["BÁSCULA / CASETA", "OPERADOR DE GRÚA", "CLIENTE"];
+
+  const brandName = config.companyName || "MINAPRO";
+
+  /* ─────────────────── Ticket copy ─────────────────── */
   const TicketCopy = ({ copyIndex }) => (
-    <div
-      className="ticket-copy"
-      style={{ pageBreakAfter: copyIndex < copies - 1 ? "always" : "auto" }}
-    >
-      <div className="border-2 border-slate-800 rounded-lg p-5 max-w-[380px] mx-auto">
-        {/* Header */}
-        <div className="text-center border-b-2 border-slate-800 pb-3 mb-3">
-          <h1 className="text-lg font-bold tracking-wider uppercase">
-            MinaPRO
-          </h1>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Ticket de Salida de Material
-          </p>
-          {(isReprinted || ticket.reprintCount > 0) && (
-            <span className="inline-block mt-1 px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold uppercase rounded border border-amber-300">
-              ★ Reimpresión ★
-            </span>
+    <div className="tkt-copy">
+      <div className="tkt-body">
+        {/* ═══ LETTERHEAD ═══ */}
+        <div className="tkt-header">
+          <div className="tkt-double-line" />
+          <img src="/ore_logo.png" alt="" className="tkt-logo" />
+          <div className="tkt-brand">{brandName}</div>
+          {config.companyAddress && (
+            <div className="tkt-company-detail">{config.companyAddress}</div>
+          )}
+          {config.companyPhone && (
+            <div className="tkt-company-detail">Tel. {config.companyPhone}</div>
+          )}
+          <div className="tkt-double-line" />
+        </div>
+
+        {/* DOCUMENT TITLE */}
+        <div className="tkt-title-section">
+          <div className="tkt-doc-title">TICKET DE SALIDA</div>
+          {showReprint && (
+            <div className="tkt-reprint-badge">★ REIMPRESIÓN ★</div>
           )}
         </div>
 
-        {/* Ticket Number + QR */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex-1 space-y-1.5">
-            <div>
-              <span className="text-[10px] uppercase text-slate-500 tracking-wider">
-                Folio
-              </span>
-              <p className="text-base font-bold font-mono tracking-wide">
-                {ticket.ticketNumber}
-              </p>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase text-slate-500 tracking-wider">
-                Fecha/Hora Emisión
-              </span>
-              <p className="text-xs font-medium">
-                {new Date(ticket.$createdAt).toLocaleString("es-MX", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase text-slate-500 tracking-wider">
-                Estado
-              </span>
-              <p className="text-xs font-medium uppercase">{ticket.status}</p>
-            </div>
-          </div>
-          <div className="shrink-0 flex flex-col items-center">
-            <QRCodeSVG
-              value={ticket.qrData}
-              size={90}
-              level="M"
-              includeMargin={false}
-            />
-            <p className="text-[8px] text-slate-400 mt-1 font-mono">
-              {ticket.ticketNumber}
-            </p>
-          </div>
+        <div className="tkt-divider" />
+
+        {/* FOLIO + DATE */}
+        <div className="tkt-folio-section">
+          <div className="tkt-label">FOLIO</div>
+          <div className="tkt-folio">{ticket.ticketNumber}</div>
+          <div className="tkt-date">{formatDate(ticket.$createdAt)}</div>
         </div>
 
-        {/* Voucher ref */}
-        {ticket.voucherId && (
-          <div className="text-[10px] text-slate-500 mb-2">
-            Ref. Voucher:{" "}
-            <span className="font-mono">
-              {ticket.voucherId.substring(0, 12)}…
-            </span>
-          </div>
-        )}
+        <div className="tkt-divider" />
 
-        {/* Data grid */}
-        <div className="border-t border-slate-300 pt-2 space-y-1.5 text-xs">
-          <PrintRow
+        {/* QR CODE — centered, prominent */}
+        <div className="tkt-qr-section">
+          <QRCodeSVG
+            value={ticket.qrData}
+            size={130}
+            level="H"
+            includeMargin={false}
+          />
+          <div className="tkt-qr-label">{ticket.ticketNumber}</div>
+        </div>
+
+        <div className="tkt-divider" />
+
+        {/* DATA ROWS */}
+        <div className="tkt-data-section">
+          <div className="tkt-section-title">DATOS DE OPERACIÓN</div>
+          <DataRow
             label="Cliente"
             value={resolveName(clientMap, ticket.clientId)}
           />
-          <PrintRow
+          <DataRow
             label="Material"
             value={resolveName(materialMap, ticket.materialId)}
           />
-          <PrintRow
-            label="Planta / Origen"
+          <DataRow
+            label="Planta"
             value={resolveName(plantMap, ticket.plantId)}
           />
           {ticket.driverId && (
-            <PrintRow
+            <DataRow
               label="Chofer"
               value={resolveName(driverMap, ticket.driverId, "fullName")}
             />
           )}
-          {ticket.truckId && (
-            <PrintRow
-              label="Camión"
-              value={
-                truckMap[ticket.truckId]
-                  ? `${truckMap[ticket.truckId].plateNumber}${truckMap[ticket.truckId].economicNumber ? ` — ${truckMap[ticket.truckId].economicNumber}` : ""}`
-                  : "—"
-              }
-            />
+          {truckDisplay && <DataRow label="Camión" value={truckDisplay} />}
+        </div>
+
+        <div className="tkt-divider" />
+
+        {/* QUANTITY — highlighted box */}
+        <div className="tkt-qty-box">
+          <div className="tkt-qty-label">CANTIDAD</div>
+          <div className="tkt-qty-value">
+            {ticket.commercialQty}{" "}
+            <span className="tkt-qty-unit">
+              {UNIT_LABELS[ticket.commercialUnit] || ticket.commercialUnit}
+            </span>
+          </div>
+        </div>
+
+        <div className="tkt-divider" />
+
+        {/* REFERENCES */}
+        <div className="tkt-refs">
+          {ticket.voucherId && (
+            <div className="tkt-ref-row">
+              Ref. Voucher:{" "}
+              <span className="tkt-mono">
+                {ticket.voucherId.substring(0, 16)}
+              </span>
+            </div>
+          )}
+          {ticket.notes && <div className="tkt-notes">Obs: {ticket.notes}</div>}
+          {ticket.printCount > 0 && (
+            <div className="tkt-print-count">
+              Impresiones: {ticket.printCount}
+              {ticket.reprintCount > 0
+                ? ` (${ticket.reprintCount} reimp.)`
+                : ""}
+            </div>
           )}
         </div>
 
-        {/* Commercial quantity — prominent */}
-        <div className="mt-3 border-2 border-slate-800 rounded p-2 text-center">
-          <span className="text-[10px] uppercase text-slate-500 tracking-wider block">
-            Cantidad
-          </span>
-          <p className="text-xl font-bold">
-            {ticket.commercialQty}{" "}
-            <span className="text-sm font-normal">
-              {UNIT_LABELS[ticket.commercialUnit] || ticket.commercialUnit}
-            </span>
-          </p>
-        </div>
-
-        {/* Notes */}
-        {ticket.notes && (
-          <div className="mt-2 text-[10px] text-slate-500">
-            <span className="uppercase tracking-wider">Obs:</span>{" "}
-            {ticket.notes}
+        {/* ═══ FOOTER ═══ */}
+        <div className="tkt-footer">
+          <div className="tkt-double-line" />
+          <div className="tkt-copy-label">
+            {copyLabels[copyIndex] || `COPIA ${copyIndex + 1}`}
           </div>
-        )}
-
-        {/* Print info */}
-        {ticket.printCount > 0 && (
-          <div className="mt-2 text-[10px] text-slate-400">
-            Impresiones: {ticket.printCount}
-            {ticket.reprintCount > 0 ? ` (${ticket.reprintCount} reimp.)` : ""}
-          </div>
-        )}
-
-        {/* Copy label */}
-        <div className="mt-3 pt-2 border-t border-dashed border-slate-400 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
-            {copyLabels[copyIndex] || `Copia ${copyIndex + 1}`}
-          </span>
+          <div className="tkt-double-line" />
+          <div className="tkt-legal">Documento de control interno</div>
         </div>
       </div>
     </div>
   );
 
+  /* ─────────────────── Render ─────────────────── */
   return (
     <>
-      {/* Print-only styles */}
-      <style>{`
-        @media print {
-          body > *:not(#ticket-print-root) { display: none !important; }
-          #ticket-print-root { position: static !important; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
-          .ticket-copy { margin: 0; padding: 10mm 5mm; }
-          @page { size: letter; margin: 10mm; }
-        }
-      `}</style>
+      {/* Embedded styles — self-contained for print reliability */}
+      <style>{thermalStyles}</style>
 
       <div
         id="ticket-print-root"
         className="fixed inset-0 z-[100] bg-white dark:bg-slate-950 overflow-y-auto"
       >
-        {/* Screen-only toolbar */}
-        <div className="no-print sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Vista de impresión — {ticket.ticketNumber}
-          </h2>
+        {/* ─── Screen toolbar (hidden on print) ─── */}
+        <div className="tkt-screen-only sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              Vista de impresión
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {ticket.ticketNumber} — Papel térmico {PAPER_WIDTH_MM}mm ·{" "}
+              {copies} copias
+            </p>
+          </div>
           <div className="flex items-center gap-2">
-            {/* Initial print button */}
             {can("tickets.print") && (
               <button
                 onClick={handlePrintClick}
@@ -241,8 +262,6 @@ export default function TicketPrintView({
                     : "Imprimir"}
               </button>
             )}
-
-            {/* Reprint button — only if already printed */}
             {can("tickets.reprint") && hasBeenPrinted && onReprint && (
               <button
                 onClick={() => onReprint(ticket)}
@@ -253,7 +272,6 @@ export default function TicketPrintView({
                 Reimprimir
               </button>
             )}
-
             <button
               onClick={onClose}
               className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
@@ -263,19 +281,29 @@ export default function TicketPrintView({
           </div>
         </div>
 
-        {/* Preview single copy on screen */}
-        <div className="no-print p-4 sm:p-8 flex justify-center">
-          <div className="bg-white shadow-lg rounded-lg p-6 max-w-[420px] w-full">
-            <TicketCopy copyIndex={0} />
-            <p className="text-center text-xs text-slate-400 mt-4">
-              Se imprimirán {copies} copias: Báscula/Mostrador, Operador de
-              carga y Chofer.
-            </p>
+        {/* ─── Screen preview: 1:1 at real paper width ─── */}
+        <div className="tkt-screen-only p-4 sm:p-8 flex justify-center">
+          <div>
+            <div
+              className="bg-white shadow-2xl border border-slate-200 overflow-hidden"
+              style={{ width: `${PAPER_WIDTH_PX}px` }}
+            >
+              <TicketCopy copyIndex={0} />
+            </div>
+            <div className="mt-3 text-center space-y-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Vista previa a escala real ({PAPER_WIDTH_MM}mm) — Se imprimirán{" "}
+                <b>{copies} copias</b>
+              </p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                1. Báscula/Caseta · 2. Operador de Grúa · 3. Cliente
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* All copies — visible only when printing */}
-        <div className="print-only hidden">
+        {/* ─── Print-only: all copies ─── */}
+        <div className="tkt-print-only" style={{ display: "none" }}>
           {Array.from({ length: copies }, (_, i) => (
             <TicketCopy key={i} copyIndex={i} />
           ))}
@@ -285,11 +313,271 @@ export default function TicketPrintView({
   );
 }
 
-function PrintRow({ label, value }) {
+/* ─── Data row sub-component ─── */
+function DataRow({ label, value }) {
   return (
-    <div className="flex justify-between gap-2">
-      <span className="text-slate-500 shrink-0">{label}:</span>
-      <span className="font-medium text-right text-slate-900">{value}</span>
+    <div className="tkt-row">
+      <span className="tkt-row-label">{label}</span>
+      <span className="tkt-row-dots" />
+      <span className="tkt-row-value">{value}</span>
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CSS — Thermal ticket styles for Epson TM-m30III (80mm paper)
+   All measurements in mm/pt for accurate physical sizing.
+   Pure B&W design for thermal print compatibility.
+   ═══════════════════════════════════════════════════════════════ */
+const thermalStyles = `
+  /* ─── Print media: 80mm thermal paper ─── */
+  @media print {
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    body > *:not(#ticket-print-root) {
+      display: none !important;
+    }
+    #ticket-print-root {
+      position: static !important;
+      overflow: visible !important;
+      background: white !important;
+    }
+    .tkt-screen-only {
+      display: none !important;
+    }
+    .tkt-print-only {
+      display: block !important;
+    }
+
+    @page {
+      size: ${PAPER_WIDTH_MM}mm auto;
+      margin: 0;
+    }
+
+    .tkt-copy {
+      width: ${PAPER_WIDTH_MM}mm;
+      padding: 2mm 4mm 4mm;
+      box-sizing: border-box;
+      page-break-after: always;
+    }
+    .tkt-copy:last-child {
+      page-break-after: auto;
+    }
+  }
+
+  /* ─── Ticket body base ─── */
+  .tkt-body {
+    font-family: Arial, Helvetica, 'Segoe UI', sans-serif;
+    color: #000;
+    background: #fff;
+    line-height: 1.3;
+  }
+
+  /* ─── Header / Letterhead ─── */
+  .tkt-header {
+    text-align: center;
+    padding-bottom: 1mm;
+  }
+  .tkt-double-line {
+    border-top: 1.5pt solid #000;
+    border-bottom: 1.5pt solid #000;
+    height: 2pt;
+    margin: 1.5mm 0;
+  }
+  .tkt-logo {
+    display: block;
+    margin: 1.5mm auto 1mm;
+    width: 12mm;
+    height: 12mm;
+    object-fit: contain;
+  }
+  .tkt-brand {
+    font-size: 13pt;
+    font-weight: 900;
+    letter-spacing: 3pt;
+    text-transform: uppercase;
+  }
+  .tkt-company-detail {
+    font-size: 6pt;
+    color: #444;
+    line-height: 1.4;
+  }
+
+  /* ─── Document title ─── */
+  .tkt-title-section {
+    text-align: center;
+    padding: 1.5mm 0 1mm;
+  }
+  .tkt-doc-title {
+    font-size: 10pt;
+    font-weight: 800;
+    letter-spacing: 1.5pt;
+  }
+  .tkt-reprint-badge {
+    display: inline-block;
+    margin-top: 1mm;
+    padding: 0.5mm 4mm;
+    border: 1.5pt solid #000;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.5pt;
+  }
+
+  /* ─── Divider ─── */
+  .tkt-divider {
+    border-top: 0.5pt dashed #666;
+    margin: 2mm 0;
+  }
+
+  /* ─── Folio section ─── */
+  .tkt-folio-section {
+    text-align: center;
+    padding: 0.5mm 0;
+  }
+  .tkt-label {
+    font-size: 6pt;
+    color: #555;
+    letter-spacing: 2pt;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .tkt-folio {
+    font-size: 14pt;
+    font-weight: 900;
+    font-family: 'Consolas', 'Courier New', monospace;
+    letter-spacing: 1pt;
+    margin: 0.5mm 0;
+  }
+  .tkt-date {
+    font-size: 7pt;
+    color: #333;
+  }
+
+  /* ─── QR section ─── */
+  .tkt-qr-section {
+    text-align: center;
+    padding: 2mm 0 1mm;
+  }
+  .tkt-qr-section svg {
+    display: inline-block;
+  }
+  .tkt-qr-label {
+    font-size: 5.5pt;
+    color: #777;
+    font-family: 'Consolas', 'Courier New', monospace;
+    margin-top: 1mm;
+  }
+
+  /* ─── Data rows ─── */
+  .tkt-data-section {
+    padding: 0.5mm 0;
+  }
+  .tkt-section-title {
+    font-size: 6.5pt;
+    font-weight: 800;
+    color: #333;
+    letter-spacing: 1pt;
+    text-transform: uppercase;
+    margin-bottom: 1mm;
+    border-bottom: 0.5pt solid #ccc;
+    padding-bottom: 0.5mm;
+  }
+  .tkt-row {
+    display: flex;
+    align-items: baseline;
+    padding: 0.4mm 0;
+    font-size: 7.5pt;
+    gap: 1mm;
+  }
+  .tkt-row-label {
+    color: #555;
+    flex-shrink: 0;
+    font-size: 6.5pt;
+    font-weight: 600;
+    min-width: 14mm;
+  }
+  .tkt-row-dots {
+    flex: 1;
+    border-bottom: 0.5pt dotted #bbb;
+    margin-bottom: 1.5pt;
+    min-width: 3mm;
+  }
+  .tkt-row-value {
+    font-weight: 700;
+    text-align: right;
+    flex-shrink: 0;
+    max-width: 38mm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ─── Quantity highlight ─── */
+  .tkt-qty-box {
+    border: 2pt solid #000;
+    padding: 2mm 3mm;
+    text-align: center;
+    margin: 0.5mm 0;
+  }
+  .tkt-qty-label {
+    font-size: 6pt;
+    color: #444;
+    letter-spacing: 2pt;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .tkt-qty-value {
+    font-size: 16pt;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .tkt-qty-unit {
+    font-size: 8pt;
+    font-weight: 400;
+  }
+
+  /* ─── References / notes ─── */
+  .tkt-refs {
+    padding: 0.5mm 0;
+    font-size: 6pt;
+    color: #555;
+  }
+  .tkt-ref-row { margin-bottom: 0.3mm; }
+  .tkt-mono {
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  .tkt-notes {
+    font-style: italic;
+    margin-bottom: 0.3mm;
+  }
+  .tkt-print-count {
+    color: #888;
+  }
+
+  /* ─── Footer ─── */
+  .tkt-footer {
+    text-align: center;
+    padding-top: 1mm;
+  }
+  .tkt-copy-label {
+    font-size: 8pt;
+    font-weight: 900;
+    letter-spacing: 2pt;
+    text-transform: uppercase;
+    padding: 0.5mm 0;
+  }
+  .tkt-legal {
+    font-size: 5pt;
+    color: #999;
+    margin-top: 0.5mm;
+  }
+
+  /* ─── Screen-only preview padding ─── */
+  @media screen {
+    .tkt-copy {
+      padding: 3mm 4mm;
+    }
+  }
+`;
