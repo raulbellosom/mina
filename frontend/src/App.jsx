@@ -9,6 +9,27 @@ import { ToastProvider } from "./shared/components/Toast";
 import MainLayout from "./layouts/MainLayout";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Lazy import wrapper that auto-reloads the page once when a chunk fails to load.
+ * This handles stale deployments where the browser has old HTML referencing
+ * chunk hashes that no longer exist on the server.
+ */
+function lazyWithReload(importFn) {
+  return lazy(() =>
+    importFn().catch((err) => {
+      // Only auto-reload once to avoid infinite loops
+      const key = "minaflow_chunk_reload";
+      const lastReload = sessionStorage.getItem(key);
+      const now = Date.now();
+      if (!lastReload || now - Number(lastReload) > 10000) {
+        sessionStorage.setItem(key, String(now));
+        window.location.reload();
+      }
+      throw err;
+    }),
+  );
+}
+
 // Auth (keep eager — needed immediately)
 import Login from "./features/auth/pages/Login";
 import ForgotPassword from "./features/auth/pages/ForgotPassword";
@@ -17,32 +38,62 @@ import ResetPassword from "./features/auth/pages/ResetPassword";
 // Dashboard (keep eager — first page users see)
 import Dashboard from "./features/dashboard/pages/Dashboard";
 
-// Lazy-loaded modules
-const Usuarios = lazy(() => import("./features/usuarios/pages/Usuarios"));
-const Roles = lazy(() => import("./features/roles/pages/Roles"));
-const Auditoria = lazy(() => import("./features/auditoria/pages/Auditoria"));
-const Configuracion = lazy(
+// Lazy-loaded modules (with auto-reload on stale chunks)
+const Usuarios = lazyWithReload(
+  () => import("./features/usuarios/pages/Usuarios"),
+);
+const Roles = lazyWithReload(() => import("./features/roles/pages/Roles"));
+const Auditoria = lazyWithReload(
+  () => import("./features/auditoria/pages/Auditoria"),
+);
+const Configuracion = lazyWithReload(
   () => import("./features/configuracion/pages/Configuracion"),
 );
 
-const Catalogos = lazy(() => import("./features/catalogos/pages/Catalogos"));
-const Categorias = lazy(() => import("./features/catalogos/pages/Categorias"));
-const Materiales = lazy(() => import("./features/catalogos/pages/Materiales"));
-const Clientes = lazy(() => import("./features/catalogos/pages/Clientes"));
-const Choferes = lazy(() => import("./features/catalogos/pages/Choferes"));
-const Camiones = lazy(() => import("./features/catalogos/pages/Camiones"));
-const Plantas = lazy(() => import("./features/catalogos/pages/Plantas"));
+const Catalogos = lazyWithReload(
+  () => import("./features/catalogos/pages/Catalogos"),
+);
+const Categorias = lazyWithReload(
+  () => import("./features/catalogos/pages/Categorias"),
+);
+const Materiales = lazyWithReload(
+  () => import("./features/catalogos/pages/Materiales"),
+);
+const Clientes = lazyWithReload(
+  () => import("./features/catalogos/pages/Clientes"),
+);
+const Choferes = lazyWithReload(
+  () => import("./features/catalogos/pages/Choferes"),
+);
+const Camiones = lazyWithReload(
+  () => import("./features/catalogos/pages/Camiones"),
+);
+const Plantas = lazyWithReload(
+  () => import("./features/catalogos/pages/Plantas"),
+);
 
-const Vouchers = lazy(() => import("./features/vouchers/pages/Vouchers"));
-const Tickets = lazy(() => import("./features/tickets/pages/Tickets"));
+const Vouchers = lazyWithReload(
+  () => import("./features/vouchers/pages/Vouchers"),
+);
+const Tickets = lazyWithReload(
+  () => import("./features/tickets/pages/Tickets"),
+);
 
-const Bascula = lazy(() => import("./features/bascula/pages/Bascula"));
-const Mostrador = lazy(() => import("./features/mostrador/pages/Mostrador"));
-const Validacion = lazy(() => import("./features/validacion/pages/Validacion"));
+const Bascula = lazyWithReload(
+  () => import("./features/bascula/pages/Bascula"),
+);
+const Mostrador = lazyWithReload(
+  () => import("./features/mostrador/pages/Mostrador"),
+);
+const Validacion = lazyWithReload(
+  () => import("./features/validacion/pages/Validacion"),
+);
 
-const Reportes = lazy(() => import("./features/reportes/pages/Reportes"));
+const Reportes = lazyWithReload(
+  () => import("./features/reportes/pages/Reportes"),
+);
 
-const OperacionesPendientes = lazy(
+const OperacionesPendientes = lazyWithReload(
   () => import("./features/offline/pages/OperacionesPendientes"),
 );
 
