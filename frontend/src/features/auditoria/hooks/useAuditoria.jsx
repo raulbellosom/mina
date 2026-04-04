@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query } from "appwrite";
 import { exportToCsv } from "../../../shared/lib/exportToCsv";
+import { fetchWithCache } from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.AUDIT_LOGS;
 const PAGE_SIZE_OPTIONS = [25, 50];
@@ -242,11 +243,13 @@ export function useAuditoria() {
   const loadFilterOptions = useCallback(async () => {
     try {
       // Get a sample of recent docs to extract unique actions/collections
-      const res = await databases.listDocuments(DATABASE_ID, COLLECTION, [
-        Query.orderDesc("$createdAt"),
-        Query.limit(500),
-        Query.select(["action", "collection"]),
-      ]);
+      const res = await fetchWithCache("audit_filter_options", () =>
+        databases.listDocuments(DATABASE_ID, COLLECTION, [
+          Query.orderDesc("$createdAt"),
+          Query.limit(500),
+          Query.select(["action", "collection"]),
+        ]),
+      );
       const actions = [...new Set(res.documents.map((d) => d.action))].sort();
       const collections = [
         ...new Set(res.documents.map((d) => d.collection)),

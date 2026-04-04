@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query } from "appwrite";
 import { exportToCsv } from "../../../shared/lib/exportToCsv";
+import { fetchWithCache } from "../../../shared/lib/catalogCache";
 
 const TICKETS = APP_IDS.collections.TICKETS;
 
@@ -77,23 +78,35 @@ export function useReportes() {
     if (catalogsLoaded) return;
     try {
       const [cl, dr, tr, ma, pl] = await Promise.all([
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
-          Query.limit(500),
-          Query.orderAsc("name"),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
-          Query.limit(500),
-          Query.orderAsc("fullName"),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [Query.limit(500)]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
-          Query.limit(500),
-          Query.orderAsc("name"),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
-          Query.limit(500),
-          Query.orderAsc("name"),
-        ]),
+        fetchWithCache("clients_all", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
+            Query.limit(500),
+            Query.orderAsc("name"),
+          ]),
+        ),
+        fetchWithCache("drivers_all", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
+            Query.limit(500),
+            Query.orderAsc("fullName"),
+          ]),
+        ),
+        fetchWithCache("trucks_all", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
+            Query.limit(500),
+          ]),
+        ),
+        fetchWithCache("materials_all", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
+            Query.limit(500),
+            Query.orderAsc("name"),
+          ]),
+        ),
+        fetchWithCache("plants_all", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
+            Query.limit(500),
+            Query.orderAsc("name"),
+          ]),
+        ),
       ]);
       setCatalogs({
         [APP_IDS.collections.CLIENTS]: cl.documents,
@@ -118,7 +131,10 @@ export function useReportes() {
     [catalogs],
   );
 
-  const getClientName = useCallback((id) => getName(APP_IDS.collections.CLIENTS, id), [getName]);
+  const getClientName = useCallback(
+    (id) => getName(APP_IDS.collections.CLIENTS, id),
+    [getName],
+  );
   const getDriverName = useCallback(
     (id) => getName(APP_IDS.collections.DRIVERS, id, "fullName"),
     [getName],
@@ -135,7 +151,10 @@ export function useReportes() {
     (id) => getName(APP_IDS.collections.MATERIALS, id),
     [getName],
   );
-  const getPlantName = useCallback((id) => getName(APP_IDS.collections.PLANTS, id), [getName]);
+  const getPlantName = useCallback(
+    (id) => getName(APP_IDS.collections.PLANTS, id),
+    [getName],
+  );
 
   /* ─── Generate report ─── */
   const generateReport = useCallback(

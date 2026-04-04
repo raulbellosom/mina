@@ -132,14 +132,15 @@ export default function MainLayout() {
       <div
         className={`h-16 flex items-center gap-3 px-4 border-b border-slate-200 dark:border-slate-800 shrink-0 ${isCollapsed ? "justify-center px-0" : ""}`}
       >
-        <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shrink-0">
-          <Scale size={16} className="text-white" />
-        </div>
+        <img
+          src="/ore_logo.png"
+          alt="MinaPRO"
+          className="w-8 h-8 object-contain shrink-0"
+        />
         {!isCollapsed && (
           <span className="font-bold text-slate-900 dark:text-white text-sm leading-tight">
             Mina
-            <br />
-            <span className="text-primary-600 font-semibold">Operativa</span>
+            <span className="text-primary-600 dark:text-primary-400">PRO</span>
           </span>
         )}
       </div>
@@ -310,11 +311,16 @@ export default function MainLayout() {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-primary-600 flex items-center justify-center shrink-0">
-              <Scale size={12} className="text-white" />
-            </div>
+            <img
+              src="/ore_logo.png"
+              alt="MinaPRO"
+              className="w-6 h-6 object-contain shrink-0"
+            />
             <span className="font-bold text-slate-900 dark:text-white text-sm">
-              Mina <span className="text-primary-600">Operativa</span>
+              Mina
+              <span className="text-primary-600 dark:text-primary-400">
+                PRO
+              </span>
             </span>
           </div>
         </header>

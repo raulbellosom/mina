@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.CLIENTS;
 
@@ -26,13 +30,18 @@ export function useClientes() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: COLLECTION,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: COLLECTION,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -49,10 +58,9 @@ export function useClientes() {
         queries.push(Query.equal("active", false));
       if (filterType !== "all") queries.push(Query.equal("type", filterType));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTION,
-        queries,
+      const cacheKey = `clients_${filterStatus}_${filterType}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(DATABASE_ID, COLLECTION, queries),
       );
       let docs = res.documents;
 
@@ -77,8 +85,9 @@ export function useClientes() {
     }
   }, [search, filterStatus, filterType]);
 
-  /* ─── CRUD ─── */
+  /* ─── CRUD (requires online) ─── */
   const create = async (data) => {
+    requireOnline();
     const payload = {
       type: data.type,
       name: data.name.trim(),
@@ -108,6 +117,7 @@ export function useClientes() {
   };
 
   const update = async (id, data) => {
+    requireOnline();
     const allowed = [
       "type",
       "name",
@@ -138,6 +148,7 @@ export function useClientes() {
   };
 
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
     await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
       active: newActive,

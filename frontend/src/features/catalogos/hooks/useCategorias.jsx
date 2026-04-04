@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 /**
  * Hook para gestión de categorías de materiales.
@@ -22,13 +26,18 @@ export function useCategorias() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: APP_IDS.collections.MATERIAL_CATEGORIES,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: APP_IDS.collections.MATERIAL_CATEGORIES,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -47,10 +56,13 @@ export function useCategorias() {
       if (filterStatus === "inactive")
         queries.push(Query.equal("active", false));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        APP_IDS.collections.MATERIAL_CATEGORIES,
-        queries,
+      const cacheKey = `categories_${filterStatus}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(
+          DATABASE_ID,
+          APP_IDS.collections.MATERIAL_CATEGORIES,
+          queries,
+        ),
       );
       let docs = res.documents;
 
@@ -73,6 +85,7 @@ export function useCategorias() {
   }, [search, filterStatus]);
 
   const create = async (data) => {
+    requireOnline();
     const payload = {
       name: data.name.trim(),
       code: data.code.trim(),
@@ -97,6 +110,7 @@ export function useCategorias() {
   };
 
   const update = async (id, data) => {
+    requireOnline();
     const allowed = ["name", "code", "description", "sortOrder"];
     const payload = {};
     for (const key of allowed) {
@@ -117,10 +131,16 @@ export function useCategorias() {
   };
 
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
-    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.MATERIAL_CATEGORIES, id, {
-      active: newActive,
-    });
+    await databases.updateDocument(
+      DATABASE_ID,
+      APP_IDS.collections.MATERIAL_CATEGORIES,
+      id,
+      {
+        active: newActive,
+      },
+    );
     await logAudit(newActive ? "category.activate" : "category.disable", id, {
       active: newActive,
     });

@@ -25,39 +25,35 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: "autoUpdate",
         manifest: {
-          name: "MinaFlow",
-          short_name: "MinaFlow",
-          description: "Sistema operativo para mina de materiales",
-          theme_color: "#1e40af",
+          name: "MinaPRO",
+          short_name: "MinaPRO",
+          description: "Control operativo y trazabilidad de mina",
+          theme_color: "#f59e0b",
           background_color: "#0f172a",
           display: "standalone",
           orientation: "any",
           start_url: "/",
           icons: [
             {
-              src: "/pwa-192x192.svg",
-              sizes: "192x192",
-              type: "image/svg+xml",
-              purpose: "any",
-            },
-            {
-              src: "/pwa-512x512.svg",
-              sizes: "512x512",
-              type: "image/svg+xml",
-              purpose: "any",
-            },
-            {
               src: "/icon-192.png",
               sizes: "192x192",
               type: "image/png",
+              purpose: "any",
             },
             {
               src: "/icon-512.png",
               sizes: "512x512",
               type: "image/png",
+              purpose: "any",
             },
             {
-              src: "/icon-512.png",
+              src: "/icon-192-maskable.png",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "maskable",
+            },
+            {
+              src: "/icon-512-maskable.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable",

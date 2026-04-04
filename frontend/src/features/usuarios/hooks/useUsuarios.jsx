@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, functions, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
+import {
+  databases,
+  functions,
+  DATABASE_ID,
+  APP_IDS,
+} from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 /**
  * Hook para gestión de usuarios internos.
@@ -23,13 +32,18 @@ export function useUsuarios() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: APP_IDS.collections.USERS_PROFILE,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: APP_IDS.collections.USERS_PROFILE,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -44,10 +58,13 @@ export function useUsuarios() {
       if (filterStatus === "inactive")
         queries.push(Query.equal("active", false));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        APP_IDS.collections.USERS_PROFILE,
-        queries,
+      const cacheKey = `users_profile_${filterStatus}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(
+          DATABASE_ID,
+          APP_IDS.collections.USERS_PROFILE,
+          queries,
+        ),
       );
 
       let docs = res.documents;
@@ -78,6 +95,7 @@ export function useUsuarios() {
    * La función crea el Auth user, asigna label y crea el profile.
    */
   const createUser = async (data) => {
+    requireOnline();
     const execution = await functions.createExecution(
       APP_IDS.functions.CREATE_USER,
       JSON.stringify({ ...data, createdBy: user.$id }),
@@ -101,6 +119,7 @@ export function useUsuarios() {
    * Si firstName o lastName cambian, sincroniza el nombre con Auth via Function.
    */
   const updateUser = async (id, data) => {
+    requireOnline();
     const allowed = ["firstName", "lastName", "phone", "employeeCode", "notes"];
     const payload = {};
     for (const key of allowed) {
@@ -138,7 +157,12 @@ export function useUsuarios() {
         );
       }
     } else {
-      await databases.updateDocument(DATABASE_ID, APP_IDS.collections.USERS_PROFILE, id, payload);
+      await databases.updateDocument(
+        DATABASE_ID,
+        APP_IDS.collections.USERS_PROFILE,
+        id,
+        payload,
+      );
     }
 
     await logAudit("user.update", id, { fields: Object.keys(payload) });
@@ -150,13 +174,19 @@ export function useUsuarios() {
    * No borra — solo cambia active y status.
    */
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
     const newStatus = newActive ? "active" : "inactive";
 
-    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.USERS_PROFILE, id, {
-      active: newActive,
-      status: newStatus,
-    });
+    await databases.updateDocument(
+      DATABASE_ID,
+      APP_IDS.collections.USERS_PROFILE,
+      id,
+      {
+        active: newActive,
+        status: newStatus,
+      },
+    );
 
     await logAudit(newActive ? "user.activate" : "user.disable", id, {
       active: newActive,

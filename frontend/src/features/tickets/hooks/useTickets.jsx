@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.TICKETS;
 const VOUCHERS_COLLECTION = APP_IDS.collections.VOUCHERS;
@@ -110,13 +114,18 @@ export function useTickets() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: COLLECTION,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: COLLECTION,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -125,11 +134,13 @@ export function useTickets() {
   /* ─── Load catalogs ─── */
   const fetchClients = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
-        Query.equal("active", true),
-        Query.orderAsc("name"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("clients_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
+          Query.equal("active", true),
+          Query.orderAsc("name"),
+          Query.limit(500),
+        ]),
+      );
       setClients(res.documents);
     } catch (err) {
       console.error("Error cargando clientes:", err);
@@ -138,11 +149,13 @@ export function useTickets() {
 
   const fetchDrivers = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
-        Query.equal("active", true),
-        Query.orderAsc("fullName"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("drivers_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
+          Query.equal("active", true),
+          Query.orderAsc("fullName"),
+          Query.limit(500),
+        ]),
+      );
       setDrivers(res.documents);
     } catch (err) {
       console.error("Error cargando choferes:", err);
@@ -151,11 +164,13 @@ export function useTickets() {
 
   const fetchTrucks = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
-        Query.equal("active", true),
-        Query.orderDesc("$createdAt"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("trucks_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
+          Query.equal("active", true),
+          Query.orderDesc("$createdAt"),
+          Query.limit(500),
+        ]),
+      );
       setTrucks(res.documents);
     } catch (err) {
       console.error("Error cargando camiones:", err);
@@ -164,11 +179,13 @@ export function useTickets() {
 
   const fetchMaterials = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
-        Query.equal("active", true),
-        Query.orderAsc("name"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("materials_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
+          Query.equal("active", true),
+          Query.orderAsc("name"),
+          Query.limit(500),
+        ]),
+      );
       setMaterials(res.documents);
     } catch (err) {
       console.error("Error cargando materiales:", err);
@@ -177,11 +194,13 @@ export function useTickets() {
 
   const fetchPlants = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
-        Query.equal("active", true),
-        Query.orderAsc("sortOrder"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("plants_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
+          Query.equal("active", true),
+          Query.orderAsc("sortOrder"),
+          Query.limit(500),
+        ]),
+      );
       setPlants(res.documents);
     } catch (err) {
       console.error("Error cargando plantas:", err);
@@ -222,8 +241,9 @@ export function useTickets() {
     }
   }, [search, filterStatus]);
 
-  /* ─── Generate ticket from voucher ─── */
+  /* ─── Generate ticket from voucher (requires online) ─── */
   const generateFromVoucher = async (voucher) => {
+    requireOnline();
     // Validate voucher state
     if (!VALID_VOUCHER_STATUSES.includes(voucher.status)) {
       throw new Error(
@@ -300,8 +320,9 @@ export function useTickets() {
     return doc;
   };
 
-  /* ─── Change status ─── */
+  /* ─── Change status (requires online) ─── */
   const changeStatus = async (id, newStatus, reason = "") => {
+    requireOnline();
     const payload = { status: newStatus, updatedBy: user.$id };
     if (newStatus === "cancelled" && reason) {
       payload.cancelReason = reason.trim();

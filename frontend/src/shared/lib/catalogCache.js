@@ -16,6 +16,18 @@
 import { setCatalogCache, getCatalogCache } from "./offlineStorage";
 
 /**
+ * Guard for write operations that require online connectivity.
+ * Throws a user-friendly error instead of raw "Failed to fetch".
+ */
+export function requireOnline() {
+  if (!navigator.onLine) {
+    throw new Error(
+      "Sin conexión a internet. Esta operación requiere conexión. Los datos se podrán modificar cuando se restablezca la conexión.",
+    );
+  }
+}
+
+/**
  * Fetch documents with automatic IndexedDB caching.
  *
  * @param {string} cacheKey - Unique key for this catalog (e.g. 'clients_active')

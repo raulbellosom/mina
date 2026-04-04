@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 /**
  * Hook para gestión de roles funcionales y permisos.
@@ -36,13 +40,18 @@ export function useRoles() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: APP_IDS.collections.ROLES,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: APP_IDS.collections.ROLES,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -59,7 +68,14 @@ export function useRoles() {
       if (filterStatus === "disabled")
         queries.push(Query.equal("enabled", false));
 
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.ROLES, queries);
+      const cacheKey = `roles_${filterStatus}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(
+          DATABASE_ID,
+          APP_IDS.collections.ROLES,
+          queries,
+        ),
+      );
       let docs = res.documents;
 
       if (search.trim()) {
@@ -81,6 +97,7 @@ export function useRoles() {
   }, [search, filterStatus]);
 
   const createRole = async (data) => {
+    requireOnline();
     const payload = {
       name: data.name,
       code: data.code,
@@ -105,18 +122,25 @@ export function useRoles() {
   };
 
   const updateRole = async (id, data) => {
+    requireOnline();
     const allowed = ["name", "code", "description"];
     const payload = {};
     for (const key of allowed) {
       if (data[key] !== undefined) payload[key] = data[key];
     }
 
-    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.ROLES, id, payload);
+    await databases.updateDocument(
+      DATABASE_ID,
+      APP_IDS.collections.ROLES,
+      id,
+      payload,
+    );
     await logAudit("role.update", id, { fields: Object.keys(payload) });
     await fetchRoles();
   };
 
   const toggleEnabled = async (id, currentEnabled) => {
+    requireOnline();
     const newEnabled = !currentEnabled;
     await databases.updateDocument(DATABASE_ID, APP_IDS.collections.ROLES, id, {
       enabled: newEnabled,
@@ -195,6 +219,7 @@ export function useRoles() {
    * Estrategia: obtener existentes, calcular diff, crear nuevos y eliminar removidos.
    */
   const saveRolePermissions = async (roleId, newCodes) => {
+    requireOnline();
     // Obtener documentos existentes (habilitados y deshabilitados)
     const existingDocs = [];
     let offset = 0;
@@ -237,11 +262,16 @@ export function useRoles() {
 
     for (const code of toCreate) {
       promises.push(
-        databases.createDocument(DATABASE_ID, APP_IDS.collections.ROLE_PERMISSIONS, ID.unique(), {
-          roleId,
-          permissionCode: code,
-          enabled: true,
-        }),
+        databases.createDocument(
+          DATABASE_ID,
+          APP_IDS.collections.ROLE_PERMISSIONS,
+          ID.unique(),
+          {
+            roleId,
+            permissionCode: code,
+            enabled: true,
+          },
+        ),
       );
     }
 

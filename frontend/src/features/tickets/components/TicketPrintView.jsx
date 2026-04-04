@@ -64,7 +64,7 @@ export default function TicketPrintView({
         {/* Header */}
         <div className="text-center border-b-2 border-slate-800 pb-3 mb-3">
           <h1 className="text-lg font-bold tracking-wider uppercase">
-            MinaFlow
+            MinaPRO
           </h1>
           <p className="text-xs text-slate-600 mt-0.5">
             Ticket de Salida de Material

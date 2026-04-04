@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.TRUCKS;
 
@@ -18,13 +22,18 @@ export function useCamiones() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: COLLECTION,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: COLLECTION,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -33,11 +42,13 @@ export function useCamiones() {
   /* ─── Load active clients for selector ─── */
   const fetchClients = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
-        Query.equal("active", true),
-        Query.orderAsc("name"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("clients_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
+          Query.equal("active", true),
+          Query.orderAsc("name"),
+          Query.limit(500),
+        ]),
+      );
       setClients(res.documents);
     } catch (err) {
       console.error("Error cargando clientes:", err);
@@ -47,11 +58,13 @@ export function useCamiones() {
   /* ─── Load active drivers for selector ─── */
   const fetchDrivers = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
-        Query.equal("active", true),
-        Query.orderAsc("fullName"),
-        Query.limit(500),
-      ]);
+      const res = await fetchWithCache("drivers_active", () =>
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
+          Query.equal("active", true),
+          Query.orderAsc("fullName"),
+          Query.limit(500),
+        ]),
+      );
       setDrivers(res.documents);
     } catch (err) {
       console.error("Error cargando choferes:", err);
@@ -68,10 +81,9 @@ export function useCamiones() {
       if (filterStatus === "inactive")
         queries.push(Query.equal("active", false));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTION,
-        queries,
+      const cacheKey = `trucks_${filterStatus}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(DATABASE_ID, COLLECTION, queries),
       );
       let docs = res.documents;
 
@@ -96,8 +108,9 @@ export function useCamiones() {
     }
   }, [search, filterStatus]);
 
-  /* ─── CRUD ─── */
+  /* ─── CRUD (requires online) ─── */
   const create = async (data) => {
+    requireOnline();
     const payload = {
       plateNumber: data.plateNumber.trim().toUpperCase(),
       secondaryPlateNumber:
@@ -133,6 +146,7 @@ export function useCamiones() {
   };
 
   const update = async (id, data) => {
+    requireOnline();
     const payload = { updatedBy: user.$id };
 
     if (data.plateNumber !== undefined)
@@ -172,6 +186,7 @@ export function useCamiones() {
   };
 
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
     await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
       active: newActive,

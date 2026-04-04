@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID, storage, APP_IDS } from "../../../shared/lib/appwrite";
+import {
+  databases,
+  DATABASE_ID,
+  storage,
+  APP_IDS,
+} from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.MATERIALS;
 const BUCKET = APP_IDS.buckets.MATERIAL_IMAGES;
@@ -29,13 +38,18 @@ export function useMateriales() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: COLLECTION,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: COLLECTION,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
@@ -44,14 +58,16 @@ export function useMateriales() {
   /* ─── Load categories for selectors ─── */
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        APP_IDS.collections.MATERIAL_CATEGORIES,
-        [
-          Query.equal("active", true),
-          Query.orderAsc("sortOrder"),
-          Query.limit(200),
-        ],
+      const res = await fetchWithCache("material_categories_active", () =>
+        databases.listDocuments(
+          DATABASE_ID,
+          APP_IDS.collections.MATERIAL_CATEGORIES,
+          [
+            Query.equal("active", true),
+            Query.orderAsc("sortOrder"),
+            Query.limit(200),
+          ],
+        ),
       );
       setCategories(res.documents);
     } catch (err) {
@@ -75,10 +91,9 @@ export function useMateriales() {
       if (filterCategory !== "all")
         queries.push(Query.equal("categoryId", filterCategory));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTION,
-        queries,
+      const cacheKey = `materials_${filterStatus}_${filterCategory}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(DATABASE_ID, COLLECTION, queries),
       );
       let docs = res.documents;
 
@@ -125,8 +140,9 @@ export function useMateriales() {
     return storage.getFilePreview(BUCKET, fileId, 80, 80);
   };
 
-  /* ─── CRUD ─── */
+  /* ─── CRUD (requires online) ─── */
   const create = async (data, imageFile) => {
+    requireOnline();
     let imageFileId = "";
     if (imageFile) {
       imageFileId = await uploadImage(imageFile);
@@ -160,6 +176,7 @@ export function useMateriales() {
   };
 
   const update = async (id, data, imageFile) => {
+    requireOnline();
     const payload = {};
     const allowed = [
       "name",
@@ -202,6 +219,7 @@ export function useMateriales() {
   };
 
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
     await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
       active: newActive,

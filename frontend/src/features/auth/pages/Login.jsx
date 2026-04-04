@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  Mountain,
-  Loader2,
-  ShieldAlert,
-  LogIn,
-  UserPlus,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { Loader2, ShieldAlert, LogIn, UserPlus, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import PasswordInput from "../../../shared/components/PasswordInput";
@@ -154,7 +146,7 @@ export default function Login() {
           animate="visible"
         >
           <div
-            className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 ${
               isRegister
                 ? "bg-amber-100 dark:bg-amber-500/10 ring-1 ring-amber-200 dark:ring-amber-500/20"
                 : "bg-primary-100 dark:bg-primary-500/10 ring-1 ring-primary-200 dark:ring-primary-500/20"
@@ -166,14 +158,24 @@ export default function Login() {
                 size={28}
               />
             ) : (
-              <Mountain
-                className="text-primary-600 dark:text-primary-400"
-                size={28}
+              <img
+                src="/ore_logo.png"
+                alt="MinaPRO"
+                className="w-10 h-10 object-contain"
               />
             )}
           </div>
           <h1 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">
-            {isRegister ? "Configuración inicial" : "MinaFlow"}
+            {isRegister ? (
+              "Configuración inicial"
+            ) : (
+              <>
+                Mina
+                <span className="text-primary-600 dark:text-primary-400">
+                  PRO
+                </span>
+              </>
+            )}
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1.5 text-center max-w-[280px]">
             {isRegister
@@ -361,7 +363,9 @@ export default function Login() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.4 }}
         >
-          MinaFlow &middot; Control operativo de mina
+          Mina
+          <span className="text-primary-600 dark:text-primary-400">PRO</span>{" "}
+          &middot; Control operativo de mina
         </motion.p>
       </motion.div>
     </div>

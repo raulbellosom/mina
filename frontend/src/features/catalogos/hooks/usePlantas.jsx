@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  fetchWithCache,
+  requireOnline,
+} from "../../../shared/lib/catalogCache";
 
 const COLLECTION = APP_IDS.collections.PLANTS;
 
@@ -16,19 +20,24 @@ export function usePlantas() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action,
-        collection: COLLECTION,
-        docId,
-        userId: user.$id,
-        details: JSON.stringify(details),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action,
+          collection: COLLECTION,
+          docId,
+          userId: user.$id,
+          details: JSON.stringify(details),
+        },
+      );
     } catch (err) {
       console.warn("Audit log failed:", err.message);
     }
   };
 
-  /* ─── Load plants ─── */
+  /* ─── Load plants (with offline cache) ─── */
   const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,10 +47,9 @@ export function usePlantas() {
       if (filterStatus === "inactive")
         queries.push(Query.equal("active", false));
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTION,
-        queries,
+      const cacheKey = `plants_${filterStatus}`;
+      const res = await fetchWithCache(cacheKey, () =>
+        databases.listDocuments(DATABASE_ID, COLLECTION, queries),
       );
       let docs = res.documents;
 
@@ -65,8 +73,9 @@ export function usePlantas() {
     }
   }, [search, filterStatus]);
 
-  /* ─── CRUD ─── */
+  /* ─── CRUD (requires online) ─── */
   const create = async (data) => {
+    requireOnline();
     const payload = {
       name: data.name.trim(),
       code: data.code?.trim().toUpperCase() || "",
@@ -93,6 +102,7 @@ export function usePlantas() {
   };
 
   const update = async (id, data) => {
+    requireOnline();
     const payload = { updatedBy: user.$id };
 
     if (data.name !== undefined) payload.name = data.name.trim();
@@ -119,6 +129,7 @@ export function usePlantas() {
   };
 
   const toggleActive = async (id, currentActive) => {
+    requireOnline();
     const newActive = !currentActive;
     await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
       active: newActive,

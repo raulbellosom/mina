@@ -3,6 +3,7 @@ import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
+import { fetchWithCache } from "../../../shared/lib/catalogCache";
 
 const TICKETS = APP_IDS.collections.TICKETS;
 const WEIGHT_LOGS = APP_IDS.collections.WEIGHT_LOGS;

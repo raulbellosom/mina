@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import { requireOnline } from "../../../shared/lib/catalogCache";
 
 const TICKETS_COLLECTION = APP_IDS.collections.TICKETS;
 const PRINT_LOGS_COLLECTION = APP_IDS.collections.PRINT_LOGS;
@@ -51,6 +52,7 @@ export function usePrintTicket() {
   const printTicket = async (ticket, { copies = DEFAULT_COPIES } = {}) => {
     if (!user) throw new Error("No autenticado");
     if (!ticket?.$id) throw new Error("Ticket inválido");
+    requireOnline();
 
     const unprintable = ["cancelled", "blocked"];
     if (unprintable.includes(ticket.status)) {
@@ -136,6 +138,7 @@ export function usePrintTicket() {
     if (!ticket?.$id) throw new Error("Ticket inválido");
     if (!reason?.trim())
       throw new Error("El motivo de reimpresión es obligatorio");
+    requireOnline();
 
     const unprintable = ["cancelled", "blocked"];
     if (unprintable.includes(ticket.status)) {
