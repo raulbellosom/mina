@@ -36,7 +36,7 @@ export function requireOnline() {
 /**
  * Detect if an error is a network/connectivity failure.
  */
-function isNetworkError(err) {
+export function isNetworkError(err) {
   if (!err) return false;
   const msg = err.message || "";
   return (

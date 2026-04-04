@@ -4,8 +4,9 @@ import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import {
   fetchWithCache,
-  requireOnline,
+  isNetworkError,
 } from "../../../shared/lib/catalogCache";
+import { addToQueue } from "../../../shared/lib/offlineStorage";
 
 const COLLECTION = APP_IDS.collections.CLIENTS;
 
@@ -85,9 +86,8 @@ export function useClientes() {
     }
   }, [search, filterStatus, filterType]);
 
-  /* ─── CRUD (requires online) ─── */
+  /* ─── CRUD (with offline queue fallback) ─── */
   const create = async (data) => {
-    requireOnline();
     const payload = {
       type: data.type,
       name: data.name.trim(),
@@ -102,22 +102,41 @@ export function useClientes() {
       createdBy: user.$id,
     };
 
-    const doc = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION,
-      ID.unique(),
-      payload,
-    );
-    await logAudit("client.create", doc.$id, {
-      name: payload.name,
-      type: payload.type,
-    });
-    await fetchItems();
-    return doc;
+    try {
+      const doc = await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION,
+        ID.unique(),
+        payload,
+      );
+      await logAudit("client.create", doc.$id, {
+        name: payload.name,
+        type: payload.type,
+      });
+      await fetchItems();
+      return doc;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const entry = await addToQueue({
+          collection: COLLECTION,
+          action: "create",
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `Crear cliente: ${payload.name}`,
+          },
+        });
+        setItems((prev) => [
+          { ...payload, $id: entry.id, _offline: true },
+          ...prev,
+        ]);
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const update = async (id, data) => {
-    requireOnline();
     const allowed = [
       "type",
       "name",
@@ -142,22 +161,60 @@ export function useClientes() {
       }
     }
 
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
-    await logAudit("client.update", id, { fields: Object.keys(payload) });
-    await fetchItems();
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit("client.update", id, { fields: Object.keys(payload) });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: { module: "catalogos", description: `Editar cliente: ${id}` },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const toggleActive = async (id, currentActive) => {
-    requireOnline();
     const newActive = !currentActive;
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
-      active: newActive,
-      updatedBy: user.$id,
-    });
-    await logAudit(newActive ? "client.activate" : "client.disable", id, {
-      active: newActive,
-    });
-    await fetchItems();
+    const payload = { active: newActive, updatedBy: user.$id };
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit(newActive ? "client.activate" : "client.disable", id, {
+        active: newActive,
+      });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `${newActive ? "Activar" : "Desactivar"} cliente: ${id}`,
+          },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   useEffect(() => {

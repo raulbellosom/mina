@@ -4,8 +4,9 @@ import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import {
   fetchWithCache,
-  requireOnline,
+  isNetworkError,
 } from "../../../shared/lib/catalogCache";
+import { addToQueue } from "../../../shared/lib/offlineStorage";
 
 const COLLECTION = APP_IDS.collections.TRUCKS;
 
@@ -108,9 +109,8 @@ export function useCamiones() {
     }
   }, [search, filterStatus]);
 
-  /* ─── CRUD (requires online) ─── */
+  /* ─── CRUD (with offline queue fallback) ─── */
   const create = async (data) => {
-    requireOnline();
     const payload = {
       plateNumber: data.plateNumber.trim().toUpperCase(),
       secondaryPlateNumber:
@@ -132,21 +132,40 @@ export function useCamiones() {
       createdBy: user.$id,
     };
 
-    const doc = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION,
-      ID.unique(),
-      payload,
-    );
-    await logAudit("truck.create", doc.$id, {
-      plateNumber: payload.plateNumber,
-    });
-    await fetchItems();
-    return doc;
+    try {
+      const doc = await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION,
+        ID.unique(),
+        payload,
+      );
+      await logAudit("truck.create", doc.$id, {
+        plateNumber: payload.plateNumber,
+      });
+      await fetchItems();
+      return doc;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const entry = await addToQueue({
+          collection: COLLECTION,
+          action: "create",
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `Crear camión: ${payload.plateNumber}`,
+          },
+        });
+        setItems((prev) => [
+          { ...payload, $id: entry.id, _offline: true },
+          ...prev,
+        ]);
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const update = async (id, data) => {
-    requireOnline();
     const payload = { updatedBy: user.$id };
 
     if (data.plateNumber !== undefined)
@@ -180,22 +199,60 @@ export function useCamiones() {
     if (data.habitualDriverId !== undefined)
       payload.habitualDriverId = data.habitualDriverId || "";
 
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
-    await logAudit("truck.update", id, { fields: Object.keys(payload) });
-    await fetchItems();
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit("truck.update", id, { fields: Object.keys(payload) });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: { module: "catalogos", description: `Editar camión: ${id}` },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const toggleActive = async (id, currentActive) => {
-    requireOnline();
     const newActive = !currentActive;
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
-      active: newActive,
-      updatedBy: user.$id,
-    });
-    await logAudit(newActive ? "truck.activate" : "truck.disable", id, {
-      active: newActive,
-    });
-    await fetchItems();
+    const payload = { active: newActive, updatedBy: user.$id };
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit(newActive ? "truck.activate" : "truck.disable", id, {
+        active: newActive,
+      });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `${newActive ? "Activar" : "Desactivar"} camión: ${id}`,
+          },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   useEffect(() => {

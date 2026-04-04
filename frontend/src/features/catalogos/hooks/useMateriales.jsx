@@ -9,8 +9,9 @@ import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import {
   fetchWithCache,
-  requireOnline,
+  isNetworkError,
 } from "../../../shared/lib/catalogCache";
+import { addToQueue } from "../../../shared/lib/offlineStorage";
 
 const COLLECTION = APP_IDS.collections.MATERIALS;
 const BUCKET = APP_IDS.buckets.MATERIAL_IMAGES;
@@ -140,12 +141,16 @@ export function useMateriales() {
     return storage.getFilePreview(BUCKET, fileId, 80, 80);
   };
 
-  /* ─── CRUD (requires online) ─── */
+  /* ─── CRUD (with offline queue fallback) ─── */
   const create = async (data, imageFile) => {
-    requireOnline();
     let imageFileId = "";
     if (imageFile) {
-      imageFileId = await uploadImage(imageFile);
+      try {
+        imageFileId = await uploadImage(imageFile);
+      } catch (imgErr) {
+        if (!isNetworkError(imgErr)) throw imgErr;
+        // Skip image upload when offline — document will be created without it
+      }
     }
 
     const payload = {
@@ -160,23 +165,42 @@ export function useMateriales() {
       createdBy: user.$id,
     };
 
-    const doc = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION,
-      ID.unique(),
-      payload,
-    );
-    await logAudit("material.create", doc.$id, {
-      name: payload.name,
-      code: payload.code,
-      categoryId: payload.categoryId,
-    });
-    await fetchItems();
-    return doc;
+    try {
+      const doc = await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION,
+        ID.unique(),
+        payload,
+      );
+      await logAudit("material.create", doc.$id, {
+        name: payload.name,
+        code: payload.code,
+        categoryId: payload.categoryId,
+      });
+      await fetchItems();
+      return doc;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const entry = await addToQueue({
+          collection: COLLECTION,
+          action: "create",
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `Crear material: ${payload.name}`,
+          },
+        });
+        setItems((prev) => [
+          { ...payload, $id: entry.id, _offline: true },
+          ...prev,
+        ]);
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const update = async (id, data, imageFile) => {
-    requireOnline();
     const payload = {};
     const allowed = [
       "name",
@@ -198,37 +222,82 @@ export function useMateriales() {
       }
     }
 
-    // Handle image replacement
+    // Handle image replacement (requires online)
     if (imageFile) {
-      // Delete old image if exists
-      if (data._oldImageFileId) {
-        await deleteImage(data._oldImageFileId);
+      try {
+        if (data._oldImageFileId) {
+          await deleteImage(data._oldImageFileId);
+        }
+        payload.referenceImageFileId = await uploadImage(imageFile);
+      } catch (imgErr) {
+        if (!isNetworkError(imgErr)) throw imgErr;
+        // Skip image update when offline
       }
-      payload.referenceImageFileId = await uploadImage(imageFile);
     } else if (data._removeImage && data._oldImageFileId) {
-      // User explicitly removed the image
-      await deleteImage(data._oldImageFileId);
-      payload.referenceImageFileId = "";
+      try {
+        await deleteImage(data._oldImageFileId);
+        payload.referenceImageFileId = "";
+      } catch (imgErr) {
+        if (!isNetworkError(imgErr)) throw imgErr;
+      }
     }
 
     payload.updatedBy = user.$id;
 
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
-    await logAudit("material.update", id, { fields: Object.keys(payload) });
-    await fetchItems();
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit("material.update", id, { fields: Object.keys(payload) });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: { module: "catalogos", description: `Editar material: ${id}` },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const toggleActive = async (id, currentActive) => {
-    requireOnline();
     const newActive = !currentActive;
-    await databases.updateDocument(DATABASE_ID, COLLECTION, id, {
-      active: newActive,
-      updatedBy: user.$id,
-    });
-    await logAudit(newActive ? "material.activate" : "material.disable", id, {
-      active: newActive,
-    });
-    await fetchItems();
+    const payload = { active: newActive, updatedBy: user.$id };
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION, id, payload);
+      await logAudit(newActive ? "material.activate" : "material.disable", id, {
+        active: newActive,
+      });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: COLLECTION,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `${newActive ? "Activar" : "Desactivar"} material: ${id}`,
+          },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   /* ─── Init ─── */

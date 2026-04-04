@@ -4,8 +4,9 @@ import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import {
   fetchWithCache,
-  requireOnline,
+  isNetworkError,
 } from "../../../shared/lib/catalogCache";
+import { addToQueue } from "../../../shared/lib/offlineStorage";
 
 /**
  * Hook para gestión de categorías de materiales.
@@ -85,7 +86,6 @@ export function useCategorias() {
   }, [search, filterStatus]);
 
   const create = async (data) => {
-    requireOnline();
     const payload = {
       name: data.name.trim(),
       code: data.code.trim(),
@@ -95,22 +95,41 @@ export function useCategorias() {
       createdBy: user.$id,
     };
 
-    const doc = await databases.createDocument(
-      DATABASE_ID,
-      APP_IDS.collections.MATERIAL_CATEGORIES,
-      ID.unique(),
-      payload,
-    );
-    await logAudit("category.create", doc.$id, {
-      name: payload.name,
-      code: payload.code,
-    });
-    await fetchItems();
-    return doc;
+    try {
+      const doc = await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.MATERIAL_CATEGORIES,
+        ID.unique(),
+        payload,
+      );
+      await logAudit("category.create", doc.$id, {
+        name: payload.name,
+        code: payload.code,
+      });
+      await fetchItems();
+      return doc;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const entry = await addToQueue({
+          collection: APP_IDS.collections.MATERIAL_CATEGORIES,
+          action: "create",
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `Crear categoría: ${payload.name}`,
+          },
+        });
+        setItems((prev) => [
+          { ...payload, $id: entry.id, _offline: true },
+          ...prev,
+        ]);
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const update = async (id, data) => {
-    requireOnline();
     const allowed = ["name", "code", "description", "sortOrder"];
     const payload = {};
     for (const key of allowed) {
@@ -120,31 +139,70 @@ export function useCategorias() {
       }
     }
 
-    await databases.updateDocument(
-      DATABASE_ID,
-      APP_IDS.collections.MATERIAL_CATEGORIES,
-      id,
-      payload,
-    );
-    await logAudit("category.update", id, { fields: Object.keys(payload) });
-    await fetchItems();
+    try {
+      await databases.updateDocument(
+        DATABASE_ID,
+        APP_IDS.collections.MATERIAL_CATEGORIES,
+        id,
+        payload,
+      );
+      await logAudit("category.update", id, { fields: Object.keys(payload) });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: APP_IDS.collections.MATERIAL_CATEGORIES,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: { module: "catalogos", description: `Editar categoría: ${id}` },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   const toggleActive = async (id, currentActive) => {
-    requireOnline();
     const newActive = !currentActive;
-    await databases.updateDocument(
-      DATABASE_ID,
-      APP_IDS.collections.MATERIAL_CATEGORIES,
-      id,
-      {
+    const payload = { active: newActive };
+    try {
+      await databases.updateDocument(
+        DATABASE_ID,
+        APP_IDS.collections.MATERIAL_CATEGORIES,
+        id,
+        payload,
+      );
+      await logAudit(newActive ? "category.activate" : "category.disable", id, {
         active: newActive,
-      },
-    );
-    await logAudit(newActive ? "category.activate" : "category.disable", id, {
-      active: newActive,
-    });
-    await fetchItems();
+      });
+      await fetchItems();
+    } catch (err) {
+      if (isNetworkError(err)) {
+        await addToQueue({
+          collection: APP_IDS.collections.MATERIAL_CATEGORIES,
+          action: "update",
+          documentId: id,
+          data: payload,
+          meta: {
+            module: "catalogos",
+            description: `${newActive ? "Activar" : "Desactivar"} categoría: ${id}`,
+          },
+        });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.$id === id ? { ...item, ...payload, _offline: true } : item,
+          ),
+        );
+        return { offline: true };
+      }
+      throw err;
+    }
   };
 
   useEffect(() => {
