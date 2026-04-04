@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
 import SearchableSelect from "../../../shared/components/SearchableSelect";
+import CenterModal from "../../../shared/components/CenterModal";
 
 const EMPTY_FORM = {
   plateNumber: "",
@@ -110,221 +110,209 @@ export default function CamionForm({
     "mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white";
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto"
-        >
-          <div className="flex items-center justify-between mb-5">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              {isEditing ? "Editar camión" : "Nuevo camión"}
-            </Dialog.Title>
-            <Dialog.Close asChild>
-              <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={20} />
-              </button>
-            </Dialog.Close>
+    <CenterModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? "Editar camión" : "Nuevo camión"}
+      size="2xl"
+      onSubmit={handleSubmit}
+      footer={
+        <>
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400 mb-3">
+              {error}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              {submitting && <Loader2 size={14} className="animate-spin" />}
+              {isEditing ? "Guardar cambios" : "Crear camión"}
+            </button>
           </div>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {/* ─── Identificación vehicular ─── */}
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          Identificación
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className={labelCls}>
+              Placa principal <span className="text-red-500">*</span>
+            </label>
+            <input
+              value={form.plateNumber}
+              onChange={set("plateNumber")}
+              required
+              placeholder="Ej: ABC-1234"
+              className={`${inputCls} font-mono uppercase`}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Placa secundaria</label>
+            <input
+              value={form.secondaryPlateNumber}
+              onChange={set("secondaryPlateNumber")}
+              placeholder="Remolque, etc."
+              className={`${inputCls} font-mono uppercase`}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>No. económico</label>
+            <input
+              value={form.economicNumber}
+              onChange={set("economicNumber")}
+              placeholder="Ej: U-042"
+              className={`${inputCls} font-mono uppercase`}
+            />
+          </div>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ─── Identificación vehicular ─── */}
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Identificación
+        {/* ─── Datos del vehículo ─── */}
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-2">
+          Vehículo
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className={labelCls}>Tipo de camión</label>
+            <SearchableSelect
+              value={form.truckType}
+              onChange={(v) => setForm((f) => ({ ...f, truckType: v }))}
+              options={TRUCK_TYPES.map((t) => ({ value: t, label: t }))}
+              placeholder="Seleccionar..."
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Marca</label>
+            <input
+              value={form.brand}
+              onChange={set("brand")}
+              placeholder="Ej: Kenworth"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Modelo</label>
+            <input
+              value={form.model}
+              onChange={set("model")}
+              placeholder="Ej: T800"
+              className={inputCls}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className={labelCls}>Año</label>
+            <input
+              type="number"
+              min="1980"
+              max="2099"
+              value={form.year}
+              onChange={set("year")}
+              placeholder="Ej: 2020"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Color</label>
+            <input
+              value={form.color}
+              onChange={set("color")}
+              placeholder="Ej: Blanco"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Tipo de eje</label>
+            <SearchableSelect
+              value={form.axleType}
+              onChange={(v) => setForm((f) => ({ ...f, axleType: v }))}
+              options={AXLE_TYPES.map((a) => ({ value: a, label: a }))}
+              placeholder="Seleccionar..."
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Capacidad ref. (t)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.referenceCapacity}
+              onChange={set("referenceCapacity")}
+              placeholder="Toneladas"
+              className={inputCls}
+            />
+          </div>
+        </div>
+
+        {/* ─── Relaciones opcionales ─── */}
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-2">
+          Relaciones
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Cliente / Empresa</label>
+            <SearchableSelect
+              value={form.clientId}
+              onChange={(v) => setForm((f) => ({ ...f, clientId: v }))}
+              options={(clients || []).map((c) => ({
+                value: c.$id,
+                label: c.name + (c.tradeName ? ` (${c.tradeName})` : ""),
+              }))}
+              placeholder="Sin asociar"
+              className="mt-1"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Opcional. Vincula el camión con un cliente.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className={labelCls}>
-                  Placa principal <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={form.plateNumber}
-                  onChange={set("plateNumber")}
-                  required
-                  placeholder="Ej: ABC-1234"
-                  className={`${inputCls} font-mono uppercase`}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Placa secundaria</label>
-                <input
-                  value={form.secondaryPlateNumber}
-                  onChange={set("secondaryPlateNumber")}
-                  placeholder="Remolque, etc."
-                  className={`${inputCls} font-mono uppercase`}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>No. económico</label>
-                <input
-                  value={form.economicNumber}
-                  onChange={set("economicNumber")}
-                  placeholder="Ej: U-042"
-                  className={`${inputCls} font-mono uppercase`}
-                />
-              </div>
-            </div>
-
-            {/* ─── Datos del vehículo ─── */}
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-2">
-              Vehículo
+          </div>
+          <div>
+            <label className={labelCls}>Chofer habitual</label>
+            <SearchableSelect
+              value={form.habitualDriverId}
+              onChange={(v) => setForm((f) => ({ ...f, habitualDriverId: v }))}
+              options={(drivers || []).map((d) => ({
+                value: d.$id,
+                label: d.fullName,
+              }))}
+              placeholder="Sin asignar"
+              className="mt-1"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Opcional. Chofer principal que opera esta unidad.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className={labelCls}>Tipo de camión</label>
-                <SearchableSelect
-                  value={form.truckType}
-                  onChange={(v) => setForm((f) => ({ ...f, truckType: v }))}
-                  options={TRUCK_TYPES.map((t) => ({ value: t, label: t }))}
-                  placeholder="Seleccionar..."
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Marca</label>
-                <input
-                  value={form.brand}
-                  onChange={set("brand")}
-                  placeholder="Ej: Kenworth"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Modelo</label>
-                <input
-                  value={form.model}
-                  onChange={set("model")}
-                  placeholder="Ej: T800"
-                  className={inputCls}
-                />
-              </div>
-            </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className={labelCls}>Año</label>
-                <input
-                  type="number"
-                  min="1980"
-                  max="2099"
-                  value={form.year}
-                  onChange={set("year")}
-                  placeholder="Ej: 2020"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Color</label>
-                <input
-                  value={form.color}
-                  onChange={set("color")}
-                  placeholder="Ej: Blanco"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Tipo de eje</label>
-                <SearchableSelect
-                  value={form.axleType}
-                  onChange={(v) => setForm((f) => ({ ...f, axleType: v }))}
-                  options={AXLE_TYPES.map((a) => ({ value: a, label: a }))}
-                  placeholder="Seleccionar..."
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Capacidad ref. (t)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.referenceCapacity}
-                  onChange={set("referenceCapacity")}
-                  placeholder="Toneladas"
-                  className={inputCls}
-                />
-              </div>
-            </div>
-
-            {/* ─── Relaciones opcionales ─── */}
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-2">
-              Relaciones
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>Cliente / Empresa</label>
-                <SearchableSelect
-                  value={form.clientId}
-                  onChange={(v) => setForm((f) => ({ ...f, clientId: v }))}
-                  options={(clients || []).map((c) => ({
-                    value: c.$id,
-                    label: c.name + (c.tradeName ? ` (${c.tradeName})` : ""),
-                  }))}
-                  placeholder="Sin asociar"
-                  className="mt-1"
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Opcional. Vincula el camión con un cliente.
-                </p>
-              </div>
-              <div>
-                <label className={labelCls}>Chofer habitual</label>
-                <SearchableSelect
-                  value={form.habitualDriverId}
-                  onChange={(v) =>
-                    setForm((f) => ({ ...f, habitualDriverId: v }))
-                  }
-                  options={(drivers || []).map((d) => ({
-                    value: d.$id,
-                    label: d.fullName,
-                  }))}
-                  placeholder="Sin asignar"
-                  className="mt-1"
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Opcional. Chofer principal que opera esta unidad.
-                </p>
-              </div>
-            </div>
-
-            {/* ─── Observaciones ─── */}
-            <div>
-              <label className={labelCls}>Observaciones</label>
-              <textarea
-                value={form.notes}
-                onChange={set("notes")}
-                rows={3}
-                placeholder="Notas internas sobre el camión..."
-                className={`${inputCls} resize-none`}
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            )}
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                >
-                  Cancelar
-                </button>
-              </Dialog.Close>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
-              >
-                {submitting && <Loader2 size={14} className="animate-spin" />}
-                {isEditing ? "Guardar cambios" : "Crear camión"}
-              </button>
-            </div>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        {/* ─── Observaciones ─── */}
+        <div>
+          <label className={labelCls}>Observaciones</label>
+          <textarea
+            value={form.notes}
+            onChange={set("notes")}
+            rows={3}
+            placeholder="Notas internas sobre el camión..."
+            className={`${inputCls} resize-none`}
+          />
+        </div>
+      </div>
+    </CenterModal>
   );
 }

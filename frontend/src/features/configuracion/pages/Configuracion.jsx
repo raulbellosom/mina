@@ -11,6 +11,7 @@ import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
 import { useTheme } from "../../../shared/context/ThemeContext";
 import PALETTES from "../../../shared/config/palettes";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const COLLECTION = APP_IDS.collections.SYSTEM_CONFIG;
 const DOC_ID = APP_IDS.docs.SYSTEM_CONFIG_SINGLETON;
@@ -180,16 +181,15 @@ export default function Configuracion() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Unidad de peso por defecto
             </label>
-            <select
+            <SearchableSelect
               value={form.defaultWeightUnit}
-              onChange={(e) =>
-                handleChange("defaultWeightUnit", e.target.value)
-              }
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="kg">Kilogramos (kg)</option>
-              <option value="ton">Toneladas (ton)</option>
-            </select>
+              onChange={(v) => handleChange("defaultWeightUnit", v)}
+              options={[
+                { value: "kg", label: "Kilogramos (kg)" },
+                { value: "ton", label: "Toneladas (ton)" },
+              ]}
+              placeholder="Unidad de peso"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">

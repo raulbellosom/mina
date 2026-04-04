@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X, Loader2, Upload, Trash2, ImageIcon } from "lucide-react";
+import { Loader2, Upload, Trash2, ImageIcon } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
 import SearchableSelect from "../../../shared/components/SearchableSelect";
+import CenterModal from "../../../shared/components/CenterModal";
 
 const EMPTY_FORM = {
   name: "",
@@ -165,194 +165,183 @@ export default function MaterialForm({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto"
-        >
-          <div className="flex items-center justify-between mb-5">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              {isEditing ? "Editar material" : "Nuevo material"}
-            </Dialog.Title>
-            <Dialog.Close asChild>
-              <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={20} />
-              </button>
-            </Dialog.Close>
+    <CenterModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? "Editar material" : "Nuevo material"}
+      onSubmit={handleSubmit}
+      footer={
+        <>
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400 mb-3">
+              {error}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              {submitting && <Loader2 size={14} className="animate-spin" />}
+              {isEditing ? "Guardar cambios" : "Crear material"}
+            </button>
           </div>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {/* Nombre */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Nombre <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.name}
+            onChange={handleNameChange}
+            required
+            placeholder="Ej: Grava 3/4, Arena fina, Base hidráulica"
+            className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
+          />
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nombre */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Nombre <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.name}
-                onChange={handleNameChange}
-                required
-                placeholder="Ej: Grava 3/4, Arena fina, Base hidráulica"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
+        {/* Código */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Código único <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={form.code}
+            onChange={set("code")}
+            required
+            placeholder="grava_3_4"
+            className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono"
+          />
+        </div>
+
+        {/* Categoría */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Categoría <span className="text-red-500">*</span>
+          </label>
+          <SearchableSelect
+            value={form.categoryId}
+            onChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
+            required
+            options={categories.map((cat) => ({
+              value: cat.$id,
+              label: cat.name,
+            }))}
+            placeholder="Seleccionar categoría..."
+            className="mt-1"
+          />
+        </div>
+
+        {/* Descripción */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Descripción
+          </label>
+          <textarea
+            value={form.description}
+            onChange={set("description")}
+            rows={2}
+            placeholder="Descripción breve del material..."
+            className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
+          />
+        </div>
+
+        {/* Unidad comercial + Orden */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Unidad comercial
+            </label>
+            <SearchableSelect
+              value={form.defaultCommercialUnit}
+              onChange={(v) =>
+                setForm((f) => ({ ...f, defaultCommercialUnit: v }))
+              }
+              options={COMMERCIAL_UNITS}
+              placeholder="Unidad"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Orden
+            </label>
+            <input
+              type="number"
+              value={form.sortOrder}
+              onChange={set("sortOrder")}
+              min="0"
+              className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        {/* Imagen de referencia */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+            Imagen de referencia
+          </label>
+          {imagePreview ? (
+            <div className="relative inline-block">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
               />
-            </div>
-
-            {/* Código */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Código único <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.code}
-                onChange={set("code")}
-                required
-                placeholder="grava_3_4"
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white font-mono"
-              />
-            </div>
-
-            {/* Categoría */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Categoría <span className="text-red-500">*</span>
-              </label>
-              <SearchableSelect
-                value={form.categoryId}
-                onChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
-                required
-                options={categories.map((cat) => ({
-                  value: cat.$id,
-                  label: cat.name,
-                }))}
-                placeholder="Seleccionar categoría..."
-                className="mt-1"
-              />
-            </div>
-
-            {/* Descripción */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Descripción
-              </label>
-              <textarea
-                value={form.description}
-                onChange={set("description")}
-                rows={2}
-                placeholder="Descripción breve del material..."
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white resize-none"
-              />
-            </div>
-
-            {/* Unidad comercial + Orden */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Unidad comercial
-                </label>
-                <SearchableSelect
-                  value={form.defaultCommercialUnit}
-                  onChange={(v) =>
-                    setForm((f) => ({ ...f, defaultCommercialUnit: v }))
-                  }
-                  options={COMMERCIAL_UNITS}
-                  placeholder="Unidad"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Orden
-                </label>
-                <input
-                  type="number"
-                  value={form.sortOrder}
-                  onChange={set("sortOrder")}
-                  min="0"
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-                />
-              </div>
-            </div>
-
-            {/* Imagen de referencia */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
-                Imagen de referencia
-              </label>
-              {imagePreview ? (
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-sm"
-                    title="Quitar imagen"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-3 w-full p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 transition-colors text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
-                >
-                  <ImageIcon size={24} className="shrink-0" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">
-                      Subir imagen de referencia
-                    </p>
-                    <p className="text-xs">JPG, PNG o WebP · máx. 5 MB</p>
-                  </div>
-                </button>
-              )}
-              {imagePreview && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                >
-                  <Upload size={12} /> Cambiar imagen
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            )}
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                >
-                  Cancelar
-                </button>
-              </Dialog.Close>
               <button
-                type="submit"
-                disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-sm"
+                title="Quitar imagen"
               >
-                {submitting && <Loader2 size={14} className="animate-spin" />}
-                {isEditing ? "Guardar cambios" : "Crear material"}
+                <Trash2 size={12} />
               </button>
             </div>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-3 w-full p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 transition-colors text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
+            >
+              <ImageIcon size={24} className="shrink-0" />
+              <div className="text-left">
+                <p className="text-sm font-medium">
+                  Subir imagen de referencia
+                </p>
+                <p className="text-xs">JPG, PNG o WebP · máx. 5 MB</p>
+              </div>
+            </button>
+          )}
+          {imagePreview && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              <Upload size={12} /> Cambiar imagen
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+        </div>
+      </div>
+    </CenterModal>
   );
 }

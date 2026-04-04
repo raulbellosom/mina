@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTickets, TICKET_STATUSES } from "../hooks/useTickets";
 import { usePrintTicket } from "../hooks/usePrintTicket";
@@ -249,18 +250,18 @@ export default function Tickets() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Filter size={16} className="text-slate-400" />
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-          >
-            <option value="all">Todos los estados</option>
-            {Object.entries(TICKET_STATUSES).map(([key, val]) => (
-              <option key={key} value={key}>
-                {val.label}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setFilterStatus(v)}
+            options={[
+              { value: "all", label: "Todos los estados" },
+              ...Object.entries(TICKET_STATUSES).map(([key, val]) => ({
+                value: key,
+                label: val.label,
+              })),
+            ]}
+            placeholder="Estado"
+          />
         </div>
       </div>
 

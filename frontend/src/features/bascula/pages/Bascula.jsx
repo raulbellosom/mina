@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useBascula } from "../hooks/useBascula";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
 
@@ -208,15 +209,16 @@ function WeightForm({ type, onSubmit, submitting, disabled }) {
         </div>
         <div>
           <label className={labelCls}>Unidad</label>
-          <select
+          <SearchableSelect
             value={unit}
-            onChange={(e) => setUnit(e.target.value)}
+            onChange={(v) => setUnit(v)}
+            options={[
+              { value: "ton", label: "ton" },
+              { value: "kg", label: "kg" },
+            ]}
+            placeholder="Unidad"
             disabled={disabled}
-            className={`${inputCls} bg-white dark:bg-slate-800`}
-          >
-            <option value="ton">ton</option>
-            <option value="kg">kg</option>
-          </select>
+          />
         </div>
       </div>
       <div>

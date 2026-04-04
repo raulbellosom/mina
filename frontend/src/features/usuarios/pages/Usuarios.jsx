@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useUsuarios } from "../hooks/useUsuarios";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useAuth } from "../../../features/auth/hooks/useAuth";
 import UsuarioForm from "../components/UsuarioForm";
@@ -173,15 +174,16 @@ export default function Usuarios() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Filter size={16} className="text-slate-400" />
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-          >
-            <option value="all">Todos</option>
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-          </select>
+            onChange={(v) => setFilterStatus(v)}
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "active", label: "Activos" },
+              { value: "inactive", label: "Inactivos" },
+            ]}
+            placeholder="Estado"
+          />
         </div>
       </div>
 

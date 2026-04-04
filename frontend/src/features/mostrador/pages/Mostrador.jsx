@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ShoppingCart,
   Plus,
@@ -14,7 +14,7 @@ import {
   QrCode,
   CheckCircle2,
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 import { useMostrador } from "../hooks/useMostrador";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import MostradorForm from "../components/MostradorForm";
@@ -22,6 +22,8 @@ import TicketPrintView from "../../tickets/components/TicketPrintView";
 import { usePrintTicket } from "../../tickets/hooks/usePrintTicket";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
+import CenterModal from "../../../shared/components/CenterModal";
+import SideModal from "../../../shared/components/SideModal";
 
 const SALE_STATUSES = {
   confirmed: {
@@ -292,18 +294,18 @@ export default function Mostrador() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Filter size={16} className="text-slate-400" />
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-          >
-            <option value="all">Todos</option>
-            {Object.entries(SALE_STATUSES).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v.label}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setFilterStatus(v)}
+            options={[
+              { value: "all", label: "Todos" },
+              ...Object.entries(SALE_STATUSES).map(([k, v]) => ({
+                value: k,
+                label: v.label,
+              })),
+            ]}
+            placeholder="Estado"
+          />
         </div>
       </div>
 
@@ -464,32 +466,32 @@ export default function Mostrador() {
       />
 
       {/* Panel de detalle */}
-      {detailSale && (
-        <SaleDetail
-          sale={detailSale}
-          clientMap={clientMap}
-          driverMap={driverMap}
-          truckMap={truckMap}
-          materialMap={materialMap}
-          plantMap={plantMap}
-          onClose={() => setDetailSale(null)}
-          onPrint={
-            can("tickets.print") && detailSale.ticketId
-              ? () => openTicketPrintView(detailSale.ticketId)
-              : null
-          }
-          onCancel={
-            can("counter_sales.cancel") &&
-            activeSaleStatuses.includes(detailSale.status)
-              ? () => {
-                  setDetailSale(null);
-                  setCancelDialog(detailSale);
-                  setCancelReason("");
-                }
-              : null
-          }
-        />
-      )}
+      <SaleDetail
+        sale={detailSale}
+        open={Boolean(detailSale)}
+        clientMap={clientMap}
+        driverMap={driverMap}
+        truckMap={truckMap}
+        materialMap={materialMap}
+        plantMap={plantMap}
+        onClose={() => setDetailSale(null)}
+        onPrint={
+          detailSale && can("tickets.print") && detailSale.ticketId
+            ? () => openTicketPrintView(detailSale.ticketId)
+            : null
+        }
+        onCancel={
+          detailSale &&
+          can("counter_sales.cancel") &&
+          activeSaleStatuses.includes(detailSale.status)
+            ? () => {
+                setDetailSale(null);
+                setCancelDialog(detailSale);
+                setCancelReason("");
+              }
+            : null
+        }
+      />
 
       {/* Vista de impresión */}
       {printViewTicket && (
@@ -513,109 +515,95 @@ export default function Mostrador() {
       )}
 
       {/* Diálogo reimpresión */}
-      <Dialog.Root
+      <CenterModal
         open={Boolean(reprintDialog)}
         onOpenChange={(v) => {
           if (!v) setReprintDialog(null);
         }}
+        title="Reimprimir ticket"
+        subtitle={
+          reprintDialog
+            ? `Ticket ${reprintDialog.ticketNumber} — Indique el motivo.`
+            : undefined
+        }
+        size="md"
+        zOverlay="z-[110]"
+        zContent="z-[111]"
+        footer={
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setReprintDialog(null)}
+              className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleReprint}
+              disabled={!reprintReason.trim() || printing}
+              className="px-4 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+            >
+              Reimprimir
+            </button>
+          </div>
+        }
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[110]" />
-          <Dialog.Content
-            aria-describedby={undefined}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[111] w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
-          >
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-              Reimprimir ticket
-            </Dialog.Title>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Ticket{" "}
-              <span className="font-mono">{reprintDialog?.ticketNumber}</span> —
-              Indique el motivo.
-            </p>
-            <textarea
-              value={reprintReason}
-              onChange={(e) => setReprintReason(e.target.value)}
-              rows={3}
-              maxLength={500}
-              placeholder="Motivo de la reimpresión..."
-              className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 dark:text-white resize-none mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <Dialog.Close asChild>
-                <button className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  Cancelar
-                </button>
-              </Dialog.Close>
-              <button
-                onClick={handleReprint}
-                disabled={!reprintReason.trim() || printing}
-                className="px-4 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
-              >
-                Reimprimir
-              </button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+        <textarea
+          value={reprintReason}
+          onChange={(e) => setReprintReason(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="Motivo de la reimpresión..."
+          className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 dark:text-white resize-none"
+        />
+      </CenterModal>
 
       {/* Diálogo cancelación */}
-      <Dialog.Root
+      <CenterModal
         open={Boolean(cancelDialog)}
         onOpenChange={(v) => {
           if (!v) setCancelDialog(null);
         }}
-      >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content
-            aria-describedby={undefined}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
-          >
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
-                <AlertTriangle
-                  size={20}
-                  className="text-red-600 dark:text-red-400"
-                />
-              </div>
-              <div>
-                <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-                  Cancelar venta
-                </Dialog.Title>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Venta{" "}
-                  <span className="font-mono">
-                    {cancelDialog?.internalNumber}
-                  </span>{" "}
-                  — su ticket vinculado también será cancelado.
-                </p>
-              </div>
-            </div>
-            <textarea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={3}
-              maxLength={500}
-              placeholder="Motivo de cancelación..."
-              className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none text-slate-900 dark:text-white resize-none mb-4"
+        title="Cancelar venta"
+        subtitle={
+          cancelDialog
+            ? `Venta ${cancelDialog.internalNumber} — su ticket vinculado también será cancelado.`
+            : undefined
+        }
+        icon={
+          <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+            <AlertTriangle
+              size={20}
+              className="text-red-600 dark:text-red-400"
             />
-            <div className="flex justify-end gap-2">
-              <Dialog.Close asChild>
-                <button className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  No, regresar
-                </button>
-              </Dialog.Close>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white"
-              >
-                Sí, cancelar venta
-              </button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+          </div>
+        }
+        size="md"
+        footer={
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setCancelDialog(null)}
+              className="px-4 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+            >
+              No, regresar
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white"
+            >
+              Sí, cancelar venta
+            </button>
+          </div>
+        }
+      >
+        <textarea
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="Motivo de cancelación..."
+          className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 outline-none text-slate-900 dark:text-white resize-none"
+        />
+      </CenterModal>
     </div>
   );
 }
@@ -623,6 +611,7 @@ export default function Mostrador() {
 /* ── Panel de detalle ─────────────────────────────────────── */
 function SaleDetail({
   sale,
+  open,
   clientMap,
   driverMap,
   truckMap,
@@ -632,157 +621,162 @@ function SaleDetail({
   onPrint,
   onCancel,
 }) {
-  const statusCfg = SALE_STATUSES[sale.status] || SALE_STATUSES.confirmed;
+  // Keep last sale data during close animation
+  const [lastSale, setLastSale] = useState(sale);
+  useEffect(() => {
+    if (sale) setLastSale(sale);
+  }, [sale]);
+  const displaySale = sale || lastSale;
+  if (!displaySale) return null;
+
+  const statusCfg =
+    SALE_STATUSES[displaySale.status] || SALE_STATUSES.confirmed;
   const resolveName = (map, id, field = "name") => map[id]?.[field] || "—";
   const displayClient = () => {
-    if (sale.clientId && clientMap[sale.clientId])
-      return clientMap[sale.clientId].name;
-    if (sale.clientName) return sale.clientName;
+    if (displaySale.clientId && clientMap[displaySale.clientId])
+      return clientMap[displaySale.clientId].name;
+    if (displaySale.clientName) return displaySale.clientName;
     return "Sin cliente";
   };
 
   return (
-    <Dialog.Root
-      open
+    <SideModal
+      open={open}
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col"
-        >
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              Detalle de venta
-            </Dialog.Title>
-            <div className="flex items-center gap-2">
-              {onPrint && (
-                <button
-                  onClick={onPrint}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100"
-                >
-                  <Printer size={13} /> Imprimir ticket
-                </button>
-              )}
-              {onCancel && (
-                <button
-                  onClick={onCancel}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100"
-                >
-                  <Ban size={13} /> Cancelar
-                </button>
-              )}
-              <Dialog.Close asChild>
-                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                  <ChevronRight size={20} className="rotate-180" />
-                </button>
-              </Dialog.Close>
-            </div>
-          </div>
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          Detalle de venta
+        </h2>
+        <div className="flex items-center gap-2">
+          {onPrint && (
+            <button
+              onClick={onPrint}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100"
+            >
+              <Printer size={13} /> Imprimir ticket
+            </button>
+          )}
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100"
+            >
+              <Ban size={13} /> Cancelar
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+        </div>
+      </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <ShoppingCart
-                    size={16}
-                    className="text-green-600 dark:text-green-400"
-                  />
-                  <span className="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                    {sale.internalNumber}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  {new Date(sale.$createdAt).toLocaleString("es-MX", {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })}
-                </p>
-              </div>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${statusCfg.classes}`}
-              >
-                {statusCfg.label}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <ShoppingCart
+                size={16}
+                className="text-green-600 dark:text-green-400"
+              />
+              <span className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                {displaySale.internalNumber}
               </span>
             </div>
-
-            {sale.ticketId && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                <CheckCircle2
-                  size={16}
-                  className="text-green-600 dark:text-green-400 shrink-0"
-                />
-                <QrCode
-                  size={14}
-                  className="text-green-600 dark:text-green-400"
-                />
-                <span className="text-xs text-green-700 dark:text-green-400 font-medium">
-                  Ticket operativo generado
-                </span>
-              </div>
-            )}
-
-            <DetailSection title="Cliente">
-              <DetailRow label="Cliente" value={displayClient()} />
-            </DetailSection>
-            <DetailSection title="Transporte">
-              <DetailRow
-                label="Chofer"
-                value={resolveName(driverMap, sale.driverId, "fullName")}
-              />
-              <DetailRow
-                label="Camión"
-                value={
-                  truckMap[sale.truckId]
-                    ? `${truckMap[sale.truckId].plateNumber}${truckMap[sale.truckId].economicNumber ? ` — ${truckMap[sale.truckId].economicNumber}` : ""}`
-                    : "—"
-                }
-              />
-            </DetailSection>
-            <DetailSection title="Material">
-              <DetailRow
-                label="Material"
-                value={resolveName(materialMap, sale.materialId)}
-              />
-              <DetailRow
-                label="Planta / Origen"
-                value={resolveName(plantMap, sale.plantId)}
-              />
-              <DetailRow
-                label="Cantidad"
-                value={`${sale.commercialQty} ${UNIT_LABELS[sale.commercialUnit] || sale.commercialUnit}`}
-              />
-            </DetailSection>
-            <DetailSection title="Pago referencial">
-              <DetailRow
-                label="Método"
-                value={PAYMENT_LABELS[sale.paymentMethod] || sale.paymentMethod}
-              />
-              {sale.paymentReference && (
-                <DetailRow label="Referencia" value={sale.paymentReference} />
-              )}
-            </DetailSection>
-            {sale.notes && (
-              <DetailSection title="Observaciones">
-                <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
-                  {sale.notes}
-                </p>
-              </DetailSection>
-            )}
-            {sale.cancelReason && (
-              <DetailSection title="Motivo de cancelación">
-                <p className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                  {sale.cancelReason}
-                </p>
-              </DetailSection>
-            )}
+            <p className="text-xs text-slate-400">
+              {new Date(displaySale.$createdAt).toLocaleString("es-MX", {
+                dateStyle: "long",
+                timeStyle: "short",
+              })}
+            </p>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${statusCfg.classes}`}
+          >
+            {statusCfg.label}
+          </span>
+        </div>
+
+        {displaySale.ticketId && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+            <CheckCircle2
+              size={16}
+              className="text-green-600 dark:text-green-400 shrink-0"
+            />
+            <QrCode size={14} className="text-green-600 dark:text-green-400" />
+            <span className="text-xs text-green-700 dark:text-green-400 font-medium">
+              Ticket operativo generado
+            </span>
+          </div>
+        )}
+
+        <DetailSection title="Cliente">
+          <DetailRow label="Cliente" value={displayClient()} />
+        </DetailSection>
+        <DetailSection title="Transporte">
+          <DetailRow
+            label="Chofer"
+            value={resolveName(driverMap, displaySale.driverId, "fullName")}
+          />
+          <DetailRow
+            label="Camión"
+            value={
+              truckMap[displaySale.truckId]
+                ? `${truckMap[displaySale.truckId].plateNumber}${truckMap[displaySale.truckId].economicNumber ? ` — ${truckMap[displaySale.truckId].economicNumber}` : ""}`
+                : "—"
+            }
+          />
+        </DetailSection>
+        <DetailSection title="Material">
+          <DetailRow
+            label="Material"
+            value={resolveName(materialMap, displaySale.materialId)}
+          />
+          <DetailRow
+            label="Planta / Origen"
+            value={resolveName(plantMap, displaySale.plantId)}
+          />
+          <DetailRow
+            label="Cantidad"
+            value={`${displaySale.commercialQty} ${UNIT_LABELS[displaySale.commercialUnit] || displaySale.commercialUnit}`}
+          />
+        </DetailSection>
+        <DetailSection title="Pago referencial">
+          <DetailRow
+            label="Método"
+            value={
+              PAYMENT_LABELS[displaySale.paymentMethod] ||
+              displaySale.paymentMethod
+            }
+          />
+          {displaySale.paymentReference && (
+            <DetailRow
+              label="Referencia"
+              value={displaySale.paymentReference}
+            />
+          )}
+        </DetailSection>
+        {displaySale.notes && (
+          <DetailSection title="Observaciones">
+            <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+              {displaySale.notes}
+            </p>
+          </DetailSection>
+        )}
+        {displaySale.cancelReason && (
+          <DetailSection title="Motivo de cancelación">
+            <p className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+              {displaySale.cancelReason}
+            </p>
+          </DetailSection>
+        )}
+      </div>
+    </SideModal>
   );
 }
 

@@ -14,12 +14,13 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { useAuditoria } from "../hooks/useAuditoria";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { APP_IDS } from "../../../shared/lib/appwrite";
 import ExportButton from "../../../shared/components/ExportButton";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
+import CenterModal from "../../../shared/components/CenterModal";
 
 /* ─── Action category → color mapping ─── */
 const ACTION_COLORS = {
@@ -121,110 +122,96 @@ function DetailModal({ log, open, onClose, userName }) {
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={onClose}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-slate-200 dark:border-zinc-700 max-h-[85vh] overflow-y-auto"
-        >
-          <div className="p-6 space-y-4">
-            <Dialog.Title className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <Eye size={18} />
-              Detalle del evento
-            </Dialog.Title>
-
-            <div className="space-y-3 text-sm">
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  Fecha
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white">
-                  {new Date(log.$createdAt).toLocaleString("es-MX", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  Acción
-                </span>
-                <span className="col-span-2">
-                  <ActionBadge action={log.action} />
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  Módulo
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white">
-                  {getCollectionLabel(log.collection)}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  ID Documento
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
-                  {log.docId}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  Usuario
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white">
-                  {userName || log.userId}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  ID Usuario
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
-                  {log.userId}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 dark:text-slate-400">
-                  ID Evento
-                </span>
-                <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
-                  {log.$id}
-                </span>
-              </div>
-            </div>
-
-            {/* Details JSON */}
-            {detailsParsed && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Detalles
-                </h3>
-                <pre className="bg-slate-50 dark:bg-zinc-800 rounded-lg p-3 text-xs text-slate-700 dark:text-slate-300 overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap break-words font-mono">
-                  {typeof detailsParsed === "string"
-                    ? detailsParsed
-                    : JSON.stringify(detailsParsed, null, 2)}
-                </pre>
-              </div>
-            )}
-
-            <div className="flex justify-end pt-2">
-              <Dialog.Close asChild>
-                <button className="px-4 py-2 text-sm rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-slate-300 transition-colors">
-                  Cerrar
-                </button>
-              </Dialog.Close>
-            </div>
+    <CenterModal
+      open={open}
+      onOpenChange={onClose}
+      title="Detalle del evento"
+      icon={<Eye size={18} />}
+      footer={
+        <div className="flex justify-end">
+          <button
+            onClick={() => onClose(false)}
+            className="px-4 py-2 text-sm rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-slate-300 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">Fecha</span>
+            <span className="col-span-2 text-slate-900 dark:text-white">
+              {new Date(log.$createdAt).toLocaleString("es-MX", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+            </span>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">Acción</span>
+            <span className="col-span-2">
+              <ActionBadge action={log.action} />
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">Módulo</span>
+            <span className="col-span-2 text-slate-900 dark:text-white">
+              {getCollectionLabel(log.collection)}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">
+              ID Documento
+            </span>
+            <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
+              {log.docId}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">Usuario</span>
+            <span className="col-span-2 text-slate-900 dark:text-white">
+              {userName || log.userId}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">
+              ID Usuario
+            </span>
+            <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
+              {log.userId}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <span className="text-slate-500 dark:text-slate-400">
+              ID Evento
+            </span>
+            <span className="col-span-2 text-slate-900 dark:text-white font-mono text-xs break-all">
+              {log.$id}
+            </span>
+          </div>
+        </div>
+
+        {/* Details JSON */}
+        {detailsParsed && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Detalles
+            </h3>
+            <pre className="bg-slate-50 dark:bg-zinc-800 rounded-lg p-3 text-xs text-slate-700 dark:text-slate-300 overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap break-words font-mono">
+              {typeof detailsParsed === "string"
+                ? detailsParsed
+                : JSON.stringify(detailsParsed, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+    </CenterModal>
   );
 }
 
@@ -262,36 +249,33 @@ function FiltersBar({
           <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
             Acción
           </label>
-          <select
+          <SearchableSelect
             value={local.action}
-            onChange={(e) => setLocal({ ...local, action: e.target.value })}
-            className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-          >
-            <option value="">Todas</option>
-            {knownActions.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setLocal({ ...local, action: v })}
+            options={[
+              { value: "", label: "Todas" },
+              ...knownActions.map((a) => ({ value: a, label: a })),
+            ]}
+            placeholder="Acción"
+          />
         </div>
         {/* Collection */}
         <div>
           <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
             Módulo
           </label>
-          <select
+          <SearchableSelect
             value={local.collection}
-            onChange={(e) => setLocal({ ...local, collection: e.target.value })}
-            className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-          >
-            <option value="">Todos</option>
-            {knownCollections.map((c) => (
-              <option key={c} value={c}>
-                {getCollectionLabel(c)}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setLocal({ ...local, collection: v })}
+            options={[
+              { value: "", label: "Todos" },
+              ...knownCollections.map((c) => ({
+                value: c,
+                label: getCollectionLabel(c),
+              })),
+            ]}
+            placeholder="Módulo"
+          />
         </div>
         {/* User ID */}
         <div>
@@ -376,17 +360,15 @@ function Pagination({
           Página {page} de {totalPages}
         </span>
         <span>·</span>
-        <select
-          value={pageSize}
-          onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm px-2 py-1 text-slate-700 dark:text-slate-300"
-        >
-          {PAGE_SIZE_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s} por página
-            </option>
-          ))}
-        </select>
+        <SearchableSelect
+          value={String(pageSize)}
+          onChange={(v) => onPageSizeChange(Number(v))}
+          options={PAGE_SIZE_OPTIONS.map((s) => ({
+            value: String(s),
+            label: `${s} por página`,
+          }))}
+          placeholder="Por página"
+        />
       </div>
       <div className="flex items-center gap-1">
         <button

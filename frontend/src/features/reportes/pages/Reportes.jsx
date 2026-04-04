@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 import { useReportes } from "../hooks/useReportes";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -174,20 +175,18 @@ function FiltersPanel({
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
               Cliente
             </label>
-            <select
+            <SearchableSelect
               value={filters.clientId}
-              onChange={(e) =>
-                setFilters({ ...filters, clientId: e.target.value })
-              }
-              className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-            >
-              <option value="">Todos</option>
-              {catalogs.clients.map((c) => (
-                <option key={c.$id} value={c.$id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, clientId: v })}
+              options={[
+                { value: "", label: "Todos" },
+                ...catalogs.clients.map((c) => ({
+                  value: c.$id,
+                  label: c.name,
+                })),
+              ]}
+              placeholder="Cliente"
+            />
           </div>
         )}
         {/* Material */}
@@ -196,20 +195,18 @@ function FiltersPanel({
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
               Material
             </label>
-            <select
+            <SearchableSelect
               value={filters.materialId}
-              onChange={(e) =>
-                setFilters({ ...filters, materialId: e.target.value })
-              }
-              className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-            >
-              <option value="">Todos</option>
-              {catalogs.materials.map((m) => (
-                <option key={m.$id} value={m.$id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, materialId: v })}
+              options={[
+                { value: "", label: "Todos" },
+                ...catalogs.materials.map((m) => ({
+                  value: m.$id,
+                  label: m.name,
+                })),
+              ]}
+              placeholder="Material"
+            />
           </div>
         )}
         {/* Status */}
@@ -218,20 +215,18 @@ function FiltersPanel({
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
               Estado
             </label>
-            <select
+            <SearchableSelect
               value={filters.status}
-              onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
-              }
-              className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-            >
-              <option value="">Todos</option>
-              {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, status: v })}
+              options={[
+                { value: "", label: "Todos" },
+                ...Object.entries(STATUS_LABELS).map(([k, v]) => ({
+                  value: k,
+                  label: v,
+                })),
+              ]}
+              placeholder="Estado"
+            />
           </div>
         )}
         {/* Plant */}
@@ -240,20 +235,18 @@ function FiltersPanel({
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
               Planta
             </label>
-            <select
+            <SearchableSelect
               value={filters.plantId}
-              onChange={(e) =>
-                setFilters({ ...filters, plantId: e.target.value })
-              }
-              className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-            >
-              <option value="">Todas</option>
-              {catalogs.plants.map((p) => (
-                <option key={p.$id} value={p.$id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setFilters({ ...filters, plantId: v })}
+              options={[
+                { value: "", label: "Todas" },
+                ...catalogs.plants.map((p) => ({
+                  value: p.$id,
+                  label: p.name,
+                })),
+              ]}
+              placeholder="Planta"
+            />
           </div>
         )}
         {/* Type */}
@@ -262,15 +255,16 @@ function FiltersPanel({
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
               Tipo Venta
             </label>
-            <select
+            <SearchableSelect
               value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-slate-900 dark:text-white px-3 py-2"
-            >
-              <option value="">Todos</option>
-              <option value="voucher">Voucher</option>
-              <option value="counter_sale">Mostrador</option>
-            </select>
+              onChange={(v) => setFilters({ ...filters, type: v })}
+              options={[
+                { value: "", label: "Todos" },
+                { value: "voucher", label: "Voucher" },
+                { value: "counter_sale", label: "Mostrador" },
+              ]}
+              placeholder="Tipo Venta"
+            />
           </div>
         )}
       </div>
