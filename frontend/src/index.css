@@ -89,3 +89,90 @@
 .sidebar-nav:hover::-webkit-scrollbar {
   width: 4px;
 }
+
+/* ── Radix Dialog / Modal Animations ─────────────── */
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-zoom-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes dialog-zoom-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+@keyframes dialog-slide-in-right {
+  from {
+    translate: 100% 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes dialog-slide-out-right {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+
+/* Overlay: fade in/out */
+.bg-black\/50[data-state="open"] {
+  animation: overlay-fade-in 150ms ease-out;
+}
+
+.bg-black\/50[data-state="closed"] {
+  animation: overlay-fade-out 120ms ease-in;
+}
+
+/* Center modals: zoom in/out */
+[role="dialog"][data-state="open"]:not([class*="right-0"]) {
+  animation: dialog-zoom-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[role="dialog"][data-state="closed"]:not([class*="right-0"]) {
+  animation: dialog-zoom-out 150ms ease-in;
+}
+
+/* Side panels: slide in/out from right */
+[role="dialog"][data-state="open"][class*="right-0"] {
+  animation: dialog-slide-in-right 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[role="dialog"][data-state="closed"][class*="right-0"] {
+  animation: dialog-slide-out-right 200ms ease-in;
+}
