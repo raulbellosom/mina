@@ -8,6 +8,8 @@ import {
   Loader2,
   Camera,
   CameraOff,
+  SwitchCamera,
+  ShieldAlert,
   Package,
   Truck,
   User,
@@ -18,132 +20,252 @@ import {
   RefreshCw,
   ChevronRight,
 } from "lucide-react";
+import { Html5Qrcode } from "html5-qrcode";
 import { useValidacion } from "../hooks/useValidacion";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 
-// ─── QR Scanner using native BarcodeDetector ─────────────────────────────────
+// ─── QR Scanner using html5-qrcode (cross-browser) ──────────────────────────
+
+const SCANNER_REGION_ID = "qr-scanner-region";
 
 function QrScannerCamera({ onResult, active }) {
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-  const detectorRef = useRef(null);
-  const scanLoopRef = useRef(null);
-  const [cameraError, setCameraError] = useState(null);
-  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef(null);
+  const mountedRef = useRef(true);
+  const [status, setStatus] = useState("idle"); // idle | requesting | scanning | denied | error
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [cameras, setCameras] = useState([]);
+  const [activeCameraIdx, setActiveCameraIdx] = useState(0);
 
-  const stopCamera = useCallback(() => {
-    if (scanLoopRef.current) {
-      clearInterval(scanLoopRef.current);
-      scanLoopRef.current = null;
+  const stopScanner = useCallback(async () => {
+    try {
+      if (scannerRef.current) {
+        const state = scannerRef.current.getState();
+        // 2 = SCANNING, 3 = PAUSED
+        if (state === 2 || state === 3) {
+          await scannerRef.current.stop();
+        }
+        scannerRef.current.clear();
+      }
+    } catch {
+      /* ignore cleanup errors */
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    setScanning(false);
+    scannerRef.current = null;
+    if (mountedRef.current) setStatus("idle");
   }, []);
 
-  const startCamera = useCallback(async () => {
-    setCameraError(null);
-    try {
-      if (!("BarcodeDetector" in window)) {
-        setCameraError(
-          "Tu navegador no soporta escaneo de QR nativo. Usa captura manual.",
-        );
-        return;
-      }
+  const startScanner = useCallback(
+    async (cameraIndex) => {
+      // Clean up any previous instance
+      await stopScanner();
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      streamRef.current = stream;
+      if (!mountedRef.current) return;
+      setStatus("requesting");
+      setErrorMsg(null);
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
-      detectorRef.current = new window.BarcodeDetector({
-        formats: ["qr_code"],
-      });
-      setScanning(true);
-
-      scanLoopRef.current = setInterval(async () => {
-        if (!videoRef.current || !detectorRef.current) return;
-        try {
-          const codes = await detectorRef.current.detect(videoRef.current);
-          if (codes.length > 0) {
-            const value = codes[0].rawValue;
-            stopCamera();
-            onResult(value);
-          }
-        } catch {
-          // ignore individual frame errors
+      try {
+        // Check for camera API support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setStatus("error");
+          setErrorMsg(
+            "Tu dispositivo no soporta acceso a cámara. Usa captura manual.",
+          );
+          return;
         }
-      }, 300);
-    } catch (err) {
-      if (err.name === "NotAllowedError") {
-        setCameraError("Permiso de cámara denegado. Usa captura manual.");
-      } else {
-        setCameraError("No se pudo acceder a la cámara. Usa captura manual.");
-      }
-    }
-  }, [onResult, stopCamera]);
 
+        // Enumerate cameras
+        let deviceList = cameras;
+        if (deviceList.length === 0) {
+          try {
+            deviceList = await Html5Qrcode.getCameras();
+          } catch {
+            // On first denial, getCameras throws
+            setStatus("denied");
+            setErrorMsg(
+              "Se necesita permiso de cámara para escanear códigos QR.",
+            );
+            return;
+          }
+          if (!mountedRef.current) return;
+          setCameras(deviceList);
+        }
+
+        if (deviceList.length === 0) {
+          setStatus("error");
+          setErrorMsg("No se detectaron cámaras en este dispositivo.");
+          return;
+        }
+
+        const cameraId = deviceList[cameraIndex ?? 0]?.id;
+
+        const scanner = new Html5Qrcode(SCANNER_REGION_ID, {
+          verbose: false,
+        });
+        scannerRef.current = scanner;
+
+        await scanner.start(
+          cameraId,
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1,
+          },
+          (decodedText) => {
+            // Success callback — stop and report
+            stopScanner();
+            onResult(decodedText);
+          },
+          () => {
+            /* ignore scan failures (no QR in frame) */
+          },
+        );
+
+        if (mountedRef.current) setStatus("scanning");
+      } catch (err) {
+        if (!mountedRef.current) return;
+        if (
+          err?.name === "NotAllowedError" ||
+          err?.message?.includes("Permission")
+        ) {
+          setStatus("denied");
+          setErrorMsg(
+            "Permiso de cámara denegado. Otorga acceso en la configuración de tu navegador.",
+          );
+        } else {
+          setStatus("error");
+          setErrorMsg(
+            err?.message || "No se pudo iniciar el escáner de cámara.",
+          );
+        }
+      }
+    },
+    [cameras, onResult, stopScanner],
+  );
+
+  // Switch camera (front/back)
+  const switchCamera = useCallback(async () => {
+    if (cameras.length < 2) return;
+    const next = (activeCameraIdx + 1) % cameras.length;
+    setActiveCameraIdx(next);
+    await startScanner(next);
+  }, [cameras, activeCameraIdx, startScanner]);
+
+  // Retry after denial (re-trigger permission prompt)
+  const retryPermission = useCallback(async () => {
+    setCameras([]); // Reset camera list to force re-prompt
+    setActiveCameraIdx(0);
+    await startScanner(0);
+  }, [startScanner]);
+
+  // Start/stop based on active prop
   useEffect(() => {
+    mountedRef.current = true;
     if (active) {
-      startCamera();
+      startScanner(activeCameraIdx);
     } else {
-      stopCamera();
+      stopScanner();
     }
-    return () => stopCamera();
+    return () => {
+      mountedRef.current = false;
+      stopScanner();
+    };
   }, [active]);
 
-  if (cameraError) {
+  // ── Permission denied view ──
+  if (status === "denied") {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
-        <CameraOff size={32} className="text-slate-400" />
-        <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
-          {cameraError}
+      <div className="flex flex-col items-center justify-center gap-4 p-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+        <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+          <ShieldAlert
+            size={28}
+            className="text-amber-600 dark:text-amber-400"
+          />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            Permiso de cámara requerido
+          </p>
+          <p className="text-xs text-amber-600 dark:text-amber-400 max-w-xs">
+            {errorMsg}
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+          <button
+            onClick={retryPermission}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors"
+          >
+            <Camera size={16} />
+            Otorgar permiso
+          </button>
+        </div>
+        <p className="text-[11px] text-amber-500 dark:text-amber-500/70 text-center max-w-xs leading-relaxed">
+          Si el permiso fue denegado permanentemente, abre la configuración de
+          tu navegador → Permisos del sitio → Cámara → Permitir, y recarga la
+          página.
         </p>
       </div>
     );
   }
 
+  // ── Error view ──
+  if (status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 p-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
+        <CameraOff size={32} className="text-slate-400" />
+        <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+          {errorMsg}
+        </p>
+        <button
+          onClick={() => startScanner(activeCameraIdx)}
+          className="text-xs text-primary-600 dark:text-primary-400 underline"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  // ── Requesting permission / loading ──
+  if (status === "requesting") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 p-8 bg-slate-100 dark:bg-slate-800 rounded-xl">
+        <Loader2 size={32} className="animate-spin text-primary-500" />
+        <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+          Solicitando acceso a la cámara…
+        </p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+          Acepta el permiso en el diálogo de tu navegador
+        </p>
+      </div>
+    );
+  }
+
+  // ── Scanner active / idle ──
   return (
     <div className="relative rounded-xl overflow-hidden bg-black">
-      <video
-        ref={videoRef}
-        className="w-full h-64 object-cover"
-        playsInline
-        muted
+      {/* html5-qrcode renders the video + canvas inside this div */}
+      <div
+        id={SCANNER_REGION_ID}
+        className="w-full"
+        style={{ minHeight: "280px" }}
       />
-      {scanning && (
-        <>
-          {/* Scanner overlay */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-48 h-48 relative">
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg" />
-              {/* Scan line animation */}
-              <div
-                className="absolute top-0 left-0 right-0 h-0.5 bg-primary-400 opacity-80 animate-bounce"
-                style={{ animationDuration: "1.5s" }}
-              />
-            </div>
-          </div>
-          <div className="absolute bottom-3 left-0 right-0 text-center">
-            <span className="text-xs text-white/80 bg-black/40 px-3 py-1 rounded-full">
-              Apunta la cámara al código QR
-            </span>
-          </div>
-        </>
+
+      {/* Camera switch button — only if >1 camera */}
+      {status === "scanning" && cameras.length > 1 && (
+        <button
+          onClick={switchCamera}
+          className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors z-10"
+          title="Cambiar cámara"
+        >
+          <SwitchCamera size={18} />
+        </button>
       )}
-      {!scanning && !cameraError && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-white" />
+
+      {/* Instruction overlay */}
+      {status === "scanning" && (
+        <div className="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
+          <span className="text-xs text-white/90 bg-black/50 px-3 py-1.5 rounded-full">
+            Apunta la cámara al código QR del ticket
+          </span>
         </div>
       )}
     </div>

@@ -23,6 +23,7 @@
     "appwrite": "^16.0.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
+    "html5-qrcode": "^2.3.8",
     "lodash": "^4.17.21",
     "lucide-react": "^1.7.0",
     "qrcode.react": "^4.2.0",
