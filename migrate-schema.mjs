@@ -63,6 +63,10 @@ async function migrate() {
                     
                     if (attr.size && type === 'string') cmd += ` --size ${attr.size}`;
                     if (attr.array !== undefined) cmd += ` --array ${attr.array}`;
+                    if (attr.default !== undefined && attr.default !== null) {
+                        const def = typeof attr.default === 'string' ? `"${attr.default}"` : attr.default;
+                        cmd += ` --default ${def}`;
+                    }
                     
                     await runCommand(cmd);
                     console.log(`Waiting for ${attr.key} to be available...`);

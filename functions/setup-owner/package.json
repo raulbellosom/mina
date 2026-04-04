@@ -4,6 +4,6 @@
   "description": "Asigna labels owner+admin al primer usuario del sistema durante el setup inicial",
   "main": "src/index.js",
   "dependencies": {
-    "node-appwrite": "^13.0.0"
+    "node-appwrite": "^14.2.0"
   }
 }

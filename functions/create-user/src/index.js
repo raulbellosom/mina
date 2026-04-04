@@ -62,6 +62,7 @@ module.exports = async ({ req, res, log, error }) => {
     email,
     password,
     label,
+    roleId,
     phone,
     employeeCode,
     notes,
@@ -146,6 +147,7 @@ module.exports = async ({ req, res, log, error }) => {
     if (phone) profileData.phone = phone;
     if (employeeCode) profileData.employeeCode = employeeCode;
     if (notes) profileData.notes = notes;
+    if (roleId) profileData.roleId = roleId;
 
     await databases.createDocument(
       DATABASE_ID,
