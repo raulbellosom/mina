@@ -95,19 +95,30 @@ function QrScannerCamera({ onResult, active }) {
           return;
         }
 
-        const cameraId = deviceList[cameraIndex ?? 0]?.id;
+        const idx = cameraIndex ?? 0;
+        const cameraId = deviceList[idx]?.id;
+
+        // Prefer facingMode on mobile for more reliable camera access
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const cameraConfig = isMobile
+          ? { facingMode: idx === 0 ? "environment" : "user" }
+          : cameraId;
 
         const scanner = new Html5Qrcode(SCANNER_REGION_ID, {
           verbose: false,
         });
         scannerRef.current = scanner;
 
+        // Responsive qrbox: 60% of container width, clamped 150–250px
+        const containerEl = document.getElementById(SCANNER_REGION_ID);
+        const containerW = containerEl?.clientWidth || 300;
+        const qrSide = Math.max(150, Math.min(250, Math.floor(containerW * 0.6)));
+
         await scanner.start(
-          cameraId,
+          cameraConfig,
           {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1,
+            qrbox: { width: qrSide, height: qrSide },
           },
           (decodedText) => {
             // Success callback — stop and report
@@ -242,6 +253,18 @@ function QrScannerCamera({ onResult, active }) {
   // ── Scanner active / idle ──
   return (
     <div className="relative rounded-xl overflow-hidden bg-black">
+      {/* Force html5-qrcode internal video to be visible and fill container */}
+      <style>{`
+        #${SCANNER_REGION_ID} video {
+          width: 100% !important;
+          height: auto !important;
+          object-fit: cover;
+          display: block !important;
+        }
+        #${SCANNER_REGION_ID} img[alt="Scanner Paused"] {
+          display: none !important;
+        }
+      `}</style>
       {/* html5-qrcode renders the video + canvas inside this div */}
       <div
         id={SCANNER_REGION_ID}

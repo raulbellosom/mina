@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { X, Printer, RotateCcw } from "lucide-react";
+import { X, Printer, RotateCcw, Download } from "lucide-react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { DEFAULT_COPIES } from "../hooks/usePrintTicket";
 
@@ -48,6 +48,8 @@ export default function TicketPrintView({
     companyAddress: "",
     companyPhone: "",
   });
+  const [downloading, setDownloading] = useState(false);
+  const printAreaRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -82,6 +84,58 @@ export default function TicketPrintView({
     }
     window.print();
   };
+
+  /**
+   * Generate a PDF by opening a new window with only the ticket copies,
+   * then triggering the browser's native Save-as-PDF print dialog.
+   */
+  const handleDownloadPdf = useCallback(async () => {
+    if (!printAreaRef.current) return;
+    setDownloading(true);
+
+    try {
+      // Clone the print area HTML
+      const ticketHtml = printAreaRef.current.innerHTML;
+
+      // Build a self-contained HTML document for the PDF
+      const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>${ticket.ticketNumber} - Ticket</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: ${PAPER_WIDTH_MM}mm auto; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .tkt-copy { width: ${PAPER_WIDTH_MM}mm; padding: 2mm 4mm 4mm; page-break-after: always; }
+  .tkt-copy:last-child { page-break-after: auto; }
+  ${thermalBaseStyles}
+</style>
+</head>
+<body>${ticketHtml}</body></html>`;
+
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, "_blank");
+      if (win) {
+        win.addEventListener("afterprint", () => win.close());
+        win.onload = () => {
+          setTimeout(() => win.print(), 300);
+          URL.revokeObjectURL(url);
+        };
+      } else {
+        // Fallback: download as HTML if popup blocked
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${ticket.ticketNumber}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error("PDF download failed:", err);
+    } finally {
+      setDownloading(false);
+    }
+  }, [ticket]);
 
   const formatDate = (iso) => {
     if (!iso) return "—";
@@ -230,14 +284,14 @@ export default function TicketPrintView({
   return (
     <>
       {/* Embedded styles — self-contained for print reliability */}
-      <style>{thermalStyles}</style>
+      <style>{thermalPrintStyles}</style>
 
       <div
         id="ticket-print-root"
         className="fixed inset-0 z-[100] bg-white dark:bg-slate-950 overflow-y-auto"
       >
         {/* ─── Screen toolbar (hidden on print) ─── */}
-        <div className="tkt-screen-only sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="tkt-toolbar sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               Vista de impresión
@@ -262,6 +316,14 @@ export default function TicketPrintView({
                     : "Imprimir"}
               </button>
             )}
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
+            >
+              <Download size={16} />
+              {downloading ? "Generando..." : "Descargar PDF"}
+            </button>
             {can("tickets.reprint") && hasBeenPrinted && onReprint && (
               <button
                 onClick={() => onReprint(ticket)}
@@ -282,7 +344,7 @@ export default function TicketPrintView({
         </div>
 
         {/* ─── Screen preview: 1:1 at real paper width ─── */}
-        <div className="tkt-screen-only p-4 sm:p-8 flex justify-center">
+        <div className="tkt-toolbar p-4 sm:p-8 flex justify-center">
           <div>
             <div
               className="bg-white shadow-2xl border border-slate-200 overflow-hidden"
@@ -302,8 +364,8 @@ export default function TicketPrintView({
           </div>
         </div>
 
-        {/* ─── Print-only: all copies ─── */}
-        <div className="tkt-print-only" style={{ display: "none" }}>
+        {/* ─── All copies for print — always in DOM, hidden on screen via CSS ─── */}
+        <div ref={printAreaRef} className="tkt-copies-area">
           {Array.from({ length: copies }, (_, i) => (
             <TicketCopy key={i} copyIndex={i} />
           ))}
@@ -325,57 +387,15 @@ function DataRow({ label, value }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CSS — Thermal ticket styles for Epson TM-m30III (80mm paper)
-   All measurements in mm/pt for accurate physical sizing.
-   Pure B&W design for thermal print compatibility.
+   CSS — Base styles shared between screen preview & print/PDF.
    ═══════════════════════════════════════════════════════════════ */
-const thermalStyles = `
-  /* ─── Print media: 80mm thermal paper ─── */
-  @media print {
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    body > *:not(#ticket-print-root) {
-      display: none !important;
-    }
-    #ticket-print-root {
-      position: static !important;
-      overflow: visible !important;
-      background: white !important;
-    }
-    .tkt-screen-only {
-      display: none !important;
-    }
-    .tkt-print-only {
-      display: block !important;
-    }
-
-    @page {
-      size: ${PAPER_WIDTH_MM}mm auto;
-      margin: 0;
-    }
-
-    .tkt-copy {
-      width: ${PAPER_WIDTH_MM}mm;
-      padding: 2mm 4mm 4mm;
-      box-sizing: border-box;
-      page-break-after: always;
-    }
-    .tkt-copy:last-child {
-      page-break-after: auto;
-    }
-  }
-
-  /* ─── Ticket body base ─── */
+const thermalBaseStyles = `
   .tkt-body {
     font-family: Arial, Helvetica, 'Segoe UI', sans-serif;
     color: #000;
     background: #fff;
     line-height: 1.3;
   }
-
-  /* ─── Header / Letterhead ─── */
   .tkt-header {
     text-align: center;
     padding-bottom: 1mm;
@@ -404,8 +424,6 @@ const thermalStyles = `
     color: #444;
     line-height: 1.4;
   }
-
-  /* ─── Document title ─── */
   .tkt-title-section {
     text-align: center;
     padding: 1.5mm 0 1mm;
@@ -424,14 +442,10 @@ const thermalStyles = `
     font-weight: 800;
     letter-spacing: 0.5pt;
   }
-
-  /* ─── Divider ─── */
   .tkt-divider {
     border-top: 0.5pt dashed #666;
     margin: 2mm 0;
   }
-
-  /* ─── Folio section ─── */
   .tkt-folio-section {
     text-align: center;
     padding: 0.5mm 0;
@@ -454,8 +468,6 @@ const thermalStyles = `
     font-size: 7pt;
     color: #333;
   }
-
-  /* ─── QR section ─── */
   .tkt-qr-section {
     text-align: center;
     padding: 2mm 0 1mm;
@@ -469,8 +481,6 @@ const thermalStyles = `
     font-family: 'Consolas', 'Courier New', monospace;
     margin-top: 1mm;
   }
-
-  /* ─── Data rows ─── */
   .tkt-data-section {
     padding: 0.5mm 0;
   }
@@ -513,8 +523,6 @@ const thermalStyles = `
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  /* ─── Quantity highlight ─── */
   .tkt-qty-box {
     border: 2pt solid #000;
     padding: 2mm 3mm;
@@ -537,8 +545,6 @@ const thermalStyles = `
     font-size: 8pt;
     font-weight: 400;
   }
-
-  /* ─── References / notes ─── */
   .tkt-refs {
     padding: 0.5mm 0;
     font-size: 6pt;
@@ -555,8 +561,6 @@ const thermalStyles = `
   .tkt-print-count {
     color: #888;
   }
-
-  /* ─── Footer ─── */
   .tkt-footer {
     text-align: center;
     padding-top: 1mm;
@@ -573,11 +577,86 @@ const thermalStyles = `
     color: #999;
     margin-top: 0.5mm;
   }
+`;
 
-  /* ─── Screen-only preview padding ─── */
+/* ═══════════════════════════════════════════════════════════════
+   CSS — Print + screen layout rules.
+   Screen: toolbar visible, copies area hidden. Only preview shown.
+   Print: toolbar hidden, copies area visible with page breaks.
+   ═══════════════════════════════════════════════════════════════ */
+const thermalPrintStyles = `
+  ${thermalBaseStyles}
+
+  /* ─── Screen: hide the print copies area ─── */
+  .tkt-copies-area {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    visibility: hidden;
+    width: ${PAPER_WIDTH_MM}mm;
+  }
+
+  /* ─── Screen: preview copy padding ─── */
   @media screen {
     .tkt-copy {
       padding: 3mm 4mm;
+    }
+  }
+
+  /* ─── Print media: 80mm thermal paper ─── */
+  @media print {
+    /* Reset everything */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* Page size for 80mm thermal */
+    @page {
+      size: ${PAPER_WIDTH_MM}mm auto;
+      margin: 0;
+    }
+
+    /* Hide everything in the document except our root */
+    body > * {
+      display: none !important;
+    }
+    body > #ticket-print-root,
+    #ticket-print-root {
+      display: block !important;
+      position: static !important;
+      overflow: visible !important;
+      background: white !important;
+      width: ${PAPER_WIDTH_MM}mm !important;
+      height: auto !important;
+      inset: auto !important;
+    }
+
+    /* Hide toolbar and screen preview */
+    .tkt-toolbar {
+      display: none !important;
+    }
+
+    /* Show the copies area */
+    .tkt-copies-area {
+      position: static !important;
+      left: auto !important;
+      visibility: visible !important;
+      width: ${PAPER_WIDTH_MM}mm !important;
+    }
+
+    /* Each copy fills a page */
+    .tkt-copy {
+      width: ${PAPER_WIDTH_MM}mm;
+      padding: 2mm 4mm 4mm;
+      box-sizing: border-box;
+      page-break-after: always;
+    }
+    .tkt-copy:last-child {
+      page-break-after: auto;
     }
   }
 `;
