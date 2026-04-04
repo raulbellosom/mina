@@ -94,7 +94,7 @@ export default function CenterModal({
         />
         <Dialog.Content
           aria-describedby={undefined}
-          className={`center-modal fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${zContent} w-full ${SIZES[size] || SIZES.lg} mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl flex flex-col max-h-[85vh]`}
+          className={`center-modal fixed inset-x-4 top-1/2 -translate-y-1/2 mx-auto ${zContent} ${SIZES[size] || SIZES.lg} bg-white dark:bg-slate-900 rounded-xl shadow-xl flex flex-col max-h-[85vh]`}
         >
           {header}
           {inner}

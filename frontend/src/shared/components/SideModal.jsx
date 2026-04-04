@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 const SIZES = {
   sm: "max-w-sm",
@@ -16,6 +17,7 @@ const SIZES = {
  *   open           {boolean}
  *   onOpenChange   {fn(bool)}
  *   size           {"sm"|"md"|"lg"|"xl"|"2xl"} — default "md"
+ *   title          {string}    — accessible title for screen readers (default "Panel")
  *   children       {ReactNode} — contenido completo del panel
  *   zOverlay       {string}    — z-index overlay (default "z-40")
  *   zContent       {string}    — z-index contenido (default "z-50")
@@ -24,6 +26,7 @@ export default function SideModal({
   open,
   onOpenChange,
   size = "md",
+  title = "Panel",
   children,
   zOverlay = "z-40",
   zContent = "z-50",
@@ -38,6 +41,9 @@ export default function SideModal({
           aria-describedby={undefined}
           className={`side-modal fixed right-0 top-0 h-full ${zContent} w-full ${SIZES[size] || SIZES.md} bg-white dark:bg-slate-900 shadow-xl flex flex-col`}
         >
+          <VisuallyHidden.Root>
+            <Dialog.Title>{title}</Dialog.Title>
+          </VisuallyHidden.Root>
           {children}
         </Dialog.Content>
       </Dialog.Portal>
