@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2 } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const EMPTY_FORM = {
   name: "",
@@ -136,18 +137,13 @@ export default function PlantaForm({ open, onOpenChange, editing, onSubmit }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className={labelCls}>Tipo de origen</label>
-                <select
+                <SearchableSelect
                   value={form.type}
-                  onChange={set("type")}
-                  className={selectCls}
-                >
-                  <option value="">Seleccionar...</option>
-                  {PLANT_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setForm((f) => ({ ...f, type: v }))}
+                  options={PLANT_TYPES.map((t) => ({ value: t, label: t }))}
+                  placeholder="Seleccionar..."
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className={labelCls}>Orden</label>

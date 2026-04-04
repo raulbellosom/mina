@@ -13,6 +13,7 @@ import {
   Eye,
   ImageIcon,
 } from "lucide-react";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 import { Link } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useMateriales } from "../hooks/useMateriales";
@@ -146,27 +147,28 @@ export default function Materiales() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Filter size={16} className="text-slate-400" />
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-          >
-            <option value="all">Todos</option>
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-          </select>
-          <select
+            onChange={(v) => setFilterStatus(v)}
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "active", label: "Activos" },
+              { value: "inactive", label: "Inactivos" },
+            ]}
+            placeholder="Estado"
+          />
+          <SearchableSelect
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-          >
-            <option value="all">Todas las categorías</option>
-            {categories.map((cat) => (
-              <option key={cat.$id} value={cat.$id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setFilterCategory(v)}
+            options={[
+              { value: "all", label: "Todas las categorías" },
+              ...categories.map((cat) => ({
+                value: cat.$id,
+                label: cat.name,
+              })),
+            ]}
+            placeholder="Categoría"
+          />
         </div>
       </div>
 
@@ -361,7 +363,10 @@ export default function Materiales() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               Desactivar material
             </Dialog.Title>
@@ -426,7 +431,10 @@ function MaterialDetalle({
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content aria-describedby={undefined} className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col">
+        <Dialog.Content
+          aria-describedby={undefined}
+          className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col"
+        >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">

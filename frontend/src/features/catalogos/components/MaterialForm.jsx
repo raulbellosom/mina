@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2, Upload, Trash2, ImageIcon } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const EMPTY_FORM = {
   name: "",
@@ -216,19 +217,17 @@ export default function MaterialForm({
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Categoría <span className="text-red-500">*</span>
               </label>
-              <select
+              <SearchableSelect
                 value={form.categoryId}
-                onChange={set("categoryId")}
+                onChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
                 required
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-              >
-                <option value="">Seleccionar categoría...</option>
-                {categories.map((cat) => (
-                  <option key={cat.$id} value={cat.$id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+                options={categories.map((cat) => ({
+                  value: cat.$id,
+                  label: cat.name,
+                }))}
+                placeholder="Seleccionar categoría..."
+                className="mt-1"
+              />
             </div>
 
             {/* Descripción */}
@@ -251,17 +250,15 @@ export default function MaterialForm({
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Unidad comercial
                 </label>
-                <select
+                <SearchableSelect
                   value={form.defaultCommercialUnit}
-                  onChange={set("defaultCommercialUnit")}
-                  className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-                >
-                  {COMMERCIAL_UNITS.map((u) => (
-                    <option key={u.value} value={u.value}>
-                      {u.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) =>
+                    setForm((f) => ({ ...f, defaultCommercialUnit: v }))
+                  }
+                  options={COMMERCIAL_UNITS}
+                  placeholder="Unidad"
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">

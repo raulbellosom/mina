@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2 } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -164,19 +165,16 @@ export default function ChoferForm({
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Cliente / Empresa asociada
               </label>
-              <select
+              <SearchableSelect
                 value={form.clientId}
-                onChange={set("clientId")}
-                className="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
-              >
-                <option value="">Sin asociar</option>
-                {(clients || []).map((c) => (
-                  <option key={c.$id} value={c.$id}>
-                    {c.name}
-                    {c.tradeName ? ` (${c.tradeName})` : ""}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setForm((f) => ({ ...f, clientId: v }))}
+                options={(clients || []).map((c) => ({
+                  value: c.$id,
+                  label: c.name + (c.tradeName ? ` (${c.tradeName})` : ""),
+                }))}
+                placeholder="Sin asociar"
+                className="mt-1"
+              />
               <p className="text-xs text-slate-400 mt-1">
                 Opcional. Vincula al chofer con un cliente o empresa.
               </p>

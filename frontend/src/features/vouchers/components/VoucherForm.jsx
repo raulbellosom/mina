@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2 } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const EMPTY_FORM = {
   externalReference: "",
@@ -146,37 +147,35 @@ export default function VoucherForm({
                 <label className={labelCls}>
                   Cliente <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
                   value={form.clientId}
-                  onChange={set("clientId")}
+                  onChange={(v) => setForm((f) => ({ ...f, clientId: v }))}
                   disabled={readOnly}
-                  className={selectCls}
-                >
-                  <option value="">— Seleccionar cliente —</option>
-                  {clients.map((c) => (
-                    <option key={c.$id} value={c.$id}>
-                      {c.name} {c.tradeName ? `(${c.tradeName})` : ""}
-                    </option>
-                  ))}
-                </select>
+                  required
+                  options={clients.map((c) => ({
+                    value: c.$id,
+                    label: c.name + (c.tradeName ? ` (${c.tradeName})` : ""),
+                  }))}
+                  placeholder="— Seleccionar cliente —"
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className={labelCls}>
                   Material <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
                   value={form.materialId}
-                  onChange={set("materialId")}
+                  onChange={(v) => setForm((f) => ({ ...f, materialId: v }))}
                   disabled={readOnly}
-                  className={selectCls}
-                >
-                  <option value="">— Seleccionar material —</option>
-                  {materials.map((m) => (
-                    <option key={m.$id} value={m.$id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+                  required
+                  options={materials.map((m) => ({
+                    value: m.$id,
+                    label: m.name,
+                  }))}
+                  placeholder="— Seleccionar material —"
+                  className="mt-1"
+                />
               </div>
             </div>
 
@@ -185,54 +184,51 @@ export default function VoucherForm({
               <label className={labelCls}>
                 Planta / Origen <span className="text-red-500">*</span>
               </label>
-              <select
+              <SearchableSelect
                 value={form.plantId}
-                onChange={set("plantId")}
+                onChange={(v) => setForm((f) => ({ ...f, plantId: v }))}
                 disabled={readOnly}
-                className={selectCls}
-              >
-                <option value="">— Seleccionar planta —</option>
-                {plants.map((p) => (
-                  <option key={p.$id} value={p.$id}>
-                    {p.name} {p.code ? `(${p.code})` : ""}
-                  </option>
-                ))}
-              </select>
+                required
+                options={plants.map((p) => ({
+                  value: p.$id,
+                  label: p.name + (p.code ? ` (${p.code})` : ""),
+                }))}
+                placeholder="— Seleccionar planta —"
+                className="mt-1"
+              />
             </div>
 
             {/* Chofer + Camión */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Chofer</label>
-                <select
+                <SearchableSelect
                   value={form.driverId}
-                  onChange={set("driverId")}
+                  onChange={(v) => setForm((f) => ({ ...f, driverId: v }))}
                   disabled={readOnly}
-                  className={selectCls}
-                >
-                  <option value="">— Sin chofer asignado —</option>
-                  {drivers.map((d) => (
-                    <option key={d.$id} value={d.$id}>
-                      {d.fullName}
-                    </option>
-                  ))}
-                </select>
+                  options={drivers.map((d) => ({
+                    value: d.$id,
+                    label: d.fullName,
+                  }))}
+                  placeholder="— Sin chofer asignado —"
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className={labelCls}>Camión</label>
-                <select
+                <SearchableSelect
                   value={form.truckId}
-                  onChange={set("truckId")}
+                  onChange={(v) => setForm((f) => ({ ...f, truckId: v }))}
                   disabled={readOnly}
-                  className={selectCls}
-                >
-                  <option value="">— Sin camión asignado —</option>
-                  {trucks.map((t) => (
-                    <option key={t.$id} value={t.$id}>
-                      {t.plateNumber} {t.economicNumber ? `— ${t.economicNumber}` : ""}
-                    </option>
-                  ))}
-                </select>
+                  options={trucks.map((t) => ({
+                    value: t.$id,
+                    label:
+                      t.plateNumber +
+                      (t.economicNumber ? ` — ${t.economicNumber}` : ""),
+                  }))}
+                  placeholder="— Sin camión asignado —"
+                  className="mt-1"
+                />
               </div>
             </div>
 
@@ -257,18 +253,16 @@ export default function VoucherForm({
                 <label className={labelCls}>
                   Unidad comercial <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
                   value={form.commercialUnit}
-                  onChange={set("commercialUnit")}
+                  onChange={(v) =>
+                    setForm((f) => ({ ...f, commercialUnit: v }))
+                  }
                   disabled={readOnly}
-                  className={selectCls}
-                >
-                  {COMMERCIAL_UNITS.map((u) => (
-                    <option key={u.value} value={u.value}>
-                      {u.label}
-                    </option>
-                  ))}
-                </select>
+                  options={COMMERCIAL_UNITS}
+                  placeholder="Unidad"
+                  className="mt-1"
+                />
               </div>
             </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2 } from "lucide-react";
 import { friendlyError } from "../../../shared/lib/catalogCache";
+import SearchableSelect from "../../../shared/components/SearchableSelect";
 
 const EMPTY_FORM = {
   plateNumber: "",
@@ -172,18 +173,13 @@ export default function CamionForm({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelCls}>Tipo de camión</label>
-                <select
+                <SearchableSelect
                   value={form.truckType}
-                  onChange={set("truckType")}
-                  className={selectCls}
-                >
-                  <option value="">Seleccionar...</option>
-                  {TRUCK_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setForm((f) => ({ ...f, truckType: v }))}
+                  options={TRUCK_TYPES.map((t) => ({ value: t, label: t }))}
+                  placeholder="Seleccionar..."
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className={labelCls}>Marca</label>
@@ -229,18 +225,13 @@ export default function CamionForm({
               </div>
               <div>
                 <label className={labelCls}>Tipo de eje</label>
-                <select
+                <SearchableSelect
                   value={form.axleType}
-                  onChange={set("axleType")}
-                  className={selectCls}
-                >
-                  <option value="">Seleccionar...</option>
-                  {AXLE_TYPES.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setForm((f) => ({ ...f, axleType: v }))}
+                  options={AXLE_TYPES.map((a) => ({ value: a, label: a }))}
+                  placeholder="Seleccionar..."
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label className={labelCls}>Capacidad ref. (t)</label>
@@ -263,37 +254,34 @@ export default function CamionForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Cliente / Empresa</label>
-                <select
+                <SearchableSelect
                   value={form.clientId}
-                  onChange={set("clientId")}
-                  className={selectCls}
-                >
-                  <option value="">Sin asociar</option>
-                  {(clients || []).map((c) => (
-                    <option key={c.$id} value={c.$id}>
-                      {c.name}
-                      {c.tradeName ? ` (${c.tradeName})` : ""}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setForm((f) => ({ ...f, clientId: v }))}
+                  options={(clients || []).map((c) => ({
+                    value: c.$id,
+                    label: c.name + (c.tradeName ? ` (${c.tradeName})` : ""),
+                  }))}
+                  placeholder="Sin asociar"
+                  className="mt-1"
+                />
                 <p className="text-xs text-slate-400 mt-1">
                   Opcional. Vincula el camión con un cliente.
                 </p>
               </div>
               <div>
                 <label className={labelCls}>Chofer habitual</label>
-                <select
+                <SearchableSelect
                   value={form.habitualDriverId}
-                  onChange={set("habitualDriverId")}
-                  className={selectCls}
-                >
-                  <option value="">Sin asignar</option>
-                  {(drivers || []).map((d) => (
-                    <option key={d.$id} value={d.$id}>
-                      {d.fullName}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) =>
+                    setForm((f) => ({ ...f, habitualDriverId: v }))
+                  }
+                  options={(drivers || []).map((d) => ({
+                    value: d.$id,
+                    label: d.fullName,
+                  }))}
+                  placeholder="Sin asignar"
+                  className="mt-1"
+                />
                 <p className="text-xs text-slate-400 mt-1">
                   Opcional. Chofer principal que opera esta unidad.
                 </p>
