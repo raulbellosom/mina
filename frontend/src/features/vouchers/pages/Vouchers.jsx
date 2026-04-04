@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Ticket,
   Plus,
@@ -33,6 +33,7 @@ import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useTickets } from "../../tickets/hooks/useTickets";
 import { useToast } from "../../../shared/components/Toast";
 import VoucherForm from "../components/VoucherForm";
+import SideModal from "../../../shared/components/SideModal";
 
 const TICKET_GENERATABLE_STATUSES = ["issued", "ready_for_ticket"];
 
@@ -85,6 +86,11 @@ export default function Vouchers() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [detailItem, setDetailItem] = useState(null);
+  const [lastDetailItem, setLastDetailItem] = useState(null);
+  useEffect(() => {
+    if (detailItem) setLastDetailItem(detailItem);
+  }, [detailItem]);
+  const displayDetail = detailItem || lastDetailItem;
   const [cancelDialog, setCancelDialog] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
   const [generating, setGenerating] = useState(null);
@@ -408,14 +414,15 @@ export default function Vouchers() {
       />
 
       {/* Detail panel */}
-      {detailItem && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setDetailItem(null)}
-          />
-          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl overflow-y-auto animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10">
+      <SideModal
+        open={Boolean(detailItem)}
+        onOpenChange={(v) => {
+          if (!v) setDetailItem(null);
+        }}
+      >
+        {displayDetail && (
+          <>
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                 Detalle de voucher
               </h2>
@@ -427,62 +434,62 @@ export default function Vouchers() {
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
               {/* Estado + Folio */}
               <div className="flex items-center justify-between">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[detailItem.status] || STATUS_COLORS.draft}`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[displayDetail.status] || STATUS_COLORS.draft}`}
                 >
-                  {VOUCHER_STATUSES[detailItem.status]?.label ||
-                    detailItem.status}
+                  {VOUCHER_STATUSES[displayDetail.status]?.label ||
+                    displayDetail.status}
                 </span>
                 <span className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {detailItem.internalFolio}
+                  {displayDetail.internalFolio}
                 </span>
               </div>
 
-              {detailItem.externalReference && (
+              {displayDetail.externalReference && (
                 <DetailRow
                   icon={FileText}
                   label="Referencia externa"
-                  value={detailItem.externalReference}
+                  value={displayDetail.externalReference}
                 />
               )}
 
               <DetailRow
                 icon={User}
                 label="Cliente"
-                value={resolveName(clientMap, detailItem.clientId)}
+                value={resolveName(clientMap, displayDetail.clientId)}
               />
               <DetailRow
                 icon={Package}
                 label="Material"
-                value={resolveName(materialMap, detailItem.materialId)}
+                value={resolveName(materialMap, displayDetail.materialId)}
               />
               <DetailRow
                 icon={MapPin}
                 label="Planta / Origen"
-                value={resolveName(plantMap, detailItem.plantId)}
+                value={resolveName(plantMap, displayDetail.plantId)}
               />
 
-              {detailItem.driverId && (
+              {displayDetail.driverId && (
                 <DetailRow
                   icon={User}
                   label="Chofer"
                   value={resolveName(
                     driverMap,
-                    detailItem.driverId,
+                    displayDetail.driverId,
                     "fullName",
                   )}
                 />
               )}
-              {detailItem.truckId && (
+              {displayDetail.truckId && (
                 <DetailRow
                   icon={Truck}
                   label="Camión"
                   value={
-                    truckMap[detailItem.truckId]
-                      ? `${truckMap[detailItem.truckId].plateNumber}${truckMap[detailItem.truckId].economicNumber ? ` — ${truckMap[detailItem.truckId].economicNumber}` : ""}`
+                    truckMap[displayDetail.truckId]
+                      ? `${truckMap[displayDetail.truckId].plateNumber}${truckMap[displayDetail.truckId].economicNumber ? ` — ${truckMap[displayDetail.truckId].economicNumber}` : ""}`
                       : "—"
                   }
                 />
@@ -493,39 +500,39 @@ export default function Vouchers() {
                   Cantidad comercial
                 </span>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                  {detailItem.commercialQty}{" "}
+                  {displayDetail.commercialQty}{" "}
                   <span className="text-base font-normal text-slate-400">
-                    {UNIT_LABELS[detailItem.commercialUnit] ||
-                      detailItem.commercialUnit}
+                    {UNIT_LABELS[displayDetail.commercialUnit] ||
+                      displayDetail.commercialUnit}
                   </span>
                 </p>
-                {detailItem.usedQty > 0 && (
+                {displayDetail.usedQty > 0 && (
                   <p className="text-xs text-slate-400 mt-1">
-                    Usado: {detailItem.usedQty}{" "}
-                    {UNIT_LABELS[detailItem.commercialUnit] ||
-                      detailItem.commercialUnit}
+                    Usado: {displayDetail.usedQty}{" "}
+                    {UNIT_LABELS[displayDetail.commercialUnit] ||
+                      displayDetail.commercialUnit}
                   </p>
                 )}
               </div>
 
-              {detailItem.notes && (
+              {displayDetail.notes && (
                 <div>
                   <span className="text-xs text-slate-500 uppercase tracking-wider">
                     Observaciones
                   </span>
                   <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-wrap">
-                    {detailItem.notes}
+                    {displayDetail.notes}
                   </p>
                 </div>
               )}
 
-              {detailItem.cancelReason && (
+              {displayDetail.cancelReason && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                   <span className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wider">
                     Motivo de cancelación
                   </span>
                   <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                    {detailItem.cancelReason}
+                    {displayDetail.cancelReason}
                   </p>
                 </div>
               )}
@@ -534,12 +541,12 @@ export default function Vouchers() {
               <div className="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <p>
                   Creado:{" "}
-                  {new Date(detailItem.$createdAt).toLocaleString("es-MX")}
+                  {new Date(displayDetail.$createdAt).toLocaleString("es-MX")}
                 </p>
-                {detailItem.$updatedAt !== detailItem.$createdAt && (
+                {displayDetail.$updatedAt !== displayDetail.$createdAt && (
                   <p>
                     Actualizado:{" "}
-                    {new Date(detailItem.$updatedAt).toLocaleString("es-MX")}
+                    {new Date(displayDetail.$updatedAt).toLocaleString("es-MX")}
                   </p>
                 )}
               </div>
@@ -547,10 +554,10 @@ export default function Vouchers() {
               {/* Detail actions */}
               <div className="flex flex-wrap gap-2 pt-2">
                 {can("vouchers.update") &&
-                  EDITABLE_STATUSES.includes(detailItem.status) && (
+                  EDITABLE_STATUSES.includes(displayDetail.status) && (
                     <button
                       onClick={() => {
-                        openEdit(detailItem);
+                        openEdit(displayDetail);
                         setDetailItem(null);
                       }}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -558,29 +565,31 @@ export default function Vouchers() {
                       <Pencil size={14} /> Editar
                     </button>
                   )}
-                {can("vouchers.update") && detailItem.status === "draft" && (
+                {can("vouchers.update") && displayDetail.status === "draft" && (
                   <button
-                    onClick={() => handleIssue(detailItem)}
+                    onClick={() => handleIssue(displayDetail)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
                   >
                     <ArrowRightCircle size={14} /> Emitir
                   </button>
                 )}
                 {can("tickets.generate") &&
-                  TICKET_GENERATABLE_STATUSES.includes(detailItem.status) && (
+                  TICKET_GENERATABLE_STATUSES.includes(
+                    displayDetail.status,
+                  ) && (
                     <button
-                      disabled={generating === detailItem.$id}
-                      onClick={() => handleGenerateTicket(detailItem)}
+                      disabled={generating === displayDetail.$id}
+                      onClick={() => handleGenerateTicket(displayDetail)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
                     >
                       <TicketPlus size={14} /> Generar ticket
                     </button>
                   )}
                 {can("vouchers.cancel") &&
-                  CANCELLABLE_STATUSES.includes(detailItem.status) && (
+                  CANCELLABLE_STATUSES.includes(displayDetail.status) && (
                     <button
                       onClick={() => {
-                        setCancelDialog(detailItem);
+                        setCancelDialog(displayDetail);
                         setCancelReason("");
                       }}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-red-300 dark:border-red-800 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -590,9 +599,9 @@ export default function Vouchers() {
                   )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </SideModal>
 
       {/* Cancel confirmation dialog */}
       <Dialog.Root

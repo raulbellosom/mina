@@ -19,6 +19,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useMateriales } from "../hooks/useMateriales";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import MaterialForm from "../components/MaterialForm";
+import SideModal from "../../../shared/components/SideModal";
 
 const STATUS_BADGE = {
   true: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -423,129 +424,117 @@ function MaterialDetalle({
   };
 
   return (
-    <Dialog.Root
+    <SideModal
       open={open}
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              Detalle de material
-            </Dialog.Title>
-            <div className="flex items-center gap-2">
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(m)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
-                >
-                  <Pencil size={13} /> Editar
-                </button>
-              )}
-              <Dialog.Close asChild>
-                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                  <ChevronRight size={20} className="rotate-180" />
-                </button>
-              </Dialog.Close>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          Detalle de material
+        </h2>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(m)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
+            >
+              <Pencil size={13} /> Editar
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+        </div>
+      </div>
+
+      {/* Contenido */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Imagen de referencia */}
+        {imageUrl ? (
+          <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+            <img
+              src={imageUrl}
+              alt={m.name}
+              className="w-full h-48 object-cover"
+            />
           </div>
-
-          {/* Contenido */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Imagen de referencia */}
-            {imageUrl ? (
-              <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-                <img
-                  src={imageUrl}
-                  alt={m.name}
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-full h-32 rounded-lg bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center">
-                <ImageIcon
-                  size={32}
-                  className="text-slate-300 dark:text-slate-600 mb-1"
-                />
-                <p className="text-xs text-slate-400">
-                  Sin imagen de referencia
-                </p>
-              </div>
-            )}
-
-            {/* Nombre + código */}
-            <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-base">
-                {m.name}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-mono">
-                {m.code}
-              </p>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2">
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                  m.active
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                }`}
-              >
-                {m.active ? "Activo" : "Inactivo"}
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                {categoryName(m.categoryId)}
-              </span>
-            </div>
-
-            {/* Campos */}
-            <div className="space-y-4">
-              <DetailField
-                label="Descripción"
-                value={m.description || "Sin descripción"}
-              />
-              <DetailField
-                label="Categoría"
-                value={categoryName(m.categoryId)}
-              />
-              <DetailField
-                label="Unidad comercial"
-                value={
-                  (m.defaultCommercialUnit || "viaje").charAt(0).toUpperCase() +
-                  (m.defaultCommercialUnit || "viaje").slice(1)
-                }
-              />
-              <DetailField
-                label="Orden de presentación"
-                value={String(m.sortOrder ?? 0)}
-              />
-              <DetailField
-                label="Fecha de creación"
-                value={formatDate(m.$createdAt)}
-              />
-              <DetailField
-                label="Última actualización"
-                value={formatDate(m.$updatedAt)}
-              />
-              {m.createdBy && (
-                <DetailField label="Creado por" value={m.createdBy} mono />
-              )}
-              {m.updatedBy && (
-                <DetailField label="Actualizado por" value={m.updatedBy} mono />
-              )}
-            </div>
+        ) : (
+          <div className="w-full h-32 rounded-lg bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center">
+            <ImageIcon
+              size={32}
+              className="text-slate-300 dark:text-slate-600 mb-1"
+            />
+            <p className="text-xs text-slate-400">Sin imagen de referencia</p>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        )}
+
+        {/* Nombre + código */}
+        <div>
+          <p className="font-semibold text-slate-900 dark:text-white text-base">
+            {m.name}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-mono">
+            {m.code}
+          </p>
+        </div>
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+              m.active
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            }`}
+          >
+            {m.active ? "Activo" : "Inactivo"}
+          </span>
+          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+            {categoryName(m.categoryId)}
+          </span>
+        </div>
+
+        {/* Campos */}
+        <div className="space-y-4">
+          <DetailField
+            label="Descripción"
+            value={m.description || "Sin descripción"}
+          />
+          <DetailField label="Categoría" value={categoryName(m.categoryId)} />
+          <DetailField
+            label="Unidad comercial"
+            value={
+              (m.defaultCommercialUnit || "viaje").charAt(0).toUpperCase() +
+              (m.defaultCommercialUnit || "viaje").slice(1)
+            }
+          />
+          <DetailField
+            label="Orden de presentación"
+            value={String(m.sortOrder ?? 0)}
+          />
+          <DetailField
+            label="Fecha de creación"
+            value={formatDate(m.$createdAt)}
+          />
+          <DetailField
+            label="Última actualización"
+            value={formatDate(m.$updatedAt)}
+          />
+          {m.createdBy && (
+            <DetailField label="Creado por" value={m.createdBy} mono />
+          )}
+          {m.updatedBy && (
+            <DetailField label="Actualizado por" value={m.updatedBy} mono />
+          )}
+        </div>
+      </div>
+    </SideModal>
   );
 }
 

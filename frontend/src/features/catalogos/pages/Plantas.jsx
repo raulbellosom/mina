@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mountain,
   Plus,
@@ -23,10 +23,16 @@ import { Link } from "react-router-dom";
 import { usePlantas } from "../hooks/usePlantas";
 import PlantaForm from "../components/PlantaForm";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
+import SideModal from "../../../shared/components/SideModal";
 
 /* ─── Detail drawer ─── */
-function PlantaDetalle({ item, onClose }) {
-  if (!item) return null;
+function PlantaDetalle({ item, open, onClose }) {
+  const [lastItem, setLastItem] = useState(item);
+  useEffect(() => {
+    if (item) setLastItem(item);
+  }, [item]);
+  const d = item || lastItem;
+  if (!d) return null;
 
   const Row = ({ icon: Icon, label, value, mono }) => (
     <div className="flex items-start gap-3 py-2.5">
@@ -43,8 +49,13 @@ function PlantaDetalle({ item, onClose }) {
   );
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl z-30 overflow-y-auto animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10">
+    <SideModal
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
           Detalle de planta / origen
         </h2>
@@ -56,7 +67,7 @@ function PlantaDetalle({ item, onClose }) {
         </button>
       </div>
 
-      <div className="p-6 space-y-1">
+      <div className="flex-1 overflow-y-auto p-6 space-y-1">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -67,16 +78,16 @@ function PlantaDetalle({ item, onClose }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-bold text-slate-900 dark:text-white text-lg truncate">
-              {item.name}
+              {d.name}
             </p>
-            {item.code && (
-              <p className="text-sm text-slate-500 font-mono">{item.code}</p>
+            {d.code && (
+              <p className="text-sm text-slate-500 font-mono">{d.code}</p>
             )}
           </div>
           <span
-            className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${item.active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+            className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${d.active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
           >
-            {item.active ? "Activo" : "Inactivo"}
+            {d.active ? "Activo" : "Inactivo"}
           </span>
         </div>
 
@@ -86,13 +97,13 @@ function PlantaDetalle({ item, onClose }) {
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-3 pb-1">
           Identificación
         </p>
-        <Row icon={Mountain} label="Nombre" value={item.name} />
-        <Row icon={Hash} label="Código / Clave" value={item.code} mono />
-        <Row icon={FileText} label="Tipo de origen" value={item.type} />
+        <Row icon={Mountain} label="Nombre" value={d.name} />
+        <Row icon={Hash} label="Código / Clave" value={d.code} mono />
+        <Row icon={FileText} label="Tipo de origen" value={d.type} />
         <Row
           icon={ArrowUpDown}
           label="Orden de aparición"
-          value={item.sortOrder != null ? String(item.sortOrder) : ""}
+          value={d.sortOrder != null ? String(d.sortOrder) : ""}
         />
 
         <hr className="border-slate-200 dark:border-slate-800 my-2" />
@@ -104,37 +115,33 @@ function PlantaDetalle({ item, onClose }) {
         <Row
           icon={MapPin}
           label="Referencia de ubicación"
-          value={item.locationReference}
+          value={d.locationReference}
         />
 
-        {item.description && (
-          <Row icon={FileText} label="Descripción" value={item.description} />
+        {d.description && (
+          <Row icon={FileText} label="Descripción" value={d.description} />
         )}
 
         {/* Contacto */}
-        {(item.contactName || item.contactPhone) && (
+        {(d.contactName || d.contactPhone) && (
           <>
             <hr className="border-slate-200 dark:border-slate-800 my-2" />
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-3 pb-1">
               Contacto
             </p>
-            <Row
-              icon={User}
-              label="Nombre de contacto"
-              value={item.contactName}
-            />
+            <Row icon={User} label="Nombre de contacto" value={d.contactName} />
             <Row
               icon={Phone}
               label="Teléfono de contacto"
-              value={item.contactPhone}
+              value={d.contactPhone}
             />
           </>
         )}
 
-        {item.notes && (
+        {d.notes && (
           <>
             <hr className="border-slate-200 dark:border-slate-800 my-2" />
-            <Row icon={StickyNote} label="Observaciones" value={item.notes} />
+            <Row icon={StickyNote} label="Observaciones" value={d.notes} />
           </>
         )}
 
@@ -147,22 +154,22 @@ function PlantaDetalle({ item, onClose }) {
         <div className="text-xs text-slate-400 space-y-1">
           <p>
             Creado:{" "}
-            {new Date(item.$createdAt).toLocaleString("es-MX", {
+            {new Date(d.$createdAt).toLocaleString("es-MX", {
               dateStyle: "medium",
               timeStyle: "short",
             })}
           </p>
           <p>
             Actualizado:{" "}
-            {new Date(item.$updatedAt).toLocaleString("es-MX", {
+            {new Date(d.$updatedAt).toLocaleString("es-MX", {
               dateStyle: "medium",
               timeStyle: "short",
             })}
           </p>
-          <p className="font-mono text-[10px] opacity-60">ID: {item.$id}</p>
+          <p className="font-mono text-[10px] opacity-60">ID: {d.$id}</p>
         </div>
       </div>
-    </div>
+    </SideModal>
   );
 }
 
@@ -448,7 +455,10 @@ export default function Plantas() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               {confirmDisable?.active
                 ? "Desactivar origen"
@@ -488,9 +498,11 @@ export default function Plantas() {
       </Dialog.Root>
 
       {/* ─── Detail panel ─── */}
-      {detailItem && (
-        <PlantaDetalle item={detailItem} onClose={() => setDetailItem(null)} />
-      )}
+      <PlantaDetalle
+        item={detailItem}
+        open={Boolean(detailItem)}
+        onClose={() => setDetailItem(null)}
+      />
     </div>
   );
 }

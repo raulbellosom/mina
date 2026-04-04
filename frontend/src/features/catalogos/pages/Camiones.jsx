@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Truck,
   Plus,
@@ -23,25 +23,31 @@ import { Link } from "react-router-dom";
 import { useCamiones } from "../hooks/useCamiones";
 import CamionForm from "../components/CamionForm";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
+import SideModal from "../../../shared/components/SideModal";
 
 /* ─── Detail drawer ─── */
-function CamionDetalle({ item, clients, drivers, onClose }) {
-  if (!item) return null;
+function CamionDetalle({ item, open, clients, drivers, onClose }) {
+  const [lastItem, setLastItem] = useState(item);
+  useEffect(() => {
+    if (item) setLastItem(item);
+  }, [item]);
+  const displayItem = item || lastItem;
+  if (!displayItem) return null;
 
   const clientName = () => {
-    if (!item.clientId) return "Sin asociar";
-    const c = clients.find((cl) => cl.$id === item.clientId);
+    if (!displayItem.clientId) return "Sin asociar";
+    const c = clients.find((cl) => cl.$id === displayItem.clientId);
     return c
       ? c.tradeName
         ? `${c.name} (${c.tradeName})`
         : c.name
-      : item.clientId;
+      : displayItem.clientId;
   };
 
   const driverName = () => {
-    if (!item.habitualDriverId) return "Sin asignar";
-    const d = drivers.find((dr) => dr.$id === item.habitualDriverId);
-    return d ? d.fullName : item.habitualDriverId;
+    if (!displayItem.habitualDriverId) return "Sin asignar";
+    const d = drivers.find((dr) => dr.$id === displayItem.habitualDriverId);
+    return d ? d.fullName : displayItem.habitualDriverId;
   };
 
   const Row = ({ icon: Icon, label, value, mono }) => (
@@ -59,8 +65,13 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
   );
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl z-30 overflow-y-auto animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10">
+    <SideModal
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
           Detalle de camión
         </h2>
@@ -72,49 +83,53 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
         </button>
       </div>
 
-      <div className="p-6 space-y-1">
+      <div className="flex-1 overflow-y-auto p-6 space-y-1">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <Truck size={24} className="text-primary-600 dark:text-primary-400" />
+            <Truck
+              size={24}
+              className="text-primary-600 dark:text-primary-400"
+            />
           </div>
           <div>
             <p className="font-bold text-slate-900 dark:text-white font-mono text-lg">
-              {item.plateNumber}
+              {displayItem.plateNumber}
             </p>
-            {item.economicNumber && (
-              <p className="text-sm text-slate-500">#{item.economicNumber}</p>
+            {displayItem.economicNumber && (
+              <p className="text-sm text-slate-500">
+                #{displayItem.economicNumber}
+              </p>
             )}
           </div>
           <span
-            className={`ml-auto px-2.5 py-1 rounded-full text-xs font-medium ${item.active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+            className={`ml-auto px-2.5 py-1 rounded-full text-xs font-medium ${displayItem.active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
           >
-            {item.active ? "Activo" : "Inactivo"}
+            {displayItem.active ? "Activo" : "Inactivo"}
           </span>
         </div>
 
         <hr className="border-slate-200 dark:border-slate-800" />
 
-        {/* Identificación */}
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-3 pb-1">
           Identificación
         </p>
         <Row
           icon={Hash}
           label="Placa principal"
-          value={item.plateNumber}
+          value={displayItem.plateNumber}
           mono
         />
         <Row
           icon={Hash}
           label="Placa secundaria"
-          value={item.secondaryPlateNumber}
+          value={displayItem.secondaryPlateNumber}
           mono
         />
         <Row
           icon={Hash}
           label="No. económico"
-          value={item.economicNumber}
+          value={displayItem.economicNumber}
           mono
         />
 
@@ -124,20 +139,24 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider pt-3 pb-1">
           Vehículo
         </p>
-        <Row icon={Truck} label="Tipo" value={item.truckType} />
-        <Row icon={Truck} label="Marca" value={item.brand} />
-        <Row icon={Truck} label="Modelo" value={item.model} />
+        <Row icon={Truck} label="Tipo" value={displayItem.truckType} />
+        <Row icon={Truck} label="Marca" value={displayItem.brand} />
+        <Row icon={Truck} label="Modelo" value={displayItem.model} />
         <Row
           icon={Calendar}
           label="Año"
-          value={item.year ? String(item.year) : ""}
+          value={displayItem.year ? String(displayItem.year) : ""}
         />
-        <Row icon={Palette} label="Color" value={item.color} />
-        <Row icon={Truck} label="Tipo de eje" value={item.axleType} />
+        <Row icon={Palette} label="Color" value={displayItem.color} />
+        <Row icon={Truck} label="Tipo de eje" value={displayItem.axleType} />
         <Row
           icon={Gauge}
           label="Capacidad referencial"
-          value={item.referenceCapacity ? `${item.referenceCapacity} t` : ""}
+          value={
+            displayItem.referenceCapacity
+              ? `${displayItem.referenceCapacity} t`
+              : ""
+          }
         />
 
         <hr className="border-slate-200 dark:border-slate-800 my-2" />
@@ -149,10 +168,14 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
         <Row icon={Building2} label="Cliente / Empresa" value={clientName()} />
         <Row icon={User} label="Chofer habitual" value={driverName()} />
 
-        {item.notes && (
+        {displayItem.notes && (
           <>
             <hr className="border-slate-200 dark:border-slate-800 my-2" />
-            <Row icon={StickyNote} label="Observaciones" value={item.notes} />
+            <Row
+              icon={StickyNote}
+              label="Observaciones"
+              value={displayItem.notes}
+            />
           </>
         )}
 
@@ -165,22 +188,24 @@ function CamionDetalle({ item, clients, drivers, onClose }) {
         <div className="text-xs text-slate-400 space-y-1">
           <p>
             Creado:{" "}
-            {new Date(item.$createdAt).toLocaleString("es-MX", {
+            {new Date(displayItem.$createdAt).toLocaleString("es-MX", {
               dateStyle: "medium",
               timeStyle: "short",
             })}
           </p>
           <p>
             Actualizado:{" "}
-            {new Date(item.$updatedAt).toLocaleString("es-MX", {
+            {new Date(displayItem.$updatedAt).toLocaleString("es-MX", {
               dateStyle: "medium",
               timeStyle: "short",
             })}
           </p>
-          <p className="font-mono text-[10px] opacity-60">ID: {item.$id}</p>
+          <p className="font-mono text-[10px] opacity-60">
+            ID: {displayItem.$id}
+          </p>
         </div>
       </div>
-    </div>
+    </SideModal>
   );
 }
 
@@ -492,7 +517,10 @@ export default function Camiones() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               {confirmDisable?.active
                 ? "Desactivar camión"
@@ -529,14 +557,13 @@ export default function Camiones() {
       </Dialog.Root>
 
       {/* ─── Detail panel ─── */}
-      {detailItem && (
-        <CamionDetalle
-          item={detailItem}
-          clients={clients}
-          drivers={drivers}
-          onClose={() => setDetailItem(null)}
-        />
-      )}
+      <CamionDetalle
+        item={detailItem}
+        open={Boolean(detailItem)}
+        clients={clients}
+        drivers={drivers}
+        onClose={() => setDetailItem(null)}
+      />
     </div>
   );
 }

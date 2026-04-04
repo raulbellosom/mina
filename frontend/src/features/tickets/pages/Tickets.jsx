@@ -438,26 +438,25 @@ export default function Tickets() {
       </div>
 
       {/* Detail panel with QR */}
-      {detailItem && (
-        <TicketDetail
-          ticket={detailItem}
-          onClose={() => setDetailItem(null)}
-          clientMap={clientMap}
-          driverMap={driverMap}
-          truckMap={truckMap}
-          materialMap={materialMap}
-          plantMap={plantMap}
-          can={can}
-          onMarkReadyToPrint={handleMarkReadyToPrint}
-          onCancel={openCancelFromDetail}
-          onOpenPrintView={handleOpenPrintView}
-          onExportPdf={handleExportPdf}
-          onOpenReprintDialog={handleOpenReprintDialog}
-          printHistory={printHistory}
-          loadingHistory={loadingHistory}
-          fetchPrintHistory={fetchPrintHistory}
-        />
-      )}
+      <TicketDetail
+        ticket={detailItem}
+        open={Boolean(detailItem)}
+        onClose={() => setDetailItem(null)}
+        clientMap={clientMap}
+        driverMap={driverMap}
+        truckMap={truckMap}
+        materialMap={materialMap}
+        plantMap={plantMap}
+        can={can}
+        onMarkReadyToPrint={handleMarkReadyToPrint}
+        onCancel={openCancelFromDetail}
+        onOpenPrintView={handleOpenPrintView}
+        onExportPdf={handleExportPdf}
+        onOpenReprintDialog={handleOpenReprintDialog}
+        printHistory={printHistory}
+        loadingHistory={loadingHistory}
+        fetchPrintHistory={fetchPrintHistory}
+      />
 
       {/* Print preview full-screen */}
       {printViewTicket && (

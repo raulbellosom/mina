@@ -23,6 +23,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useChoferes } from "../hooks/useChoferes";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import ChoferForm from "../components/ChoferForm";
+import SideModal from "../../../shared/components/SideModal";
 
 const STATUS_BADGE = {
   true: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -405,186 +406,176 @@ function ChoferDetalle({ item: d, open, onClose, onEdit, clientName }) {
   const client = clientName(d.clientId);
 
   return (
-    <Dialog.Root
+    <SideModal
       open={open}
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              Detalle de chofer
-            </Dialog.Title>
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          Detalle de chofer
+        </h2>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(d)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
+            >
+              <Pencil size={13} /> Editar
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+        </div>
+      </div>
+
+      {/* Contenido */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Icono + nombre */}
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+            <UserSquare2
+              size={22}
+              className="text-amber-600 dark:text-amber-400"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-900 dark:text-white text-base">
+              {d.fullName}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {d.firstName} {d.lastName}
+            </p>
+          </div>
+        </div>
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+              d.active
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            }`}
+          >
+            {d.active ? "Activo" : "Inactivo"}
+          </span>
+          {d.licenseNumber && (
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Lic: {d.licenseNumber}
+            </span>
+          )}
+        </div>
+
+        {/* Datos de contacto */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Datos de contacto
+          </h3>
+
+          {d.phone && (
+            <div className="flex items-start gap-3">
+              <Phone size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Teléfono</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {d.phone}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {d.email && (
+            <div className="flex items-start gap-3">
+              <Mail size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Correo electrónico</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {d.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {d.licenseNumber && (
+            <div className="flex items-start gap-3">
+              <IdCard size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">No. de licencia</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100 font-mono">
+                  {d.licenseNumber}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!d.phone && !d.email && !d.licenseNumber && (
+            <p className="text-sm text-slate-400 italic">
+              Sin datos de contacto registrados.
+            </p>
+          )}
+        </div>
+
+        {/* Cliente asociado */}
+        {client && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Cliente asociado
+            </h3>
             <div className="flex items-center gap-2">
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(d)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
-                >
-                  <Pencil size={13} /> Editar
-                </button>
-              )}
-              <Dialog.Close asChild>
-                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                  <ChevronRight size={20} className="rotate-180" />
-                </button>
-              </Dialog.Close>
+              <Building2 size={16} className="text-slate-400" />
+              <p className="text-sm text-slate-900 dark:text-slate-100">
+                {client}
+              </p>
             </div>
           </div>
+        )}
 
-          {/* Contenido */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Icono + nombre */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                <UserSquare2
-                  size={22}
-                  className="text-amber-600 dark:text-amber-400"
-                />
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-white text-base">
-                  {d.fullName}
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {d.firstName} {d.lastName}
-                </p>
-              </div>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2">
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                  d.active
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                }`}
-              >
-                {d.active ? "Activo" : "Inactivo"}
-              </span>
-              {d.licenseNumber && (
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                  Lic: {d.licenseNumber}
-                </span>
-              )}
-            </div>
-
-            {/* Datos de contacto */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Datos de contacto
-              </h3>
-
-              {d.phone && (
-                <div className="flex items-start gap-3">
-                  <Phone size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400">Teléfono</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {d.phone}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {d.email && (
-                <div className="flex items-start gap-3">
-                  <Mail size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400">Correo electrónico</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {d.email}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {d.licenseNumber && (
-                <div className="flex items-start gap-3">
-                  <IdCard
-                    size={16}
-                    className="text-slate-400 mt-0.5 shrink-0"
-                  />
-                  <div>
-                    <p className="text-xs text-slate-400">No. de licencia</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100 font-mono">
-                      {d.licenseNumber}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {!d.phone && !d.email && !d.licenseNumber && (
-                <p className="text-sm text-slate-400 italic">
-                  Sin datos de contacto registrados.
-                </p>
-              )}
-            </div>
-
-            {/* Cliente asociado */}
-            {client && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Cliente asociado
-                </h3>
-                <div className="flex items-center gap-2">
-                  <Building2 size={16} className="text-slate-400" />
-                  <p className="text-sm text-slate-900 dark:text-slate-100">
-                    {client}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Observaciones */}
-            {d.notes && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Observaciones
-                </h3>
-                <div className="flex items-start gap-2">
-                  <StickyNote
-                    size={16}
-                    className="text-slate-400 mt-0.5 shrink-0"
-                  />
-                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                    {d.notes}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Metadata */}
-            <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Información del registro
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <p className="text-slate-400">Creado</p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    {formatDate(d.$createdAt)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-400">Última modificación</p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    {formatDate(d.$updatedAt)}
-                  </p>
-                </div>
-              </div>
+        {/* Observaciones */}
+        {d.notes && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Observaciones
+            </h3>
+            <div className="flex items-start gap-2">
+              <StickyNote
+                size={16}
+                className="text-slate-400 mt-0.5 shrink-0"
+              />
+              <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
+                {d.notes}
+              </p>
             </div>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        )}
+
+        {/* Metadata */}
+        <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Información del registro
+          </h3>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <p className="text-slate-400">Creado</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {formatDate(d.$createdAt)}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-400">Última modificación</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {formatDate(d.$updatedAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SideModal>
   );
 }

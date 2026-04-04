@@ -24,6 +24,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useClientes } from "../hooks/useClientes";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import ClienteForm from "../components/ClienteForm";
+import SideModal from "../../../shared/components/SideModal";
 
 const STATUS_BADGE = {
   true: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -438,210 +439,191 @@ function ClienteDetalle({ item: c, open, onClose, onEdit }) {
   };
 
   return (
-    <Dialog.Root
+    <SideModal
       open={open}
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-            <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
-              Detalle de cliente
-            </Dialog.Title>
-            <div className="flex items-center gap-2">
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(c)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
-                >
-                  <Pencil size={13} /> Editar
-                </button>
-              )}
-              <Dialog.Close asChild>
-                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                  <ChevronRight size={20} className="rotate-180" />
-                </button>
-              </Dialog.Close>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          Detalle de cliente
+        </h2>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(c)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100"
+            >
+              <Pencil size={13} /> Editar
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+        </div>
+      </div>
 
-          {/* Contenido */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Icono + nombre */}
-            <div className="flex items-start gap-4">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
-                  c.type === "company"
-                    ? "bg-purple-100 dark:bg-purple-900/30"
-                    : "bg-sky-100 dark:bg-sky-900/30"
-                }`}
-              >
-                {c.type === "company" ? (
-                  <Building2
-                    size={22}
-                    className="text-purple-600 dark:text-purple-400"
-                  />
-                ) : (
-                  <User size={22} className="text-sky-600 dark:text-sky-400" />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-white text-base">
-                  {c.name}
-                </p>
-                {c.tradeName && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {c.tradeName}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2">
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                  c.active
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                }`}
-              >
-                {c.active ? "Activo" : "Inactivo"}
-              </span>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${TYPE_BADGE[c.type] || TYPE_BADGE.person}`}
-              >
-                {TYPE_LABEL[c.type] || c.type}
-              </span>
-            </div>
-
-            {/* Datos de contacto */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Datos de contacto
-              </h3>
-
-              {c.contactName && (
-                <div className="flex items-start gap-3">
-                  <User size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400">
-                      Persona de contacto
-                    </p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {c.contactName}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {c.rfc && (
-                <div className="flex items-start gap-3">
-                  <FileText
-                    size={16}
-                    className="text-slate-400 mt-0.5 shrink-0"
-                  />
-                  <div>
-                    <p className="text-xs text-slate-400">RFC</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100 font-mono">
-                      {c.rfc}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {c.phone && (
-                <div className="flex items-start gap-3">
-                  <Phone size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400">Teléfono</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {c.phone}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {c.email && (
-                <div className="flex items-start gap-3">
-                  <Mail size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-400">Correo electrónico</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {c.email}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {c.address && (
-                <div className="flex items-start gap-3">
-                  <MapPin
-                    size={16}
-                    className="text-slate-400 mt-0.5 shrink-0"
-                  />
-                  <div>
-                    <p className="text-xs text-slate-400">Dirección</p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {c.address}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {!c.rfc &&
-                !c.phone &&
-                !c.email &&
-                !c.address &&
-                !c.contactName && (
-                  <p className="text-sm text-slate-400 italic">
-                    Sin datos de contacto registrados.
-                  </p>
-                )}
-            </div>
-
-            {/* Observaciones */}
-            {c.notes && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Observaciones
-                </h3>
-                <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                  {c.notes}
-                </p>
-              </div>
+      {/* Contenido */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Icono + nombre */}
+        <div className="flex items-start gap-4">
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+              c.type === "company"
+                ? "bg-purple-100 dark:bg-purple-900/30"
+                : "bg-sky-100 dark:bg-sky-900/30"
+            }`}
+          >
+            {c.type === "company" ? (
+              <Building2
+                size={22}
+                className="text-purple-600 dark:text-purple-400"
+              />
+            ) : (
+              <User size={22} className="text-sky-600 dark:text-sky-400" />
             )}
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-900 dark:text-white text-base">
+              {c.name}
+            </p>
+            {c.tradeName && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {c.tradeName}
+              </p>
+            )}
+          </div>
+        </div>
 
-            {/* Metadata */}
-            <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Información del registro
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <p className="text-slate-400">Creado</p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    {formatDate(c.$createdAt)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-400">Última modificación</p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    {formatDate(c.$updatedAt)}
-                  </p>
-                </div>
+        {/* Badges */}
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+              c.active
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            }`}
+          >
+            {c.active ? "Activo" : "Inactivo"}
+          </span>
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium ${TYPE_BADGE[c.type] || TYPE_BADGE.person}`}
+          >
+            {TYPE_LABEL[c.type] || c.type}
+          </span>
+        </div>
+
+        {/* Datos de contacto */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Datos de contacto
+          </h3>
+
+          {c.contactName && (
+            <div className="flex items-start gap-3">
+              <User size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Persona de contacto</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {c.contactName}
+                </p>
               </div>
             </div>
+          )}
+
+          {c.rfc && (
+            <div className="flex items-start gap-3">
+              <FileText size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">RFC</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100 font-mono">
+                  {c.rfc}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {c.phone && (
+            <div className="flex items-start gap-3">
+              <Phone size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Teléfono</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {c.phone}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {c.email && (
+            <div className="flex items-start gap-3">
+              <Mail size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Correo electrónico</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {c.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {c.address && (
+            <div className="flex items-start gap-3">
+              <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400">Dirección</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">
+                  {c.address}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!c.rfc && !c.phone && !c.email && !c.address && !c.contactName && (
+            <p className="text-sm text-slate-400 italic">
+              Sin datos de contacto registrados.
+            </p>
+          )}
+        </div>
+
+        {/* Observaciones */}
+        {c.notes && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Observaciones
+            </h3>
+            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
+              {c.notes}
+            </p>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        )}
+
+        {/* Metadata */}
+        <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Información del registro
+          </h3>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <p className="text-slate-400">Creado</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {formatDate(c.$createdAt)}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-400">Última modificación</p>
+              <p className="text-slate-700 dark:text-slate-300">
+                {formatDate(c.$updatedAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SideModal>
   );
 }

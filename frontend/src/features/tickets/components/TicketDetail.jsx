@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   X,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { TICKET_STATUSES } from "../hooks/useTickets";
 import PrintHistoryPanel from "./PrintHistoryPanel";
+import SideModal from "../../../shared/components/SideModal";
 
 const STATUS_COLORS = {
   generated:
@@ -48,6 +50,7 @@ export { STATUS_COLORS };
 
 export default function TicketDetail({
   ticket,
+  open,
   onClose,
   clientMap = {},
   driverMap = {},
@@ -64,252 +67,248 @@ export default function TicketDetail({
   loadingHistory = false,
   fetchPrintHistory,
 }) {
-  if (!ticket) return null;
+  const [lastTicket, setLastTicket] = useState(ticket);
+  useEffect(() => {
+    if (ticket) setLastTicket(ticket);
+  }, [ticket]);
+  const t = ticket || lastTicket;
+  if (!t) return null;
 
   const resolveName = (map, id, field = "name") => map[id]?.[field] || "—";
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl overflow-y-auto animate-in slide-in-from-right duration-300">
-        {/* Header */}
-        <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Detalle de ticket
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+    <SideModal
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          Detalle de ticket
+        </h2>
+        <button
+          onClick={onClose}
+          className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        {/* Status + Ticket Number */}
+        <div className="flex items-center justify-between">
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[t.status] || STATUS_COLORS.generated}`}
           >
-            <X size={18} />
-          </button>
+            {TICKET_STATUSES[t.status]?.label || t.status}
+          </span>
+          <span className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
+            {t.ticketNumber}
+          </span>
         </div>
 
-        <div className="p-6 space-y-5">
-          {/* Status + Ticket Number */}
-          <div className="flex items-center justify-between">
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[ticket.status] || STATUS_COLORS.generated}`}
-            >
-              {TICKET_STATUSES[ticket.status]?.label || ticket.status}
-            </span>
-            <span className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {ticket.ticketNumber}
-            </span>
-          </div>
+        {/* QR Code */}
+        <div className="flex flex-col items-center bg-white rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+          <QRCodeSVG
+            value={t.qrData}
+            size={180}
+            level="M"
+            includeMargin={false}
+          />
+          <p className="mt-3 text-xs text-slate-400 font-mono break-all text-center max-w-[220px]">
+            {t.qrData}
+          </p>
+        </div>
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center bg-white rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-            <QRCodeSVG
-              value={ticket.qrData}
-              size={180}
-              level="M"
-              includeMargin={false}
-            />
-            <p className="mt-3 text-xs text-slate-400 font-mono break-all text-center max-w-[220px]">
-              {ticket.qrData}
-            </p>
-          </div>
+        {/* Voucher link */}
+        {t.voucherId && (
+          <DetailRow
+            icon={Ticket}
+            label="Voucher origen"
+            value={t.voucherId}
+            mono
+          />
+        )}
 
-          {/* Voucher link */}
-          {ticket.voucherId && (
-            <DetailRow
-              icon={Ticket}
-              label="Voucher origen"
-              value={ticket.voucherId}
-              mono
-            />
-          )}
+        {/* Catalog data */}
+        <DetailRow
+          icon={User}
+          label="Cliente"
+          value={resolveName(clientMap, t.clientId)}
+        />
+        <DetailRow
+          icon={Package}
+          label="Material"
+          value={resolveName(materialMap, t.materialId)}
+        />
+        <DetailRow
+          icon={MapPin}
+          label="Planta / Origen"
+          value={resolveName(plantMap, t.plantId)}
+        />
 
-          {/* Catalog data */}
+        {t.driverId && (
           <DetailRow
             icon={User}
-            label="Cliente"
-            value={resolveName(clientMap, ticket.clientId)}
+            label="Chofer"
+            value={resolveName(driverMap, t.driverId, "fullName")}
           />
+        )}
+        {t.truckId && (
           <DetailRow
-            icon={Package}
-            label="Material"
-            value={resolveName(materialMap, ticket.materialId)}
+            icon={Truck}
+            label="Camión"
+            value={
+              truckMap[t.truckId]
+                ? `${truckMap[t.truckId].plateNumber}${truckMap[t.truckId].economicNumber ? ` — ${truckMap[t.truckId].economicNumber}` : ""}`
+                : "—"
+            }
           />
-          <DetailRow
-            icon={MapPin}
-            label="Planta / Origen"
-            value={resolveName(plantMap, ticket.plantId)}
-          />
+        )}
 
-          {ticket.driverId && (
-            <DetailRow
-              icon={User}
-              label="Chofer"
-              value={resolveName(driverMap, ticket.driverId, "fullName")}
-            />
-          )}
-          {ticket.truckId && (
-            <DetailRow
-              icon={Truck}
-              label="Camión"
-              value={
-                truckMap[ticket.truckId]
-                  ? `${truckMap[ticket.truckId].plateNumber}${truckMap[ticket.truckId].economicNumber ? ` — ${truckMap[ticket.truckId].economicNumber}` : ""}`
-                  : "—"
-              }
-            />
-          )}
-
-          {/* Commercial quantity */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-            <span className="text-xs text-slate-500 uppercase tracking-wider">
-              Cantidad comercial
+        {/* Commercial quantity */}
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
+          <span className="text-xs text-slate-500 uppercase tracking-wider">
+            Cantidad comercial
+          </span>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            {t.commercialQty}{" "}
+            <span className="text-base font-normal text-slate-400">
+              {UNIT_LABELS[t.commercialUnit] || t.commercialUnit}
             </span>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              {ticket.commercialQty}{" "}
-              <span className="text-base font-normal text-slate-400">
-                {UNIT_LABELS[ticket.commercialUnit] || ticket.commercialUnit}
-              </span>
-            </p>
-          </div>
+          </p>
+        </div>
 
-          {/* Print summary */}
-          {(ticket.printCount > 0 || ticket.firstPrintedAt) && (
-            <div className="bg-cyan-50 dark:bg-cyan-900/10 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4 space-y-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Printer
-                  size={14}
-                  className="text-cyan-600 dark:text-cyan-400"
-                />
-                <span className="text-xs font-semibold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">
-                  Información de impresión
+        {/* Print summary */}
+        {(t.printCount > 0 || t.firstPrintedAt) && (
+          <div className="bg-cyan-50 dark:bg-cyan-900/10 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4 space-y-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Printer size={14} className="text-cyan-600 dark:text-cyan-400" />
+              <span className="text-xs font-semibold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">
+                Información de impresión
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Total impresiones:{" "}
+              <span className="font-semibold">{t.printCount || 0}</span>
+              {t.reprintCount > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-[10px] font-bold">
+                  {t.reprintCount} reimp.
                 </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Total impresiones:{" "}
-                <span className="font-semibold">{ticket.printCount || 0}</span>
-                {ticket.reprintCount > 0 && (
-                  <span className="ml-2 px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-[10px] font-bold">
-                    {ticket.reprintCount} reimp.
-                  </span>
-                )}
-              </p>
-              {ticket.firstPrintedAt && (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Primera:{" "}
-                  {new Date(ticket.firstPrintedAt).toLocaleString("es-MX")}
-                </p>
               )}
-              {ticket.lastPrintedAt &&
-                ticket.lastPrintedAt !== ticket.firstPrintedAt && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Última:{" "}
-                    {new Date(ticket.lastPrintedAt).toLocaleString("es-MX")}
-                  </p>
-                )}
-            </div>
-          )}
-
-          {ticket.notes && (
-            <div>
-              <span className="text-xs text-slate-500 uppercase tracking-wider">
-                Observaciones
-              </span>
-              <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-wrap">
-                {ticket.notes}
-              </p>
-            </div>
-          )}
-
-          {ticket.cancelReason && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <span className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wider">
-                Motivo de cancelación
-              </span>
-              <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                {ticket.cancelReason}
-              </p>
-            </div>
-          )}
-
-          {/* Print history */}
-          <PrintHistoryPanel
-            ticketId={ticket.$id}
-            printHistory={printHistory}
-            loadingHistory={loadingHistory}
-            fetchPrintHistory={fetchPrintHistory}
-          />
-
-          {/* Metadata */}
-          <div className="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800">
-            <p>
-              Emitido: {new Date(ticket.$createdAt).toLocaleString("es-MX")}
             </p>
-            {ticket.$updatedAt !== ticket.$createdAt && (
-              <p>
-                Actualizado:{" "}
-                {new Date(ticket.$updatedAt).toLocaleString("es-MX")}
+            {t.firstPrintedAt && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Primera: {new Date(t.firstPrintedAt).toLocaleString("es-MX")}
+              </p>
+            )}
+            {t.lastPrintedAt && t.lastPrintedAt !== t.firstPrintedAt && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Última: {new Date(t.lastPrintedAt).toLocaleString("es-MX")}
               </p>
             )}
           </div>
+        )}
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {/* View print preview */}
-            {can("tickets.print") &&
-              !["cancelled", "blocked"].includes(ticket.status) &&
-              onOpenPrintView && (
-                <button
-                  onClick={() => onOpenPrintView(ticket)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-700"
-                >
-                  <Eye size={14} /> Ver impresión
-                </button>
-              )}
-            {/* Export PDF */}
-            {can("tickets.print") &&
-              !["cancelled", "blocked"].includes(ticket.status) &&
-              onExportPdf && (
-                <button
-                  onClick={() => onExportPdf(ticket)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
-                >
-                  <Download size={14} /> Exportar PDF
-                </button>
-              )}
-            {/* Reprint */}
-            {can("tickets.reprint") &&
-              ticket.printCount > 0 &&
-              !["cancelled", "blocked"].includes(ticket.status) &&
-              onOpenReprintDialog && (
-                <button
-                  onClick={() => onOpenReprintDialog(ticket)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-amber-400 dark:border-amber-600 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                >
-                  <RotateCcw size={14} /> Reimprimir
-                </button>
-              )}
-            {can("tickets.generate") &&
-              ticket.status === "generated" &&
-              onMarkReadyToPrint && (
-                <button
-                  onClick={() => onMarkReadyToPrint(ticket.$id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
-                >
-                  <ArrowRightCircle size={14} /> Marcar listo para imprimir
-                </button>
-              )}
-            {can("tickets.cancel") &&
-              !["completed", "cancelled", "blocked"].includes(ticket.status) &&
-              onCancel && (
-                <button
-                  onClick={() => onCancel(ticket)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-red-300 dark:border-red-800 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <Ban size={14} /> Cancelar
-                </button>
-              )}
+        {t.notes && (
+          <div>
+            <span className="text-xs text-slate-500 uppercase tracking-wider">
+              Observaciones
+            </span>
+            <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-wrap">
+              {t.notes}
+            </p>
           </div>
+        )}
+
+        {t.cancelReason && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <span className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wider">
+              Motivo de cancelación
+            </span>
+            <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+              {t.cancelReason}
+            </p>
+          </div>
+        )}
+
+        {/* Print history */}
+        <PrintHistoryPanel
+          ticketId={t.$id}
+          printHistory={printHistory}
+          loadingHistory={loadingHistory}
+          fetchPrintHistory={fetchPrintHistory}
+        />
+
+        {/* Metadata */}
+        <div className="text-xs text-slate-400 space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <p>Emitido: {new Date(t.$createdAt).toLocaleString("es-MX")}</p>
+          {t.$updatedAt !== t.$createdAt && (
+            <p>Actualizado: {new Date(t.$updatedAt).toLocaleString("es-MX")}</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {/* View print preview */}
+          {can("tickets.print") &&
+            !["cancelled", "blocked"].includes(t.status) &&
+            onOpenPrintView && (
+              <button
+                onClick={() => onOpenPrintView(t)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-700"
+              >
+                <Eye size={14} /> Ver impresión
+              </button>
+            )}
+          {/* Export PDF */}
+          {can("tickets.print") &&
+            !["cancelled", "blocked"].includes(t.status) &&
+            onExportPdf && (
+              <button
+                onClick={() => onExportPdf(t)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+              >
+                <Download size={14} /> Exportar PDF
+              </button>
+            )}
+          {/* Reprint */}
+          {can("tickets.reprint") &&
+            t.printCount > 0 &&
+            !["cancelled", "blocked"].includes(t.status) &&
+            onOpenReprintDialog && (
+              <button
+                onClick={() => onOpenReprintDialog(t)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-amber-400 dark:border-amber-600 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+              >
+                <RotateCcw size={14} /> Reimprimir
+              </button>
+            )}
+          {can("tickets.generate") &&
+            t.status === "generated" &&
+            onMarkReadyToPrint && (
+              <button
+                onClick={() => onMarkReadyToPrint(t.$id)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
+              >
+                <ArrowRightCircle size={14} /> Marcar listo para imprimir
+              </button>
+            )}
+          {can("tickets.cancel") &&
+            !["completed", "cancelled", "blocked"].includes(t.status) &&
+            onCancel && (
+              <button
+                onClick={() => onCancel(t)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-red-300 dark:border-red-800 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <Ban size={14} /> Cancelar
+              </button>
+            )}
         </div>
       </div>
-    </div>
+    </SideModal>
   );
 }
 
