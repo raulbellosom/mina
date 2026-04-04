@@ -88,7 +88,7 @@ export default function Login() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-400">
+      <div className="min-h-dvh min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-400">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin h-8 w-8 text-primary-500 dark:text-primary-400" />
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -130,7 +130,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
+    <div className="min-h-dvh min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
       {/* Theme toggle */}
       <button
         onClick={() => setIsDark(!isDark)}

@@ -1,7 +1,19 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { account, databases, functions, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
+import {
+  account,
+  databases,
+  functions,
+  DATABASE_ID,
+  APP_IDS,
+} from "../../../shared/lib/appwrite";
 import { ID, Permission, Role } from "appwrite";
-import { clearAll as clearOfflineQueue } from "../../../shared/lib/offlineStorage";
+import {
+  clearAll as clearOfflineQueue,
+  countQueue,
+  requestPersistentStorage,
+  clearCatalogCache,
+} from "../../../shared/lib/offlineStorage";
+import { prefetchAllCatalogs } from "../../../shared/lib/catalogCache";
 
 const AuthContext = createContext(null);
 
@@ -99,9 +111,38 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     await account.createEmailPasswordSession(email, password);
     await loadUser();
+
+    // Request persistent storage so IndexedDB survives long offline periods
+    requestPersistentStorage().catch(() => {});
+
+    // Pre-cache catalogs for offline operation (fire-and-forget)
+    prefetchAllCatalogs(
+      databases.listDocuments.bind(databases),
+      DATABASE_ID,
+      APP_IDS.collections,
+    ).catch((err) =>
+      console.warn("[Auth] Catalog prefetch error:", err.message),
+    );
   };
 
-  const logout = async () => {
+  const logout = async (force = false) => {
+    // Check for pending offline operations before destroying data
+    if (!force) {
+      try {
+        const pending = await countQueue("pending");
+        const errored = await countQueue("error");
+        const total = pending + errored;
+        if (total > 0) {
+          const confirmed = window.confirm(
+            `Hay ${total} operación(es) pendiente(s) de sincronizar. Si cierra sesión se perderán.\n\n¿Desea continuar?`,
+          );
+          if (!confirmed) return;
+        }
+      } catch (_) {
+        /* ignore count errors */
+      }
+    }
+
     await account.deleteSession("current");
     // Limpiar caches del Service Worker
     if ("caches" in window) {
@@ -111,6 +152,12 @@ export const AuthProvider = ({ children }) => {
     // Limpiar IndexedDB offline queue
     try {
       await clearOfflineQueue();
+    } catch (_) {
+      /* ignore */
+    }
+    // Limpiar cache de catálogos
+    try {
+      await clearCatalogCache();
     } catch (_) {
       /* ignore */
     }
@@ -215,6 +262,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     loadUser();
+    // Request persistent storage on app start for returning users
+    requestPersistentStorage().catch(() => {});
   }, []);
 
   return (

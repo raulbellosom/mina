@@ -38,7 +38,8 @@ const STATUS_CONFIG = {
   },
   syncing: {
     label: "Sincronizando...",
-    classes: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
+    classes:
+      "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
     icon: RefreshCw,
   },
   synced: {
@@ -209,10 +210,14 @@ export default function OperacionesPendientes() {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Administración
-          </p>
+        <header>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Sistema</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">
+              Operaciones Pendientes
+            </span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <CloudOff size={24} className="text-orange-500" />
             Operaciones Pendientes
@@ -220,7 +225,7 @@ export default function OperacionesPendientes() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Operaciones registradas sin conexión, pendientes de sincronizar
           </p>
-        </div>
+        </header>
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* Connection status */}
           <span

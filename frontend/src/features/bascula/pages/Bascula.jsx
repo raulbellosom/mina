@@ -38,7 +38,8 @@ const STATUS_COLORS = {
   issued: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
   ready_to_print:
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  printed: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
+  printed:
+    "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   loading:
     "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
   loaded:
@@ -440,7 +441,12 @@ export default function Bascula() {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+        <header>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Operación</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">Báscula</span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Scale size={24} className="text-primary-500" />
             Báscula
@@ -448,7 +454,7 @@ export default function Bascula() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Registro de pesos y control operativo de cargas
           </p>
-        </div>
+        </header>
         <button
           onClick={() => fetchOperations()}
           className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors self-start sm:self-auto"

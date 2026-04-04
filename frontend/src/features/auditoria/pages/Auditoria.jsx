@@ -124,7 +124,10 @@ function DetailModal({ log, open, onClose, userName }) {
     <Dialog.Root open={open} onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content aria-describedby={undefined} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-slate-200 dark:border-zinc-700 max-h-[85vh] overflow-y-auto">
+        <Dialog.Content
+          aria-describedby={undefined}
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-slate-200 dark:border-zinc-700 max-h-[85vh] overflow-y-auto"
+        >
           <div className="p-6 space-y-4">
             <Dialog.Title className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Eye size={18} />
@@ -496,18 +499,22 @@ export default function Auditoria() {
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-4 animate-in fade-in duration-500">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Administración / Auditoría
-          </p>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Administración</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">
+              Auditoría
+            </span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <ClipboardList size={24} />
             Auditoría y Bitácoras
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Registro de eventos sensibles y trazabilidad de acciones del
             sistema.
           </p>

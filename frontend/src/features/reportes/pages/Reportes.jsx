@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   Calendar,
   ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useReportes } from "../hooks/useReportes";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
@@ -840,7 +841,7 @@ export default function Reportes() {
 
   if (!can("reports.view")) {
     return (
-      <div className="space-y-6 animate-in fade-in duration-500 p-4 sm:p-6 lg:p-8">
+      <div className="space-y-6 animate-in fade-in duration-500">
         <header>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Reportes
@@ -857,13 +858,15 @@ export default function Reportes() {
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-4 animate-in fade-in duration-500">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Administración / Reportes
-          </p>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Reportes</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">Reportes</span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <BarChart2 size={24} />
             Reportes

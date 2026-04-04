@@ -1,25 +1,22 @@
 /**
- * IndexedDB wrapper for MinaFlow offline sync queue.
+ * IndexedDB wrapper for MinaFlow offline persistence.
  *
- * Store: sync_queue — holds operations created offline, pending sync to Appwrite.
+ * Stores:
+ *   sync_queue     — operations created offline, pending sync to Appwrite
+ *   catalog_cache  — cached catalog data (materials, clients, drivers, etc.)
  *
- * Each entry:
- *   id           — crypto.randomUUID()
- *   collection   — target Appwrite collection (e.g. 'weight_logs')
- *   action       — 'create' | 'update'
- *   documentId   — for updates, the existing doc id; for creates, the desired id or null
- *   data         — full payload to send to Appwrite
- *   meta         — extra context for UI (ticketNumber, description, module, etc.)
- *   status       — 'pending' | 'syncing' | 'synced' | 'error'
- *   attempts     — retry count
- *   lastError    — last error message
- *   createdAt    — ISO timestamp
- *   syncedAt     — ISO timestamp or null
+ * sync_queue entry:
+ *   id, collection, action, documentId, data, meta, status, attempts,
+ *   lastError, createdAt, syncedAt
+ *
+ * catalog_cache entry:
+ *   collection (key), documents[], lastUpdated (ISO)
  */
 
 const DB_NAME = "minaflow_offline";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "sync_queue";
+const CATALOG_STORE = "catalog_cache";
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -34,8 +31,51 @@ function openDB() {
         store.createIndex("collection", "collection", { unique: false });
         store.createIndex("createdAt", "createdAt", { unique: false });
       }
+      if (!db.objectStoreNames.contains(CATALOG_STORE)) {
+        db.createObjectStore(CATALOG_STORE, { keyPath: "collection" });
+      }
     };
   });
+}
+
+/**
+ * Request persistent storage so the browser won't evict IndexedDB data.
+ * Critical for long offline periods (up to a month without internet).
+ * Returns true if granted, false otherwise.
+ */
+export async function requestPersistentStorage() {
+  if (navigator.storage && navigator.storage.persist) {
+    const granted = await navigator.storage.persist();
+    if (granted) {
+      console.log("[MinaFlow] Persistent storage granted");
+    } else {
+      console.warn(
+        "[MinaFlow] Persistent storage denied — data may be evicted by the browser",
+      );
+    }
+    return granted;
+  }
+  return false;
+}
+
+/**
+ * Check if persistent storage is already granted.
+ */
+export async function isPersisted() {
+  if (navigator.storage && navigator.storage.persisted) {
+    return navigator.storage.persisted();
+  }
+  return false;
+}
+
+/**
+ * Get storage usage estimate.
+ */
+export async function getStorageEstimate() {
+  if (navigator.storage && navigator.storage.estimate) {
+    return navigator.storage.estimate();
+  }
+  return null;
 }
 
 function tx(mode, fn) {
@@ -216,6 +256,71 @@ export async function clearAll() {
   return new Promise((resolve, reject) => {
     const t = db.transaction(STORE_NAME, "readwrite");
     t.objectStore(STORE_NAME).clear();
+    t.oncomplete = () => resolve(true);
+    t.onerror = () => reject(t.error);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Catalog Cache — persists master data for offline operation
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Save catalog documents to IndexedDB for offline access.
+ * @param {string} collection - The collection key (e.g. 'clients', 'materials')
+ * @param {Array} documents - Array of Appwrite documents
+ */
+export async function setCatalogCache(collection, documents) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(CATALOG_STORE, "readwrite");
+    t.objectStore(CATALOG_STORE).put({
+      collection,
+      documents,
+      lastUpdated: new Date().toISOString(),
+    });
+    t.oncomplete = () => resolve(true);
+    t.onerror = () => reject(t.error);
+  });
+}
+
+/**
+ * Get cached catalog documents from IndexedDB.
+ * @param {string} collection - The collection key
+ * @returns {{ documents: Array, lastUpdated: string } | null}
+ */
+export async function getCatalogCache(collection) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(CATALOG_STORE, "readonly");
+    const req = t.objectStore(CATALOG_STORE).get(collection);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/**
+ * Get all cached catalogs (for diagnostics or preload checks).
+ * @returns {Array<{ collection, documents, lastUpdated }>}
+ */
+export async function getAllCatalogCache() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(CATALOG_STORE, "readonly");
+    const req = t.objectStore(CATALOG_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/**
+ * Clear all catalog cache (used on logout).
+ */
+export async function clearCatalogCache() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(CATALOG_STORE, "readwrite");
+    t.objectStore(CATALOG_STORE).clear();
     t.oncomplete = () => resolve(true);
     t.onerror = () => reject(t.error);
   });

@@ -66,6 +66,8 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          // Increase max entries to accommodate long offline periods
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB per file
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/appwrite\.racoondevs\.com\/v1\/.*/i,
@@ -73,9 +75,10 @@ export default defineConfig(({ mode }) => {
               options: {
                 cacheName: "api-cache",
                 expiration: {
-                  maxEntries: 200,
-                  maxAgeSeconds: 60 * 60, // 1 hour
+                  maxEntries: 500,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days for long offline periods
                 },
+                networkTimeoutSeconds: 10,
               },
             },
           ],

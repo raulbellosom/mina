@@ -38,7 +38,8 @@ const TICKET_GENERATABLE_STATUSES = ["issued", "ready_for_ticket"];
 /* ─── Status badges ─── */
 const STATUS_COLORS = {
   draft: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  issued: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
+  issued:
+    "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400",
   ready_for_ticket:
     "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
   consumed:
@@ -174,20 +175,14 @@ export default function Vouchers() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
-        <span>Inicio</span>
-        <ChevronRight size={14} />
-        <span>Operaciones</span>
-        <ChevronRight size={14} />
-        <span className="text-slate-900 dark:text-white font-medium">
-          Vouchers
-        </span>
-      </nav>
-
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <header>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Documentos</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">Vouchers</span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Vouchers / Referencias Prepago
           </h1>
@@ -607,7 +602,10 @@ export default function Vouchers() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                 <AlertTriangle

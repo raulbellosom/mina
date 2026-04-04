@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Settings, Save, Loader2, Palette, Check } from "lucide-react";
+import {
+  Settings,
+  Save,
+  Loader2,
+  Palette,
+  Check,
+  ChevronRight,
+} from "lucide-react";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
 import { useTheme } from "../../../shared/context/ThemeContext";
@@ -93,6 +100,13 @@ export default function Configuracion() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header>
+        <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+          <span>Administración</span>
+          <ChevronRight size={14} />
+          <span className="text-slate-900 dark:text-slate-100">
+            Configuración
+          </span>
+        </div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Configuración General
         </h1>

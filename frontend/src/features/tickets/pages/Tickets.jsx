@@ -12,7 +12,9 @@ import {
   QrCode,
   Printer,
   RotateCcw,
+  ChevronRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -134,17 +136,22 @@ export default function Tickets() {
   const handleExportPdf = async (ticket) => {
     // Log export to audit, then open print view (browser Save as PDF)
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action: "export.ticket_pdf",
-        collection: APP_IDS.collections.TICKETS,
-        docId: ticket.$id,
-        userId: user?.$id || "unknown",
-        details: JSON.stringify({
-          ticketNumber: ticket.ticketNumber,
-          clientId: ticket.clientId,
-          materialId: ticket.materialId,
-        }),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action: "export.ticket_pdf",
+          collection: APP_IDS.collections.TICKETS,
+          docId: ticket.$id,
+          userId: user?.$id || "unknown",
+          details: JSON.stringify({
+            ticketNumber: ticket.ticketNumber,
+            clientId: ticket.clientId,
+            materialId: ticket.materialId,
+          }),
+        },
+      );
     } catch (err) {
       console.warn("Audit log for PDF export failed:", err.message);
     }
@@ -208,8 +215,15 @@ export default function Tickets() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <header>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Documentos</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">
+              Tickets Operativos
+            </span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Tickets Operativos
           </h1>
@@ -251,7 +265,7 @@ export default function Tickets() {
       </div>
 
       {/* Tabla */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
@@ -471,7 +485,10 @@ export default function Tickets() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[110]" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[111] w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[111] w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
                 <RotateCcw
@@ -538,7 +555,10 @@ export default function Tickets() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6"
+          >
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                 <AlertTriangle

@@ -16,6 +16,7 @@ import {
   Hash,
   Clock,
   RefreshCw,
+  ChevronRight,
 } from "lucide-react";
 import { useValidacion } from "../hooks/useValidacion";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
@@ -457,7 +458,14 @@ export default function Validacion() {
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+        <header>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <span>Operación</span>
+            <ChevronRight size={14} />
+            <span className="text-slate-900 dark:text-slate-100">
+              Validación de Salida
+            </span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <QrCode size={24} className="text-primary-500" />
             Validación de Salida
@@ -465,7 +473,7 @@ export default function Validacion() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Escanea el QR del ticket o captura el folio para autorizar la salida
           </p>
-        </div>
+        </header>
         <button
           onClick={() => setShowHistory((h) => !h)}
           className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors self-start sm:self-auto ${

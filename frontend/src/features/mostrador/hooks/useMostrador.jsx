@@ -3,6 +3,7 @@ import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
+import { fetchWithCache } from "../../../shared/lib/catalogCache";
 
 const COUNTER_SALES = APP_IDS.collections.COUNTER_SALES;
 const TICKETS = APP_IDS.collections.TICKETS;
@@ -117,36 +118,46 @@ export function useMostrador() {
     }
   };
 
-  // ─── Catálogos ─────────────────────────────────────────────────
+  // ─── Catálogos (con caché offline) ──────────────────────────────
   const fetchCatalogs = useCallback(async () => {
     setLoadingCatalogs(true);
     try {
       const [c, d, tr, m, p] = await Promise.all([
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
-          Query.equal("active", true),
-          Query.orderAsc("name"),
-          Query.limit(200),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
-          Query.equal("active", true),
-          Query.orderAsc("fullName"),
-          Query.limit(200),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
-          Query.equal("active", true),
-          Query.orderAsc("plates"),
-          Query.limit(200),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
-          Query.equal("active", true),
-          Query.orderAsc("name"),
-          Query.limit(200),
-        ]),
-        databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
-          Query.equal("active", true),
-          Query.orderAsc("name"),
-          Query.limit(200),
-        ]),
+        fetchWithCache("clients_active", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
+            Query.equal("active", true),
+            Query.orderAsc("name"),
+            Query.limit(500),
+          ]),
+        ),
+        fetchWithCache("drivers_active", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
+            Query.equal("active", true),
+            Query.orderAsc("fullName"),
+            Query.limit(500),
+          ]),
+        ),
+        fetchWithCache("trucks_active", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
+            Query.equal("active", true),
+            Query.orderAsc("plates"),
+            Query.limit(500),
+          ]),
+        ),
+        fetchWithCache("materials_active", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
+            Query.equal("active", true),
+            Query.orderAsc("name"),
+            Query.limit(500),
+          ]),
+        ),
+        fetchWithCache("plants_active", () =>
+          databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
+            Query.equal("active", true),
+            Query.orderAsc("name"),
+            Query.limit(500),
+          ]),
+        ),
       ]);
       setClients(c.documents);
       setDrivers(d.documents);
