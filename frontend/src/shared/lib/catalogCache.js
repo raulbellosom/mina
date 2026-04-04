@@ -15,16 +15,68 @@
 
 import { setCatalogCache, getCatalogCache } from "./offlineStorage";
 
+/** Message shown when a write operation is attempted offline */
+const OFFLINE_MSG =
+  "Sin conexión a internet. Esta operación requiere conexión. Los datos se podrán modificar cuando se restablezca la conexión.";
+
 /**
  * Guard for write operations that require online connectivity.
  * Throws a user-friendly error instead of raw "Failed to fetch".
+ *
+ * Note: navigator.onLine is unreliable — it only checks if the network
+ * adapter is connected, not actual internet reachability. That's why we
+ * also wrap network errors in wrapOnlineOperation().
  */
 export function requireOnline() {
   if (!navigator.onLine) {
-    throw new Error(
-      "Sin conexión a internet. Esta operación requiere conexión. Los datos se podrán modificar cuando se restablezca la conexión.",
-    );
+    throw new Error(OFFLINE_MSG);
   }
+}
+
+/**
+ * Detect if an error is a network/connectivity failure.
+ */
+function isNetworkError(err) {
+  if (!err) return false;
+  const msg = err.message || "";
+  return (
+    msg.includes("Failed to fetch") ||
+    msg.includes("NetworkError") ||
+    msg.includes("Network request failed") ||
+    msg.includes("ERR_NAME_NOT_RESOLVED") ||
+    msg.includes("ERR_INTERNET_DISCONNECTED") ||
+    msg.includes("ERR_NETWORK") ||
+    msg.includes("Load failed") ||
+    err.code === 0
+  );
+}
+
+/**
+ * Wraps an async write operation so that network errors are translated
+ * to a clear user-facing message instead of raw "Failed to fetch".
+ *
+ * Usage in hooks:
+ *   return wrapOnlineOperation(async () => { ... });
+ */
+export async function wrapOnlineOperation(fn) {
+  requireOnline();
+  try {
+    return await fn();
+  } catch (err) {
+    if (isNetworkError(err)) {
+      throw new Error(OFFLINE_MSG);
+    }
+    throw err;
+  }
+}
+
+/**
+ * Convert raw errors to user-friendly messages.
+ * Use in form catch blocks: setError(friendlyError(err))
+ */
+export function friendlyError(err) {
+  if (isNetworkError(err)) return OFFLINE_MSG;
+  return err?.message || "Error inesperado";
 }
 
 /**

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Loader2 } from "lucide-react";
+import { friendlyError } from "../../../shared/lib/catalogCache";
 
 const EMPTY_FORM = {
   name: "",
@@ -66,7 +67,7 @@ export default function PlantaForm({ open, onOpenChange, editing, onSubmit }) {
       await onSubmit(form);
       onOpenChange(false);
     } catch (err) {
-      const msg = err.message || "Error al guardar";
+      const msg = friendlyError(err);
       if (
         msg.includes("Document with the requested ID already exists") ||
         msg.includes("unique")
@@ -90,7 +91,10 @@ export default function PlantaForm({ open, onOpenChange, editing, onSubmit }) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+        <Dialog.Content
+          aria-describedby={undefined}
+          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 max-h-[90vh] overflow-y-auto"
+        >
           <div className="flex items-center justify-between mb-5">
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
               {isEditing ? "Editar planta / origen" : "Nueva planta / origen"}
