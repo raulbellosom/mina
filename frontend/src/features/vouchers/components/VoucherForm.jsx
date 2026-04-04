@@ -229,7 +229,7 @@ export default function VoucherForm({
                   <option value="">— Sin camión asignado —</option>
                   {trucks.map((t) => (
                     <option key={t.$id} value={t.$id}>
-                      {t.plates} {t.alias ? `— ${t.alias}` : ""}
+                      {t.plateNumber} {t.economicNumber ? `— ${t.economicNumber}` : ""}
                     </option>
                   ))}
                 </select>

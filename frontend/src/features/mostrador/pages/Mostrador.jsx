@@ -737,7 +737,7 @@ function SaleDetail({
                 label="Camión"
                 value={
                   truckMap[sale.truckId]
-                    ? `${truckMap[sale.truckId].plates}${truckMap[sale.truckId].alias ? ` — ${truckMap[sale.truckId].alias}` : ""}`
+                    ? `${truckMap[sale.truckId].plateNumber}${truckMap[sale.truckId].economicNumber ? ` — ${truckMap[sale.truckId].economicNumber}` : ""}`
                     : "—"
                 }
               />

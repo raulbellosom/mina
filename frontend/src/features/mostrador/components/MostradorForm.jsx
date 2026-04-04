@@ -216,8 +216,8 @@ export default function MostradorForm({
                     <option value="">Sin camión registrado</option>
                     {trucks.map((t) => (
                       <option key={t.$id} value={t.$id}>
-                        {t.plates}
-                        {t.alias ? ` — ${t.alias}` : ""}
+                        {t.plateNumber}
+                        {t.economicNumber ? ` — ${t.economicNumber}` : ""}
                       </option>
                     ))}
                   </select>

@@ -154,7 +154,7 @@ export async function prefetchAllCatalogs(
       collection: collections.TRUCKS,
       queries: [
         Query.equal("active", true),
-        Query.orderAsc("plates"),
+        Query.orderAsc("plateNumber"),
         Query.limit(500),
       ],
     },

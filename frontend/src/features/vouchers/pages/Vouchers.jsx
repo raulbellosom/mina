@@ -481,7 +481,7 @@ export default function Vouchers() {
                   label="Camión"
                   value={
                     truckMap[detailItem.truckId]
-                      ? `${truckMap[detailItem.truckId].plates}${truckMap[detailItem.truckId].alias ? ` — ${truckMap[detailItem.truckId].alias}` : ""}`
+                      ? `${truckMap[detailItem.truckId].plateNumber}${truckMap[detailItem.truckId].economicNumber ? ` — ${truckMap[detailItem.truckId].economicNumber}` : ""}`
                       : "—"
                   }
                 />

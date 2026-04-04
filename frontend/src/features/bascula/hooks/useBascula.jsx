@@ -138,7 +138,7 @@ export function useBascula() {
 
       // 2. Intentar por placas del camión
       const truckRes = await databases.listDocuments(DATABASE_ID, TRUCKS, [
-        Query.equal("plates", q.toUpperCase()),
+        Query.equal("plateNumber", q.toUpperCase()),
         Query.limit(5),
       ]);
       if (truckRes.documents.length > 0) {
@@ -328,7 +328,7 @@ export function useBascula() {
 
       await databases.updateDocument(DATABASE_ID, TICKETS, ticketId, {
         weightOut: exitW,
-        tara,
+        tare: tara,
         netWeight,
         weightUnit: unit,
         scaleNotes: notes || ticket.scaleNotes || "",

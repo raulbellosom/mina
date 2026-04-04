@@ -1540,14 +1540,6 @@
           "size": 36
         },
         {
-          "key": "tara",
-          "type": "float",
-          "status": "available",
-          "required": false,
-          "array": false,
-          "default": 0
-        },
-        {
           "key": "weightUnit",
           "type": "string",
           "status": "available",

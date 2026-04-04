@@ -156,7 +156,7 @@ export default function TicketPrintView({
               label="Camión"
               value={
                 truckMap[ticket.truckId]
-                  ? `${truckMap[ticket.truckId].plates}${truckMap[ticket.truckId].alias ? ` — ${truckMap[ticket.truckId].alias}` : ""}`
+                  ? `${truckMap[ticket.truckId].plateNumber}${truckMap[ticket.truckId].economicNumber ? ` — ${truckMap[ticket.truckId].economicNumber}` : ""}`
                   : "—"
               }
             />

@@ -140,7 +140,7 @@ export function useMostrador() {
         fetchWithCache("trucks_active", () =>
           databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
             Query.equal("active", true),
-            Query.orderAsc("plates"),
+            Query.orderAsc("plateNumber"),
             Query.limit(500),
           ]),
         ),

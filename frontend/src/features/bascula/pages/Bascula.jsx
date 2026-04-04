@@ -428,7 +428,7 @@ export default function Bascula() {
 
   const entryWeight = parseFloat(selectedTicket?.weightIn) || 0;
   const exitWeight = parseFloat(selectedTicket?.weightOut) || 0;
-  const tara = parseFloat(selectedTicket?.tara) || 0;
+  const tara = parseFloat(selectedTicket?.tare) || 0;
   const netWeight = parseFloat(selectedTicket?.netWeight) || 0;
 
   const FILTER_OPTIONS = [
