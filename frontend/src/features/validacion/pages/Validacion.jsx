@@ -181,76 +181,10 @@ function QrScannerCamera({ onResult, active }) {
     };
   }, [active]);
 
-  // ── Permission denied view ──
-  if (status === "denied") {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 p-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-        <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-          <ShieldAlert
-            size={28}
-            className="text-amber-600 dark:text-amber-400"
-          />
-        </div>
-        <div className="text-center space-y-1">
-          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-            Permiso de cámara requerido
-          </p>
-          <p className="text-xs text-amber-600 dark:text-amber-400 max-w-xs">
-            {errorMsg}
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
-          <button
-            onClick={retryPermission}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors"
-          >
-            <Camera size={16} />
-            Otorgar permiso
-          </button>
-        </div>
-        <p className="text-[11px] text-amber-500 dark:text-amber-500/70 text-center max-w-xs leading-relaxed">
-          Si el permiso fue denegado permanentemente, abre la configuración de
-          tu navegador → Permisos del sitio → Cámara → Permitir, y recarga la
-          página.
-        </p>
-      </div>
-    );
-  }
+  // ── Always render the scanner div so html5-qrcode can find it ──
+  // Overlay status messages on top instead of conditional rendering
+  const showOverlay = status === "denied" || status === "error" || status === "requesting";
 
-  // ── Error view ──
-  if (status === "error") {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 p-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
-        <CameraOff size={32} className="text-slate-400" />
-        <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
-          {errorMsg}
-        </p>
-        <button
-          onClick={() => startScanner(activeCameraIdx)}
-          className="text-xs text-primary-600 dark:text-primary-400 underline"
-        >
-          Reintentar
-        </button>
-      </div>
-    );
-  }
-
-  // ── Requesting permission / loading ──
-  if (status === "requesting") {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 p-8 bg-slate-100 dark:bg-slate-800 rounded-xl">
-        <Loader2 size={32} className="animate-spin text-primary-500" />
-        <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
-          Solicitando acceso a la cámara…
-        </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-          Acepta el permiso en el diálogo de tu navegador
-        </p>
-      </div>
-    );
-  }
-
-  // ── Scanner active / idle ──
   return (
     <div className="relative rounded-xl overflow-hidden bg-black">
       {/* Force html5-qrcode internal video to be visible and fill container */}
@@ -265,12 +199,76 @@ function QrScannerCamera({ onResult, active }) {
           display: none !important;
         }
       `}</style>
-      {/* html5-qrcode renders the video + canvas inside this div */}
+
+      {/* Scanner region — ALWAYS in the DOM */}
       <div
         id={SCANNER_REGION_ID}
         className="w-full"
         style={{ minHeight: "280px" }}
       />
+
+      {/* ── Permission denied overlay ── */}
+      {status === "denied" && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 p-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+            <ShieldAlert
+              size={28}
+              className="text-amber-600 dark:text-amber-400"
+            />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+              Permiso de cámara requerido
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 max-w-xs">
+              {errorMsg}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+            <button
+              onClick={retryPermission}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              <Camera size={16} />
+              Otorgar permiso
+            </button>
+          </div>
+          <p className="text-[11px] text-amber-500 dark:text-amber-500/70 text-center max-w-xs leading-relaxed">
+            Si el permiso fue denegado permanentemente, abre la configuración de
+            tu navegador → Permisos del sitio → Cámara → Permitir, y recarga la
+            página.
+          </p>
+        </div>
+      )}
+
+      {/* ── Error overlay ── */}
+      {status === "error" && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 p-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <CameraOff size={32} className="text-slate-400" />
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+            {errorMsg}
+          </p>
+          <button
+            onClick={() => startScanner(activeCameraIdx)}
+            className="text-xs text-primary-600 dark:text-primary-400 underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {/* ── Requesting permission overlay ── */}
+      {status === "requesting" && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 p-8 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <Loader2 size={32} className="animate-spin text-primary-500" />
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+            Solicitando acceso a la cámara…
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+            Acepta el permiso en el diálogo de tu navegador
+          </p>
+        </div>
+      )}
 
       {/* Camera switch button — only if >1 camera */}
       {status === "scanning" && cameras.length > 1 && (
