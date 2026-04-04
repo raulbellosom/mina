@@ -132,7 +132,7 @@ export default function PermisosMatrix({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content className="fixed right-0 top-0 h-full z-50 w-full max-w-2xl bg-white dark:bg-slate-900 shadow-xl flex flex-col">
+        <Dialog.Content aria-describedby={undefined} className="fixed right-0 top-0 h-full z-50 w-full max-w-2xl bg-white dark:bg-slate-900 shadow-xl flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
             <div>

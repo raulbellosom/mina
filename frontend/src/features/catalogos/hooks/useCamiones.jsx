@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const COLLECTION = "trucks";
+const COLLECTION = APP_IDS.collections.TRUCKS;
 
 export function useCamiones() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export function useCamiones() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
         collection: COLLECTION,
         docId,
@@ -33,7 +33,7 @@ export function useCamiones() {
   /* ─── Load active clients for selector ─── */
   const fetchClients = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "clients", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
         Query.equal("active", true),
         Query.orderAsc("name"),
         Query.limit(500),
@@ -47,7 +47,7 @@ export function useCamiones() {
   /* ─── Load active drivers for selector ─── */
   const fetchDrivers = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "drivers", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
         Query.equal("active", true),
         Query.orderAsc("fullName"),
         Query.limit(500),

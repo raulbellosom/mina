@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const COLLECTION = "clients";
+const COLLECTION = APP_IDS.collections.CLIENTS;
 
 /**
  * Hook para gestión de clientes.
@@ -26,7 +26,7 @@ export function useClientes() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
         collection: COLLECTION,
         docId,

@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
 
-const TICKETS = "tickets";
-const WEIGHT_LOGS = "weight_logs";
-const AUDIT = "audit_logs";
-const TRUCKS = "trucks";
-const VOUCHERS = "vouchers";
+const TICKETS = APP_IDS.collections.TICKETS;
+const WEIGHT_LOGS = APP_IDS.collections.WEIGHT_LOGS;
+const AUDIT = APP_IDS.collections.AUDIT_LOGS;
+const TRUCKS = APP_IDS.collections.TRUCKS;
+const VOUCHERS = APP_IDS.collections.VOUCHERS;
 
 function isNetworkError(err) {
   return (

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID, storage } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, storage, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const COLLECTION = "materials";
-const BUCKET = "material_images";
+const COLLECTION = APP_IDS.collections.MATERIALS;
+const BUCKET = APP_IDS.buckets.MATERIAL_IMAGES;
 
 /**
  * Hook para gestión de materiales.
@@ -29,7 +29,7 @@ export function useMateriales() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
         collection: COLLECTION,
         docId,
@@ -46,7 +46,7 @@ export function useMateriales() {
     try {
       const res = await databases.listDocuments(
         DATABASE_ID,
-        "material_categories",
+        APP_IDS.collections.MATERIAL_CATEGORIES,
         [
           Query.equal("active", true),
           Query.orderAsc("sortOrder"),

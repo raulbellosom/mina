@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
 
-const COUNTER_SALES = "counter_sales";
-const TICKETS = "tickets";
-const AUDIT = "audit_logs";
+const COUNTER_SALES = APP_IDS.collections.COUNTER_SALES;
+const TICKETS = APP_IDS.collections.TICKETS;
+const AUDIT = APP_IDS.collections.AUDIT_LOGS;
 
 function isNetworkError(err) {
   return (
@@ -122,27 +122,27 @@ export function useMostrador() {
     setLoadingCatalogs(true);
     try {
       const [c, d, tr, m, p] = await Promise.all([
-        databases.listDocuments(DATABASE_ID, "clients", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
           Query.equal("active", true),
           Query.orderAsc("name"),
           Query.limit(200),
         ]),
-        databases.listDocuments(DATABASE_ID, "drivers", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
           Query.equal("active", true),
           Query.orderAsc("fullName"),
           Query.limit(200),
         ]),
-        databases.listDocuments(DATABASE_ID, "trucks", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
           Query.equal("active", true),
           Query.orderAsc("plates"),
           Query.limit(200),
         ]),
-        databases.listDocuments(DATABASE_ID, "materials", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
           Query.equal("active", true),
           Query.orderAsc("name"),
           Query.limit(200),
         ]),
-        databases.listDocuments(DATABASE_ID, "plants", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
           Query.equal("active", true),
           Query.orderAsc("name"),
           Query.limit(200),

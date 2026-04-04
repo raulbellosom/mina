@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { addToQueue } from "../../../shared/lib/offlineStorage";
 import { verifyQrToken } from "../../tickets/hooks/useTickets";
 
-const TICKETS = "tickets";
-const SCAN_LOGS = "scan_logs";
-const AUDIT = "audit_logs";
+const TICKETS = APP_IDS.collections.TICKETS;
+const SCAN_LOGS = APP_IDS.collections.SCAN_LOGS;
+const AUDIT = APP_IDS.collections.AUDIT_LOGS;
 
 function isNetworkError(err) {
   return (

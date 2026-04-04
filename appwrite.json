@@ -7,7 +7,11 @@
       "$id": "create-user",
       "name": "Create User",
       "runtime": "node-18.0",
-      "execute": ["label:admin", "label:owner", "label:root"],
+      "execute": [
+        "label:admin",
+        "label:owner",
+        "label:root"
+      ],
       "events": [],
       "schedule": "",
       "timeout": 15,
@@ -25,16 +29,29 @@
         {
           "name": "APPWRITE_DATABASE_ID",
           "value": "mina_db"
+        },
+        {
+          "name": "APPWRITE_COLLECTION_USERS_PROFILE",
+          "value": "users_profile"
+        },
+        {
+          "name": "APPWRITE_COLLECTION_AUDIT_LOGS",
+          "value": "audit_logs"
         }
       ],
-      "ignore": ["node_modules", ".npm"],
+      "ignore": [
+        "node_modules",
+        ".npm"
+      ],
       "path": "functions/create-user"
     },
     {
       "$id": "setup-owner",
       "name": "Setup Owner",
       "runtime": "node-18.0",
-      "execute": ["any"],
+      "execute": [
+        "any"
+      ],
       "events": [],
       "schedule": "",
       "timeout": 15,
@@ -42,21 +59,40 @@
       "logging": true,
       "entrypoint": "src/index.js",
       "commands": "npm install",
-      "scopes": ["users.read", "users.write", "databases.read"],
+      "scopes": [
+        "users.read",
+        "users.write",
+        "databases.read"
+      ],
       "vars": [
         {
           "name": "APPWRITE_DATABASE_ID",
           "value": "mina_db"
+        },
+        {
+          "name": "APPWRITE_COLLECTION_SYSTEM_CONFIG",
+          "value": "system_config"
+        },
+        {
+          "name": "APPWRITE_DOC_SYSTEM_CONFIG_SINGLETON",
+          "value": "singleton"
         }
       ],
-      "ignore": ["node_modules", ".npm"],
+      "ignore": [
+        "node_modules",
+        ".npm"
+      ],
       "path": "functions/setup-owner"
     },
     {
       "$id": "sync-user-name",
       "name": "Sync User Name",
       "runtime": "node-18.0",
-      "execute": ["label:admin", "label:owner", "label:root"],
+      "execute": [
+        "label:admin",
+        "label:owner",
+        "label:root"
+      ],
       "events": [],
       "schedule": "",
       "timeout": 15,
@@ -74,9 +110,16 @@
         {
           "name": "APPWRITE_DATABASE_ID",
           "value": "mina_db"
+        },
+        {
+          "name": "APPWRITE_COLLECTION_USERS_PROFILE",
+          "value": "users_profile"
         }
       ],
-      "ignore": ["node_modules", ".npm"],
+      "ignore": [
+        "node_modules",
+        ".npm"
+      ],
       "path": "functions/sync-user-name"
     }
   ],
@@ -217,19 +260,25 @@
           "key": "idx_userId",
           "type": "unique",
           "status": "available",
-          "attributes": ["userId"]
+          "attributes": [
+            "userId"
+          ]
         },
         {
           "key": "idx_roleId",
           "type": "key",
           "status": "available",
-          "attributes": ["roleId"]
+          "attributes": [
+            "roleId"
+          ]
         },
         {
           "key": "idx_status",
           "type": "key",
           "status": "available",
-          "attributes": ["status"]
+          "attributes": [
+            "status"
+          ]
         }
       ]
     },
@@ -308,13 +357,17 @@
           "key": "idx_code",
           "type": "unique",
           "status": "available",
-          "attributes": ["code"]
+          "attributes": [
+            "code"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         }
       ]
     },
@@ -429,19 +482,25 @@
           "key": "idx_code",
           "type": "unique",
           "status": "available",
-          "attributes": ["code"]
+          "attributes": [
+            "code"
+          ]
         },
         {
           "key": "idx_category",
           "type": "key",
           "status": "available",
-          "attributes": ["categoryId"]
+          "attributes": [
+            "categoryId"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         }
       ]
     },
@@ -576,19 +635,25 @@
           "key": "idx_rfc",
           "type": "key",
           "status": "available",
-          "attributes": ["rfc"]
+          "attributes": [
+            "rfc"
+          ]
         },
         {
           "key": "idx_type",
           "type": "key",
           "status": "available",
-          "attributes": ["type"]
+          "attributes": [
+            "type"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         }
       ]
     },
@@ -713,25 +778,33 @@
           "key": "idx_fullName",
           "type": "key",
           "status": "available",
-          "attributes": ["fullName"]
+          "attributes": [
+            "fullName"
+          ]
         },
         {
           "key": "idx_clientId",
           "type": "key",
           "status": "available",
-          "attributes": ["clientId"]
+          "attributes": [
+            "clientId"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         },
         {
           "key": "idx_licenseNumber",
           "type": "key",
           "status": "available",
-          "attributes": ["licenseNumber"]
+          "attributes": [
+            "licenseNumber"
+          ]
         }
       ]
     },
@@ -900,31 +973,41 @@
           "key": "idx_plateNumber",
           "type": "unique",
           "status": "available",
-          "attributes": ["plateNumber"]
+          "attributes": [
+            "plateNumber"
+          ]
         },
         {
           "key": "idx_economicNumber",
           "type": "key",
           "status": "available",
-          "attributes": ["economicNumber"]
+          "attributes": [
+            "economicNumber"
+          ]
         },
         {
           "key": "idx_clientId",
           "type": "key",
           "status": "available",
-          "attributes": ["clientId"]
+          "attributes": [
+            "clientId"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         },
         {
           "key": "idx_habitualDriverId",
           "type": "key",
           "status": "available",
-          "attributes": ["habitualDriverId"]
+          "attributes": [
+            "habitualDriverId"
+          ]
         }
       ]
     },
@@ -1060,25 +1143,33 @@
           "key": "idx_name",
           "type": "unique",
           "status": "available",
-          "attributes": ["name"]
+          "attributes": [
+            "name"
+          ]
         },
         {
           "key": "idx_code",
           "type": "unique",
           "status": "available",
-          "attributes": ["code"]
+          "attributes": [
+            "code"
+          ]
         },
         {
           "key": "idx_active",
           "type": "key",
           "status": "available",
-          "attributes": ["active"]
+          "attributes": [
+            "active"
+          ]
         },
         {
           "key": "idx_sortOrder",
           "type": "key",
           "status": "available",
-          "attributes": ["sortOrder"]
+          "attributes": [
+            "sortOrder"
+          ]
         }
       ]
     },
@@ -1245,37 +1336,49 @@
           "key": "idx_internalFolio",
           "type": "unique",
           "status": "available",
-          "attributes": ["internalFolio"]
+          "attributes": [
+            "internalFolio"
+          ]
         },
         {
           "key": "idx_status",
           "type": "key",
           "status": "available",
-          "attributes": ["status"]
+          "attributes": [
+            "status"
+          ]
         },
         {
           "key": "idx_clientId",
           "type": "key",
           "status": "available",
-          "attributes": ["clientId"]
+          "attributes": [
+            "clientId"
+          ]
         },
         {
           "key": "idx_materialId",
           "type": "key",
           "status": "available",
-          "attributes": ["materialId"]
+          "attributes": [
+            "materialId"
+          ]
         },
         {
           "key": "idx_plantId",
           "type": "key",
           "status": "available",
-          "attributes": ["plantId"]
+          "attributes": [
+            "plantId"
+          ]
         },
         {
           "key": "idx_ticketId",
           "type": "key",
           "status": "available",
-          "attributes": ["ticketId"]
+          "attributes": [
+            "ticketId"
+          ]
         }
       ]
     },
@@ -1566,49 +1669,75 @@
           "key": "idx_ticketNumber",
           "type": "unique",
           "status": "available",
-          "attributes": ["ticketNumber"],
-          "orders": ["ASC"]
+          "attributes": [
+            "ticketNumber"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_voucherId",
           "type": "key",
           "status": "available",
-          "attributes": ["voucherId"],
-          "orders": ["ASC"]
+          "attributes": [
+            "voucherId"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_status",
           "type": "key",
           "status": "available",
-          "attributes": ["status"],
-          "orders": ["ASC"]
+          "attributes": [
+            "status"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_clientId",
           "type": "key",
           "status": "available",
-          "attributes": ["clientId"],
-          "orders": ["ASC"]
+          "attributes": [
+            "clientId"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_qrData",
           "type": "unique",
           "status": "available",
-          "attributes": ["qrData"],
-          "orders": ["ASC"]
+          "attributes": [
+            "qrData"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_materialId",
           "type": "key",
           "status": "available",
-          "attributes": ["materialId"],
-          "orders": ["ASC"]
+          "attributes": [
+            "materialId"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_counterSaleId",
           "type": "key",
           "status": "available",
-          "attributes": ["counterSaleId"]
+          "attributes": [
+            "counterSaleId"
+          ]
         }
       ]
     },
@@ -1701,22 +1830,34 @@
           "key": "idx_ticketId",
           "type": "key",
           "status": "available",
-          "attributes": ["ticketId"],
-          "orders": ["ASC"]
+          "attributes": [
+            "ticketId"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_printType",
           "type": "key",
           "status": "available",
-          "attributes": ["printType"],
-          "orders": ["ASC"]
+          "attributes": [
+            "printType"
+          ],
+          "orders": [
+            "ASC"
+          ]
         },
         {
           "key": "idx_printedBy",
           "type": "key",
           "status": "available",
-          "attributes": ["printedBy"],
-          "orders": ["ASC"]
+          "attributes": [
+            "printedBy"
+          ],
+          "orders": [
+            "ASC"
+          ]
         }
       ]
     },
@@ -1784,25 +1925,33 @@
           "key": "idx_docid",
           "type": "key",
           "status": "available",
-          "attributes": ["docId"]
+          "attributes": [
+            "docId"
+          ]
         },
         {
           "key": "idx_action",
           "type": "key",
           "status": "available",
-          "attributes": ["action"]
+          "attributes": [
+            "action"
+          ]
         },
         {
           "key": "idx_collection",
           "type": "key",
           "status": "available",
-          "attributes": ["collection"]
+          "attributes": [
+            "collection"
+          ]
         },
         {
           "key": "idx_userId",
           "type": "key",
           "status": "available",
-          "attributes": ["userId"]
+          "attributes": [
+            "userId"
+          ]
         }
       ]
     },
@@ -1953,7 +2102,9 @@
           "key": "idx_code",
           "type": "unique",
           "status": "available",
-          "attributes": ["code"]
+          "attributes": [
+            "code"
+          ]
         }
       ]
     },
@@ -2024,13 +2175,17 @@
           "key": "idx_code",
           "type": "unique",
           "status": "available",
-          "attributes": ["code"]
+          "attributes": [
+            "code"
+          ]
         },
         {
           "key": "idx_module",
           "type": "key",
           "status": "available",
-          "attributes": ["module"]
+          "attributes": [
+            "module"
+          ]
         }
       ]
     },
@@ -2086,13 +2241,17 @@
           "key": "idx_roleId",
           "type": "key",
           "status": "available",
-          "attributes": ["roleId"]
+          "attributes": [
+            "roleId"
+          ]
         },
         {
           "key": "idx_permCode",
           "type": "key",
           "status": "available",
-          "attributes": ["permissionCode"]
+          "attributes": [
+            "permissionCode"
+          ]
         }
       ]
     },
@@ -2270,31 +2429,41 @@
           "key": "idx_internalNumber",
           "type": "unique",
           "status": "available",
-          "attributes": ["internalNumber"]
+          "attributes": [
+            "internalNumber"
+          ]
         },
         {
           "key": "idx_status",
           "type": "key",
           "status": "available",
-          "attributes": ["status"]
+          "attributes": [
+            "status"
+          ]
         },
         {
           "key": "idx_clientId",
           "type": "key",
           "status": "available",
-          "attributes": ["clientId"]
+          "attributes": [
+            "clientId"
+          ]
         },
         {
           "key": "idx_materialId",
           "type": "key",
           "status": "available",
-          "attributes": ["materialId"]
+          "attributes": [
+            "materialId"
+          ]
         },
         {
           "key": "idx_ticketId",
           "type": "key",
           "status": "available",
-          "attributes": ["ticketId"]
+          "attributes": [
+            "ticketId"
+          ]
         }
       ]
     },
@@ -2392,13 +2561,17 @@
           "key": "idx_ticketId",
           "type": "key",
           "status": "available",
-          "attributes": ["ticketId"]
+          "attributes": [
+            "ticketId"
+          ]
         },
         {
           "key": "idx_type",
           "type": "key",
           "status": "available",
-          "attributes": ["type"]
+          "attributes": [
+            "type"
+          ]
         }
       ]
     },
@@ -2488,19 +2661,25 @@
           "key": "idx_ticketId",
           "type": "key",
           "status": "available",
-          "attributes": ["ticketId"]
+          "attributes": [
+            "ticketId"
+          ]
         },
         {
           "key": "idx_result",
           "type": "key",
           "status": "available",
-          "attributes": ["result"]
+          "attributes": [
+            "result"
+          ]
         },
         {
           "key": "idx_validatorId",
           "type": "key",
           "status": "available",
-          "attributes": ["validatorId"]
+          "attributes": [
+            "validatorId"
+          ]
         }
       ]
     }
@@ -2530,7 +2709,12 @@
       "name": "Imágenes de Materiales",
       "enabled": true,
       "maximumFileSize": 5242880,
-      "allowedFileExtensions": ["jpg", "jpeg", "png", "webp"],
+      "allowedFileExtensions": [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp"
+      ],
       "compression": "gzip",
       "encryption": true,
       "antivirus": false

@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  databases,
-  functions,
-  DATABASE_ID,
-} from "../../../shared/lib/appwrite";
+import { databases, functions, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
@@ -27,9 +23,9 @@ export function useUsuarios() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
-        collection: "users_profile",
+        collection: APP_IDS.collections.USERS_PROFILE,
         docId,
         userId: user.$id,
         details: JSON.stringify(details),
@@ -50,7 +46,7 @@ export function useUsuarios() {
 
       const res = await databases.listDocuments(
         DATABASE_ID,
-        "users_profile",
+        APP_IDS.collections.USERS_PROFILE,
         queries,
       );
 
@@ -83,7 +79,7 @@ export function useUsuarios() {
    */
   const createUser = async (data) => {
     const execution = await functions.createExecution(
-      "create-user",
+      APP_IDS.functions.CREATE_USER,
       JSON.stringify({ ...data, createdBy: user.$id }),
       false, // synchronous
       "/",
@@ -120,7 +116,7 @@ export function useUsuarios() {
       // Sincronizar nombre con Appwrite Auth via server-side Function
       try {
         const execution = await functions.createExecution(
-          "sync-user-name",
+          APP_IDS.functions.SYNC_USER_NAME,
           JSON.stringify({ userId: id, firstName, lastName }),
           false,
           "/",
@@ -136,13 +132,13 @@ export function useUsuarios() {
         // Aún así actualizar el profile localmente
         await databases.updateDocument(
           DATABASE_ID,
-          "users_profile",
+          APP_IDS.collections.USERS_PROFILE,
           id,
           payload,
         );
       }
     } else {
-      await databases.updateDocument(DATABASE_ID, "users_profile", id, payload);
+      await databases.updateDocument(DATABASE_ID, APP_IDS.collections.USERS_PROFILE, id, payload);
     }
 
     await logAudit("user.update", id, { fields: Object.keys(payload) });
@@ -157,7 +153,7 @@ export function useUsuarios() {
     const newActive = !currentActive;
     const newStatus = newActive ? "active" : "inactive";
 
-    await databases.updateDocument(DATABASE_ID, "users_profile", id, {
+    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.USERS_PROFILE, id, {
       active: newActive,
       status: newStatus,
     });

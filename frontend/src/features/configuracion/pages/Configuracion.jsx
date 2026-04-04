@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Settings, Save, Loader2, Palette, Check } from "lucide-react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
 import { useTheme } from "../../../shared/context/ThemeContext";
 import PALETTES from "../../../shared/config/palettes";
 
-const COLLECTION = "system_config";
-const DOC_ID = "singleton";
+const COLLECTION = APP_IDS.collections.SYSTEM_CONFIG;
+const DOC_ID = APP_IDS.docs.SYSTEM_CONFIG_SINGLETON;
 
 const DEFAULTS = {
   companyName: "",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
@@ -36,9 +36,9 @@ export function useRoles() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
-        collection: "roles",
+        collection: APP_IDS.collections.ROLES,
         docId,
         userId: user.$id,
         details: JSON.stringify(details),
@@ -59,7 +59,7 @@ export function useRoles() {
       if (filterStatus === "disabled")
         queries.push(Query.equal("enabled", false));
 
-      const res = await databases.listDocuments(DATABASE_ID, "roles", queries);
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.ROLES, queries);
       let docs = res.documents;
 
       if (search.trim()) {
@@ -92,7 +92,7 @@ export function useRoles() {
 
     const doc = await databases.createDocument(
       DATABASE_ID,
-      "roles",
+      APP_IDS.collections.ROLES,
       ID.unique(),
       payload,
     );
@@ -111,14 +111,14 @@ export function useRoles() {
       if (data[key] !== undefined) payload[key] = data[key];
     }
 
-    await databases.updateDocument(DATABASE_ID, "roles", id, payload);
+    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.ROLES, id, payload);
     await logAudit("role.update", id, { fields: Object.keys(payload) });
     await fetchRoles();
   };
 
   const toggleEnabled = async (id, currentEnabled) => {
     const newEnabled = !currentEnabled;
-    await databases.updateDocument(DATABASE_ID, "roles", id, {
+    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.ROLES, id, {
       enabled: newEnabled,
     });
     await logAudit(newEnabled ? "role.enable" : "role.disable", id, {
@@ -137,7 +137,7 @@ export function useRoles() {
       while (true) {
         const res = await databases.listDocuments(
           DATABASE_ID,
-          "permissions_catalog",
+          APP_IDS.collections.PERMISSIONS_CATALOG,
           [
             Query.equal("enabled", true),
             Query.orderAsc("module"),
@@ -167,7 +167,7 @@ export function useRoles() {
       while (true) {
         const res = await databases.listDocuments(
           DATABASE_ID,
-          "role_permissions",
+          APP_IDS.collections.ROLE_PERMISSIONS,
           [
             Query.equal("roleId", roleId),
             Query.equal("enabled", true),
@@ -202,7 +202,7 @@ export function useRoles() {
     while (true) {
       const res = await databases.listDocuments(
         DATABASE_ID,
-        "role_permissions",
+        APP_IDS.collections.ROLE_PERMISSIONS,
         [
           Query.equal("roleId", roleId),
           Query.limit(batchSize),
@@ -237,7 +237,7 @@ export function useRoles() {
 
     for (const code of toCreate) {
       promises.push(
-        databases.createDocument(DATABASE_ID, "role_permissions", ID.unique(), {
+        databases.createDocument(DATABASE_ID, APP_IDS.collections.ROLE_PERMISSIONS, ID.unique(), {
           roleId,
           permissionCode: code,
           enabled: true,
@@ -249,7 +249,7 @@ export function useRoles() {
       promises.push(
         databases.updateDocument(
           DATABASE_ID,
-          "role_permissions",
+          APP_IDS.collections.ROLE_PERMISSIONS,
           existingByCode[code].$id,
           {
             enabled: true,
@@ -262,7 +262,7 @@ export function useRoles() {
       promises.push(
         databases.updateDocument(
           DATABASE_ID,
-          "role_permissions",
+          APP_IDS.collections.ROLE_PERMISSIONS,
           existingByCode[code].$id,
           {
             enabled: false,
@@ -293,7 +293,7 @@ export function useRoles() {
       while (true) {
         const res = await databases.listDocuments(
           DATABASE_ID,
-          "role_permissions",
+          APP_IDS.collections.ROLE_PERMISSIONS,
           [
             Query.equal("enabled", true),
             Query.limit(batchSize),

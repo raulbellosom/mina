@@ -7,7 +7,7 @@ import {
   updateQueueEntry,
   clearSynced,
 } from "../lib/offlineStorage";
-import { databases, DATABASE_ID } from "../lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../lib/appwrite";
 import { ID } from "appwrite";
 import { useOnlineStatus } from "./useOnlineStatus";
 
@@ -106,11 +106,11 @@ export function useSyncQueue() {
     delete cleanData.salePayload;
 
     if (action === "create") {
-      if (collection === "counter_sales" && salePayload) {
+      if (collection === APP_IDS.collections.COUNTER_SALES && salePayload) {
         // Mostrador offline — re-execute full flow
         const sale = await databases.createDocument(
           DATABASE_ID,
-          "counter_sales",
+          APP_IDS.collections.COUNTER_SALES,
           ID.unique(),
           salePayload,
         );
@@ -141,11 +141,11 @@ export function useSyncQueue() {
 
         await databases.createDocument(
           DATABASE_ID,
-          "tickets",
+          APP_IDS.collections.TICKETS,
           ticketId,
           ticketPayload,
         );
-        await databases.updateDocument(DATABASE_ID, "counter_sales", sale.$id, {
+        await databases.updateDocument(DATABASE_ID, APP_IDS.collections.COUNTER_SALES, sale.$id, {
           ticketId,
           status: "ticket_generated",
         });
@@ -161,7 +161,7 @@ export function useSyncQueue() {
         if (ticketUpdate && cleanData.ticketId) {
           await databases.updateDocument(
             DATABASE_ID,
-            "tickets",
+            APP_IDS.collections.TICKETS,
             cleanData.ticketId,
             ticketUpdate,
           );
@@ -180,7 +180,7 @@ export function useSyncQueue() {
       if (scanLog) {
         await databases.createDocument(
           DATABASE_ID,
-          "scan_logs",
+          APP_IDS.collections.SCAN_LOGS,
           ID.unique(),
           scanLog,
         );
@@ -189,7 +189,7 @@ export function useSyncQueue() {
 
     // Log audit for sync
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action: "sync.completed",
         collection,
         docId: documentId || "offline_sync",

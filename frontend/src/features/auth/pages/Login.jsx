@@ -11,7 +11,7 @@ import {
   Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import PasswordInput from "../../../shared/components/PasswordInput";
 import { useTheme } from "../../../shared/context/ThemeContext";
 
@@ -36,8 +36,8 @@ export default function Login() {
       try {
         const response = await databases.getDocument(
           DATABASE_ID,
-          "system_config",
-          "singleton",
+          APP_IDS.collections.SYSTEM_CONFIG,
+          APP_IDS.docs.SYSTEM_CONFIG_SINGLETON,
         );
         if (response.isInitialized) {
           setMode("login");

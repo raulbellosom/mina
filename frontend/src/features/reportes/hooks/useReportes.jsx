@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query } from "appwrite";
 import { exportToCsv } from "../../../shared/lib/exportToCsv";
 
-const TICKETS = "tickets";
+const TICKETS = APP_IDS.collections.TICKETS;
 
 /**
  * Fetches ALL tickets matching date range in batches of 100 (Appwrite limit).
@@ -54,11 +54,11 @@ export function useReportes() {
 
   // Catalogs for name resolution
   const [catalogs, setCatalogs] = useState({
-    clients: [],
-    drivers: [],
-    trucks: [],
-    materials: [],
-    plants: [],
+    [APP_IDS.collections.CLIENTS]: [],
+    [APP_IDS.collections.DRIVERS]: [],
+    [APP_IDS.collections.TRUCKS]: [],
+    [APP_IDS.collections.MATERIALS]: [],
+    [APP_IDS.collections.PLANTS]: [],
   });
   const [catalogsLoaded, setCatalogsLoaded] = useState(false);
 
@@ -77,30 +77,30 @@ export function useReportes() {
     if (catalogsLoaded) return;
     try {
       const [cl, dr, tr, ma, pl] = await Promise.all([
-        databases.listDocuments(DATABASE_ID, "clients", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
           Query.limit(500),
           Query.orderAsc("name"),
         ]),
-        databases.listDocuments(DATABASE_ID, "drivers", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
           Query.limit(500),
           Query.orderAsc("fullName"),
         ]),
-        databases.listDocuments(DATABASE_ID, "trucks", [Query.limit(500)]),
-        databases.listDocuments(DATABASE_ID, "materials", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [Query.limit(500)]),
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
           Query.limit(500),
           Query.orderAsc("name"),
         ]),
-        databases.listDocuments(DATABASE_ID, "plants", [
+        databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
           Query.limit(500),
           Query.orderAsc("name"),
         ]),
       ]);
       setCatalogs({
-        clients: cl.documents,
-        drivers: dr.documents,
-        trucks: tr.documents,
-        materials: ma.documents,
-        plants: pl.documents,
+        [APP_IDS.collections.CLIENTS]: cl.documents,
+        [APP_IDS.collections.DRIVERS]: dr.documents,
+        [APP_IDS.collections.TRUCKS]: tr.documents,
+        [APP_IDS.collections.MATERIALS]: ma.documents,
+        [APP_IDS.collections.PLANTS]: pl.documents,
       });
       setCatalogsLoaded(true);
     } catch (err) {
@@ -118,24 +118,24 @@ export function useReportes() {
     [catalogs],
   );
 
-  const getClientName = useCallback((id) => getName("clients", id), [getName]);
+  const getClientName = useCallback((id) => getName(APP_IDS.collections.CLIENTS, id), [getName]);
   const getDriverName = useCallback(
-    (id) => getName("drivers", id, "fullName"),
+    (id) => getName(APP_IDS.collections.DRIVERS, id, "fullName"),
     [getName],
   );
   const getTruckPlate = useCallback(
     (id) => {
       if (!id) return "—";
-      const t = catalogs.trucks?.find((d) => d.$id === id);
+      const t = catalogs[APP_IDS.collections.TRUCKS]?.find((d) => d.$id === id);
       return t ? t.plateNumber || t.economicNumber || id : id;
     },
     [catalogs],
   );
   const getMaterialName = useCallback(
-    (id) => getName("materials", id),
+    (id) => getName(APP_IDS.collections.MATERIALS, id),
     [getName],
   );
-  const getPlantName = useCallback((id) => getName("plants", id), [getName]);
+  const getPlantName = useCallback((id) => getName(APP_IDS.collections.PLANTS, id), [getName]);
 
   /* ─── Generate report ─── */
   const generateReport = useCallback(
@@ -520,7 +520,7 @@ export function useReportes() {
       audit: resolvers.userId
         ? {
             action: "export.reports_csv",
-            collection: "tickets",
+            collection: APP_IDS.collections.TICKETS,
             userId: resolvers.userId,
             details: { reportType: reportData.type, rowCount: rows.length },
           }

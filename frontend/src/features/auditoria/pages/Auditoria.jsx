@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   ClipboardList,
   Search,
@@ -18,6 +18,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useAuditoria } from "../hooks/useAuditoria";
 import { usePermissions } from "../../../shared/hooks/usePermissions";
 import { useAuth } from "../../auth/hooks/useAuth";
+import { APP_IDS } from "../../../shared/lib/appwrite";
 import ExportButton from "../../../shared/components/ExportButton";
 
 /* ─── Action category → color mapping ─── */
@@ -85,23 +86,23 @@ function ActionBadge({ action }) {
 
 /* ─── Collection label mapping ─── */
 const COLLECTION_LABELS = {
-  users_profile: "Usuarios",
-  roles: "Roles",
-  role_permissions: "Permisos de rol",
-  permissions_catalog: "Catálogo permisos",
-  material_categories: "Categorías",
-  materials: "Materiales",
-  clients: "Clientes",
-  drivers: "Choferes",
-  trucks: "Camiones",
-  plants: "Plantas",
-  vouchers: "Vouchers",
-  tickets: "Tickets",
-  print_logs: "Impresiones",
-  weight_logs: "Pesos",
-  scan_logs: "Escaneos",
-  counter_sales: "Ventas mostrador",
-  audit_logs: "Auditoría",
+  [APP_IDS.collections.USERS_PROFILE]: "Usuarios",
+  [APP_IDS.collections.ROLES]: "Roles",
+  [APP_IDS.collections.ROLE_PERMISSIONS]: "Permisos de rol",
+  [APP_IDS.collections.PERMISSIONS_CATALOG]: "Catalogo permisos",
+  [APP_IDS.collections.MATERIAL_CATEGORIES]: "Categorias",
+  [APP_IDS.collections.MATERIALS]: "Materiales",
+  [APP_IDS.collections.CLIENTS]: "Clientes",
+  [APP_IDS.collections.DRIVERS]: "Choferes",
+  [APP_IDS.collections.TRUCKS]: "Camiones",
+  [APP_IDS.collections.PLANTS]: "Plantas",
+  [APP_IDS.collections.VOUCHERS]: "Vouchers",
+  [APP_IDS.collections.TICKETS]: "Tickets",
+  [APP_IDS.collections.PRINT_LOGS]: "Impresiones",
+  [APP_IDS.collections.WEIGHT_LOGS]: "Pesos",
+  [APP_IDS.collections.SCAN_LOGS]: "Escaneos",
+  [APP_IDS.collections.COUNTER_SALES]: "Ventas mostrador",
+  [APP_IDS.collections.AUDIT_LOGS]: "Auditoria",
 };
 
 function getCollectionLabel(col) {
@@ -123,7 +124,7 @@ function DetailModal({ log, open, onClose, userName }) {
     <Dialog.Root open={open} onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-slate-200 dark:border-zinc-700 max-h-[85vh] overflow-y-auto">
+        <Dialog.Content aria-describedby={undefined} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg mx-4 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-slate-200 dark:border-zinc-700 max-h-[85vh] overflow-y-auto">
           <div className="p-6 space-y-4">
             <Dialog.Title className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Eye size={18} />
@@ -233,10 +234,6 @@ function FiltersBar({
   onClear,
 }) {
   const [local, setLocal] = useState({ ...filters });
-
-  useEffect(() => {
-    setLocal({ ...filters });
-  }, [filters]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -525,6 +522,7 @@ export default function Auditoria() {
 
       {/* Filters */}
       <FiltersBar
+        key={`${filters.action}|${filters.collection}|${filters.userId}|${filters.dateFrom}|${filters.dateTo}`}
         filters={filters}
         knownActions={knownActions}
         knownCollections={knownCollections}

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const COLLECTION = "drivers";
+const COLLECTION = APP_IDS.collections.DRIVERS;
 
 /**
  * Hook para gestión de choferes.
@@ -26,7 +26,7 @@ export function useChoferes() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
         collection: COLLECTION,
         docId,
@@ -41,7 +41,7 @@ export function useChoferes() {
   /* ─── Load active clients for selector ─── */
   const fetchClients = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "clients", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
         Query.equal("active", true),
         Query.orderAsc("name"),
         Query.limit(500),

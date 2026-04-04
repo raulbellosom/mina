@@ -1,65 +1,77 @@
-const { Client, Users, Databases } = require('node-appwrite');
+const { Client, Users, Databases } = require("node-appwrite");
 
 /**
  * Appwrite Function: setup-owner
  *
- * Asigna los labels ['owner', 'admin'] al primer usuario del sistema.
- * Solo ejecuta si el sistema aún no está inicializado (system_config/singleton no existe).
- *
- * Se llama una sola vez durante el flujo de setup inicial desde registerAdmin().
- * Si el sistema ya está inicializado, devuelve error 403.
- *
- * Execute: ["any"] — el setup ocurre antes de que exista un admin con sesión.
- * Seguridad: el guard es la ausencia de system_config/singleton.
- *
- * Body esperado (JSON):
- *   userId {string} — ID del usuario al que se le asignarán los labels
+ * Assigns labels ['owner', 'admin'] to the first user in the system.
+ * Runs only while system setup is not sealed.
  */
 module.exports = async ({ req, res, log, error }) => {
-    const client = new Client()
-        .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-        .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-        .setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+  const getRequiredEnv = (key) => {
+    const value = process.env[key];
+    if (!value) throw new Error(`Missing required env: ${key}`);
+    return value;
+  };
 
-    const users = new Users(client);
-    const databases = new Databases(client);
-    const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'mina_db';
+  const client = new Client()
+    .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
+    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+    .setKey(req.headers["x-appwrite-key"]);
 
-    let body;
-    try {
-        body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    } catch (e) {
-        return res.json({ success: false, error: 'Invalid JSON body' }, 400);
+  const users = new Users(client);
+  const databases = new Databases(client);
+
+  let DATABASE_ID;
+  let SYSTEM_CONFIG_COLLECTION;
+  let SYSTEM_CONFIG_SINGLETON_DOC;
+  try {
+    DATABASE_ID = getRequiredEnv("APPWRITE_DATABASE_ID");
+    SYSTEM_CONFIG_COLLECTION = getRequiredEnv(
+      "APPWRITE_COLLECTION_SYSTEM_CONFIG",
+    );
+    SYSTEM_CONFIG_SINGLETON_DOC = getRequiredEnv(
+      "APPWRITE_DOC_SYSTEM_CONFIG_SINGLETON",
+    );
+  } catch (err) {
+    error(err.message);
+    return res.json({ success: false, error: err.message }, 500);
+  }
+
+  let body;
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch (e) {
+    return res.json({ success: false, error: "Invalid JSON body" }, 400);
+  }
+
+  const { userId } = body || {};
+
+  if (!userId) {
+    return res.json({ success: false, error: "Falta userId" }, 400);
+  }
+
+  // Guard: only execute while setup is not sealed yet
+  try {
+    await databases.getDocument(
+      DATABASE_ID,
+      SYSTEM_CONFIG_COLLECTION,
+      SYSTEM_CONFIG_SINGLETON_DOC,
+    );
+    return res.json({ success: false, error: "Sistema ya inicializado" }, 403);
+  } catch (err) {
+    if (err.code !== 404) {
+      error(`Error verificando system_config: ${err.message}`);
+      return res.json({ success: false, error: "Error interno" }, 500);
     }
+  }
 
-    const { userId } = body || {};
+  try {
+    await users.updateLabels(userId, ["owner", "admin"]);
+    log(`Labels ['owner', 'admin'] asignadas a: ${userId}`);
 
-    if (!userId) {
-        return res.json({ success: false, error: 'Falta userId' }, 400);
-    }
-
-    // Guard: solo ejecutar si el sistema NO está inicializado aún
-    try {
-        await databases.getDocument(DATABASE_ID, 'system_config', 'singleton');
-        // Si llega aquí, el sistema ya fue inicializado — rechazar
-        return res.json({ success: false, error: 'Sistema ya inicializado' }, 403);
-    } catch (err) {
-        if (err.code !== 404) {
-            // Error inesperado al leer system_config
-            error(`Error verificando system_config: ${err.message}`);
-            return res.json({ success: false, error: 'Error interno' }, 500);
-        }
-        // 404 = sistema no inicializado, continuar
-    }
-
-    try {
-        // Asignar labels owner + admin al usuario del setup
-        await users.updateLabels(userId, ['owner', 'admin']);
-        log(`Labels ['owner', 'admin'] asignadas a: ${userId}`);
-
-        return res.json({ success: true, userId });
-    } catch (err) {
-        error(`Error asignando labels: ${err.message}`);
-        return res.json({ success: false, error: err.message }, 500);
-    }
+    return res.json({ success: true, userId });
+  } catch (err) {
+    error(`Error asignando labels: ${err.message}`);
+    return res.json({ success: false, error: err.message }, 500);
+  }
 };

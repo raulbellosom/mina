@@ -7,10 +7,11 @@ export default defineConfig(({ mode }) => {
   // Configuración de env parser dinámico desde la carpeta padre
   const envDir = "../";
   const env = loadEnv(mode, envDir, "");
+  const blockedFrontendEnv = new Set(["APPWRITE_API_KEY"]);
 
   const processEnv = {};
   Object.keys(env).forEach((key) => {
-    if (key.startsWith("APPWRITE_")) {
+    if (key.startsWith("APPWRITE_") && !blockedFrontendEnv.has(key)) {
       processEnv[`import.meta.env.VITE_${key}`] = JSON.stringify(env[key]);
     }
   });

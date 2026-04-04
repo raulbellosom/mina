@@ -264,7 +264,7 @@ export default function Usuarios() {
             <Dialog.Root open={Boolean(confirmDisable)} onOpenChange={(v) => { if (!v) setConfirmDisable(null); }}>
                 <Dialog.Portal>
                     <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-                    <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+                    <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
                         <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                             Deshabilitar usuario
                         </Dialog.Title>
@@ -302,7 +302,7 @@ function UsuarioDetalle({ user: u, open, onClose, onEdit }) {
         <Dialog.Root open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
             <Dialog.Portal>
                 <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-                <Dialog.Content className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col">
+                <Dialog.Content aria-describedby={undefined} className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                         <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">

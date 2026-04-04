@@ -1,4 +1,4 @@
-import { databases, DATABASE_ID } from "./appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "./appwrite";
 import { ID } from "appwrite";
 
 /**
@@ -66,7 +66,7 @@ export async function exportToCsv({
     // Log to audit if requested
     if (audit?.userId) {
       try {
-        await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+        await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
           action: audit.action || "export.csv",
           collection: audit.collection || "unknown",
           docId: "bulk_export",

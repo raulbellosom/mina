@@ -1,10 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import {
-  account,
-  databases,
-  functions,
-  DATABASE_ID,
-} from "../../../shared/lib/appwrite";
+import { account, databases, functions, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { ID, Permission, Role } from "appwrite";
 import { clearAll as clearOfflineQueue } from "../../../shared/lib/offlineStorage";
 
@@ -39,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const currentProfile = await databases.getDocument(
           DATABASE_ID,
-          "users_profile",
+          APP_IDS.collections.USERS_PROFILE,
           currentAccount.$id,
         );
         // Sobrescribir 'role' con el valor real derivado de las labels de Auth
@@ -72,7 +67,7 @@ export const AuthProvider = ({ children }) => {
           try {
             const created = await databases.createDocument(
               DATABASE_ID,
-              "users_profile",
+              APP_IDS.collections.USERS_PROFILE,
               currentAccount.$id,
               newProfile,
               [
@@ -142,7 +137,7 @@ export const AuthProvider = ({ children }) => {
     //    llama users.updateLabels(['owner', 'admin']) server-side.
     try {
       await functions.createExecution(
-        "setup-owner",
+        APP_IDS.functions.SETUP_OWNER,
         JSON.stringify({ userId: currentAccount.$id }),
         false,
         "/",
@@ -166,7 +161,7 @@ export const AuthProvider = ({ children }) => {
     // 5. Crear el documento de perfil.
     const newProfile = await databases.createDocument(
       DATABASE_ID,
-      "users_profile",
+      APP_IDS.collections.USERS_PROFILE,
       currentAccount.$id,
       {
         userId: currentAccount.$id,
@@ -188,8 +183,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await databases.createDocument(
         DATABASE_ID,
-        "system_config",
-        "singleton",
+        APP_IDS.collections.SYSTEM_CONFIG,
+        APP_IDS.docs.SYSTEM_CONFIG_SINGLETON,
         { isInitialized: true },
         [
           Permission.read(Role.any()),

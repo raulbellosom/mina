@@ -22,14 +22,32 @@ const { Client, Users, Databases, ID } = require("node-appwrite");
  *   createdBy   {string}  userId del admin que crea (requerido)
  */
 module.exports = async ({ req, res, log, error }) => {
+  const getRequiredEnv = (key) => {
+    const value = process.env[key];
+    if (!value) throw new Error(`Missing required env: ${key}`);
+    return value;
+  };
+
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-    .setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+    .setKey(req.headers["x-appwrite-key"]);
 
   const users = new Users(client);
   const databases = new Databases(client);
-  const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || "mina_db";
+  let DATABASE_ID;
+  let USERS_PROFILE_COLLECTION;
+  let AUDIT_COLLECTION;
+  try {
+    DATABASE_ID = getRequiredEnv("APPWRITE_DATABASE_ID");
+    USERS_PROFILE_COLLECTION = getRequiredEnv(
+      "APPWRITE_COLLECTION_USERS_PROFILE",
+    );
+    AUDIT_COLLECTION = getRequiredEnv("APPWRITE_COLLECTION_AUDIT_LOGS");
+  } catch (err) {
+    error(err.message);
+    return res.json({ success: false, error: err.message }, 500);
+  }
 
   let body;
   try {
@@ -131,16 +149,16 @@ module.exports = async ({ req, res, log, error }) => {
 
     await databases.createDocument(
       DATABASE_ID,
-      "users_profile",
+      USERS_PROFILE_COLLECTION,
       newUserId,
       profileData,
     );
     log(`Perfil creado para: ${newUserId}`);
 
     // 4. Registrar auditoría
-    await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+    await databases.createDocument(DATABASE_ID, AUDIT_COLLECTION, ID.unique(), {
       action: "user.create",
-      collection: "users_profile",
+      collection: USERS_PROFILE_COLLECTION,
       docId: newUserId,
       userId: createdBy,
       details: JSON.stringify({

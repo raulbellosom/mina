@@ -30,8 +30,13 @@ for (const line of envFile.split('\n')) {
     env[key.trim()] = rest.join('=').trim();
 }
 
-const DATABASE_ID = env.APPWRITE_DATABASE_ID || 'mina_db';
-const COLLECTION = 'roles';
+const DATABASE_ID = env.APPWRITE_DATABASE_ID;
+const COLLECTION = env.APPWRITE_COLLECTION_ROLES;
+
+if (!DATABASE_ID || !COLLECTION) {
+    console.error('Faltan variables: APPWRITE_DATABASE_ID y APPWRITE_COLLECTION_ROLES');
+    process.exit(1);
+}
 
 // ─── Roles de sistema ────────────────────────────────────────────────
 const SYSTEM_ROLES = [

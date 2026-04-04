@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query } from "appwrite";
 import { exportToCsv } from "../../../shared/lib/exportToCsv";
 
-const COLLECTION = "audit_logs";
+const COLLECTION = APP_IDS.collections.AUDIT_LOGS;
 const PAGE_SIZE_OPTIONS = [25, 50];
 
 export function useAuditoria() {
@@ -37,7 +37,7 @@ export function useAuditoria() {
           const batch = missing.slice(i, i + batchSize);
           const res = await databases.listDocuments(
             DATABASE_ID,
-            "users_profile",
+            APP_IDS.collections.USERS_PROFILE,
             [Query.equal("userId", batch), Query.limit(batchSize)],
           );
           res.documents.forEach((u) => {
@@ -221,7 +221,7 @@ export function useAuditoria() {
           audit: userId
             ? {
                 action: "export.audit_csv",
-                collection: "audit_logs",
+                collection: APP_IDS.collections.AUDIT_LOGS,
                 userId,
                 details: { filters },
               }

@@ -20,7 +20,7 @@ import { usePermissions } from "../../../shared/hooks/usePermissions";
 import MostradorForm from "../components/MostradorForm";
 import TicketPrintView from "../../tickets/components/TicketPrintView";
 import { usePrintTicket } from "../../tickets/hooks/usePrintTicket";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { useToast } from "../../../shared/components/Toast";
 
 const SALE_STATUSES = {
@@ -171,7 +171,7 @@ export default function Mostrador() {
     try {
       const ticket = await databases.getDocument(
         DATABASE_ID,
-        "tickets",
+        APP_IDS.collections.TICKETS,
         ticketId,
       );
       setPrintViewTicket(ticket);
@@ -513,7 +513,7 @@ export default function Mostrador() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[110]" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[111] w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[111] w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white mb-1">
               Reimprimir ticket
             </Dialog.Title>
@@ -557,7 +557,7 @@ export default function Mostrador() {
       >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
+          <Dialog.Content aria-describedby={undefined} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                 <AlertTriangle
@@ -636,7 +636,7 @@ function SaleDetail({
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
-        <Dialog.Content className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col">
+        <Dialog.Content aria-describedby={undefined} className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-xl flex flex-col">
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
             <Dialog.Title className="text-lg font-bold text-slate-900 dark:text-white">
               Detalle de venta

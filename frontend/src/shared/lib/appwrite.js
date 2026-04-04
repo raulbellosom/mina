@@ -15,5 +15,11 @@ export const functions = new Functions(client);
 
 // Default Database ID
 export const DATABASE_ID = ENV.appwrite.databaseId;
+export const APP_IDS = {
+    collections: ENV.appwrite.collections,
+    buckets: ENV.appwrite.buckets,
+    functions: ENV.appwrite.functions,
+    docs: ENV.appwrite.docs,
+};
 
 export default client;

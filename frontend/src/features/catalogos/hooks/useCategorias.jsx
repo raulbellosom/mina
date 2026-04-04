@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
@@ -22,9 +22,9 @@ export function useCategorias() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
-        collection: "material_categories",
+        collection: APP_IDS.collections.MATERIAL_CATEGORIES,
         docId,
         userId: user.$id,
         details: JSON.stringify(details),
@@ -49,7 +49,7 @@ export function useCategorias() {
 
       const res = await databases.listDocuments(
         DATABASE_ID,
-        "material_categories",
+        APP_IDS.collections.MATERIAL_CATEGORIES,
         queries,
       );
       let docs = res.documents;
@@ -84,7 +84,7 @@ export function useCategorias() {
 
     const doc = await databases.createDocument(
       DATABASE_ID,
-      "material_categories",
+      APP_IDS.collections.MATERIAL_CATEGORIES,
       ID.unique(),
       payload,
     );
@@ -108,7 +108,7 @@ export function useCategorias() {
 
     await databases.updateDocument(
       DATABASE_ID,
-      "material_categories",
+      APP_IDS.collections.MATERIAL_CATEGORIES,
       id,
       payload,
     );
@@ -118,7 +118,7 @@ export function useCategorias() {
 
   const toggleActive = async (id, currentActive) => {
     const newActive = !currentActive;
-    await databases.updateDocument(DATABASE_ID, "material_categories", id, {
+    await databases.updateDocument(DATABASE_ID, APP_IDS.collections.MATERIAL_CATEGORIES, id, {
       active: newActive,
     });
     await logAudit(newActive ? "category.activate" : "category.disable", id, {

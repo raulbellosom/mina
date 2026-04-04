@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const COLLECTION = "tickets";
-const VOUCHERS_COLLECTION = "vouchers";
+const COLLECTION = APP_IDS.collections.TICKETS;
+const VOUCHERS_COLLECTION = APP_IDS.collections.VOUCHERS;
 
 /**
  * Estados del ticket operativo:
@@ -110,7 +110,7 @@ export function useTickets() {
   const logAudit = async (action, docId, details = {}) => {
     if (!user) return;
     try {
-      await databases.createDocument(DATABASE_ID, "audit_logs", ID.unique(), {
+      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
         action,
         collection: COLLECTION,
         docId,
@@ -125,7 +125,7 @@ export function useTickets() {
   /* ─── Load catalogs ─── */
   const fetchClients = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "clients", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.CLIENTS, [
         Query.equal("active", true),
         Query.orderAsc("name"),
         Query.limit(500),
@@ -138,7 +138,7 @@ export function useTickets() {
 
   const fetchDrivers = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "drivers", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.DRIVERS, [
         Query.equal("active", true),
         Query.orderAsc("fullName"),
         Query.limit(500),
@@ -151,7 +151,7 @@ export function useTickets() {
 
   const fetchTrucks = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "trucks", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.TRUCKS, [
         Query.equal("active", true),
         Query.orderDesc("$createdAt"),
         Query.limit(500),
@@ -164,7 +164,7 @@ export function useTickets() {
 
   const fetchMaterials = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "materials", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.MATERIALS, [
         Query.equal("active", true),
         Query.orderAsc("name"),
         Query.limit(500),
@@ -177,7 +177,7 @@ export function useTickets() {
 
   const fetchPlants = useCallback(async () => {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, "plants", [
+      const res = await databases.listDocuments(DATABASE_ID, APP_IDS.collections.PLANTS, [
         Query.equal("active", true),
         Query.orderAsc("sortOrder"),
         Query.limit(500),

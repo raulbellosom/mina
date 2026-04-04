@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { databases, DATABASE_ID } from "../../../shared/lib/appwrite";
+import { databases, DATABASE_ID, APP_IDS } from "../../../shared/lib/appwrite";
 import { Query, ID } from "appwrite";
 import { useAuth } from "../../auth/hooks/useAuth";
 
-const TICKETS_COLLECTION = "tickets";
-const PRINT_LOGS_COLLECTION = "print_logs";
-const AUDIT_COLLECTION = "audit_logs";
+const TICKETS_COLLECTION = APP_IDS.collections.TICKETS;
+const PRINT_LOGS_COLLECTION = APP_IDS.collections.PRINT_LOGS;
+const AUDIT_COLLECTION = APP_IDS.collections.AUDIT_LOGS;
 
 /** Default number of copies per print operation */
 export const DEFAULT_COPIES = 3;
