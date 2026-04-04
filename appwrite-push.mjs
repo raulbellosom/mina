@@ -25,7 +25,9 @@ const respond = (chunk) => {
   if (
     text.includes("confirm") ||
     text.includes("cancel") ||
-    text.includes("YES")
+    text.includes("YES") ||
+    text.includes("(Y/n)") ||
+    text.includes("(y/N)")
   ) {
     p.stdin.write("YES\n");
   }

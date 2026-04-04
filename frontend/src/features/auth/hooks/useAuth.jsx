@@ -51,8 +51,17 @@ export const AuthProvider = ({ children }) => {
         if (err.code === 404) {
           // Sin perfil — crear documento en Appwrite para persistir
           const derivedRole = getRoleFromLabels(currentAccount.labels);
+          const nameParts = (
+            currentAccount.name ||
+            currentAccount.email ||
+            ""
+          ).split(" ");
+          const fallbackFirst = nameParts[0] || "";
+          const fallbackLast = nameParts.slice(1).join(" ") || "";
           const newProfile = {
             userId: currentAccount.$id,
+            firstName: fallbackFirst,
+            lastName: fallbackLast,
             name: currentAccount.name || currentAccount.email,
             email: currentAccount.email || "",
             phone: "",
@@ -119,9 +128,10 @@ export const AuthProvider = ({ children }) => {
     setProfile(null);
   };
 
-  const registerAdmin = async (name, email, password) => {
+  const registerAdmin = async (firstName, lastName, email, password) => {
+    const fullName = `${firstName} ${lastName}`.trim();
     // 1. Crear cuenta en Appwrite Auth
-    await account.create(ID.unique(), email, password, name);
+    await account.create(ID.unique(), email, password, fullName);
     // 2. Iniciar sesión inmediatamente
     await account.createEmailPasswordSession(email, password);
     // 3. Obtener datos frescos de la cuenta (con $id definitivo)
@@ -150,9 +160,13 @@ export const AuthProvider = ({ children }) => {
       currentAccount.$id,
       {
         userId: currentAccount.$id,
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
+        name: fullName,
+        email: email,
         role: "owner",
         active: true,
+        createdBy: currentAccount.$id,
       },
       [
         Permission.read(Role.user(currentAccount.$id)),

@@ -51,6 +51,33 @@
       ],
       "ignore": ["node_modules", ".npm"],
       "path": "functions/setup-owner"
+    },
+    {
+      "$id": "sync-user-name",
+      "name": "Sync User Name",
+      "runtime": "node-18.0",
+      "execute": ["label:admin", "label:owner", "label:root"],
+      "events": [],
+      "schedule": "",
+      "timeout": 15,
+      "enabled": true,
+      "logging": true,
+      "entrypoint": "src/index.js",
+      "commands": "npm install",
+      "scopes": [
+        "users.read",
+        "users.write",
+        "databases.read",
+        "databases.write"
+      ],
+      "vars": [
+        {
+          "name": "APPWRITE_DATABASE_ID",
+          "value": "mina_db"
+        }
+      ],
+      "ignore": ["node_modules", ".npm"],
+      "path": "functions/sync-user-name"
     }
   ],
   "databases": [
@@ -70,6 +97,7 @@
         "read(\"label:root\")",
         "read(\"label:operador\")",
         "read(\"label:capturista\")",
+        "update(\"label:root\")",
         "update(\"label:owner\")",
         "update(\"label:admin\")",
         "delete(\"label:owner\")"
@@ -107,7 +135,7 @@
           "key": "firstName",
           "type": "string",
           "status": "available",
-          "required": false,
+          "required": true,
           "array": false,
           "size": 64
         },
@@ -115,7 +143,7 @@
           "key": "lastName",
           "type": "string",
           "status": "available",
-          "required": false,
+          "required": true,
           "array": false,
           "size": 64
         },
@@ -213,10 +241,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -295,10 +326,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -419,10 +453,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -563,10 +600,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -703,10 +743,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -893,10 +936,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -1049,6 +1095,7 @@
         "create(\"label:capturista\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
         "delete(\"label:owner\")"
@@ -1245,6 +1292,7 @@
         "create(\"label:capturista\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
         "delete(\"label:owner\")"
@@ -1675,6 +1723,7 @@
     {
       "$id": "audit_logs",
       "$permissions": [
+        "read(\"label:root\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
         "create(\"label:root\")",
@@ -1764,6 +1813,7 @@
         "create(\"users\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "update(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -1829,10 +1879,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -1904,10 +1957,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:owner\")"
       ],
       "databaseId": "mina_db",
@@ -1978,10 +2034,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:admin\")",
         "delete(\"label:owner\")"
       ],
@@ -2042,6 +2101,7 @@
         "create(\"label:capturista\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
         "delete(\"label:owner\")"
@@ -2243,6 +2303,7 @@
         "create(\"label:capturista\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
         "delete(\"label:owner\")"
@@ -2336,6 +2397,7 @@
     {
       "$id": "scan_logs",
       "$permissions": [
+        "read(\"label:root\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
         "create(\"label:root\")",
@@ -2446,10 +2508,13 @@
         "read(\"label:capturista\")",
         "read(\"label:admin\")",
         "read(\"label:owner\")",
+        "create(\"label:root\")",
         "create(\"label:admin\")",
         "create(\"label:owner\")",
+        "update(\"label:root\")",
         "update(\"label:admin\")",
         "update(\"label:owner\")",
+        "delete(\"label:root\")",
         "delete(\"label:admin\")",
         "delete(\"label:owner\")"
       ],
