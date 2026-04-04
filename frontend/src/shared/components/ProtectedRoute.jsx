@@ -16,7 +16,7 @@ export default function ProtectedRoute({ requiredPermission }) {
 
   if (loading) {
     return (
-      <div className="h-dvh h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">
           Cargando sesión...
         </p>
@@ -37,7 +37,7 @@ export default function ProtectedRoute({ requiredPermission }) {
 
 function AccessDenied() {
   return (
-    <div className="h-dvh h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white p-8">
+    <div className="h-dvh flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white p-8">
       <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 mb-4">
         <ShieldOff size={36} />
       </div>

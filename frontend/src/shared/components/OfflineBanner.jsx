@@ -14,7 +14,13 @@ export default function OfflineBanner() {
     syncing,
     syncProgress,
     syncAll,
+    clearSyncResult,
   } = useSyncQueue();
+
+  const dismissBanner = () => {
+    clearWasOffline();
+    clearSyncResult();
+  };
 
   // Offline banner
   if (!isOnline) {
@@ -63,7 +69,7 @@ export default function OfflineBanner() {
           </span>
         </div>
         <button
-          onClick={clearWasOffline}
+          onClick={dismissBanner}
           className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors"
         >
           Cerrar
@@ -92,7 +98,7 @@ export default function OfflineBanner() {
             Sincronizar ahora
           </button>
           <button
-            onClick={clearWasOffline}
+            onClick={dismissBanner}
             className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition-colors"
           >
             Cerrar

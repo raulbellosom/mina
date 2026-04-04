@@ -25,7 +25,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-dvh min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+    <div className="min-h-dvh flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="mb-6">
           <Link

@@ -145,10 +145,15 @@ export function useSyncQueue() {
           ticketId,
           ticketPayload,
         );
-        await databases.updateDocument(DATABASE_ID, APP_IDS.collections.COUNTER_SALES, sale.$id, {
-          ticketId,
-          status: "ticket_generated",
-        });
+        await databases.updateDocument(
+          DATABASE_ID,
+          APP_IDS.collections.COUNTER_SALES,
+          sale.$id,
+          {
+            ticketId,
+            status: "ticket_generated",
+          },
+        );
       } else {
         // Generic create (weight_logs, etc.)
         await databases.createDocument(
@@ -189,17 +194,22 @@ export function useSyncQueue() {
 
     // Log audit for sync
     try {
-      await databases.createDocument(DATABASE_ID, APP_IDS.collections.AUDIT_LOGS, ID.unique(), {
-        action: "sync.completed",
-        collection,
-        docId: documentId || "offline_sync",
-        userId: data.createdBy || data.operatorId || data.validatedBy || "",
-        details: JSON.stringify({
-          queueId: entry.id,
-          module: entry.meta?.module,
-          description: entry.meta?.description,
-        }),
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        APP_IDS.collections.AUDIT_LOGS,
+        ID.unique(),
+        {
+          action: "sync.completed",
+          collection,
+          docId: documentId || "offline_sync",
+          userId: data.createdBy || data.operatorId || data.validatedBy || "",
+          details: JSON.stringify({
+            queueId: entry.id,
+            module: entry.meta?.module,
+            description: entry.meta?.description,
+          }),
+        },
+      );
     } catch {
       // audit log failure is non-critical
     }
@@ -371,6 +381,10 @@ export function useSyncQueue() {
     await refreshQueue();
   }, [refreshQueue]);
 
+  const clearSyncResult = useCallback(() => {
+    setSyncProgress((prev) => ({ ...prev, lastResult: null }));
+  }, []);
+
   return {
     entries,
     pendingCount,
@@ -386,5 +400,6 @@ export function useSyncQueue() {
     isOnline,
     wasOffline,
     clearWasOffline,
+    clearSyncResult,
   };
 }

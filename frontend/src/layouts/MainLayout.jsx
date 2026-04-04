@@ -4,21 +4,21 @@ import { useTheme } from "../shared/context/ThemeContext";
 import {
   LayoutDashboard,
   Scale,
-  ShieldCheck,
-  ShoppingBag,
-  FileText,
+  ScanLine,
+  Store,
+  ReceiptText,
   Ticket,
   Pickaxe,
-  Tag,
+  Tags,
   Users,
-  UserSquare2,
+  Contact,
   Truck,
-  Droplet,
+  Mountain,
   Users2,
   KeyRound,
   ClipboardList,
   Settings,
-  BarChart2,
+  BarChart3,
   CloudOff,
   LogOut,
   Sun,
@@ -39,26 +39,26 @@ const navGroups = [
     items: [
       { name: "Dashboard", path: "/", icon: LayoutDashboard, end: true },
       { name: "Báscula", path: "/bascula", icon: Scale },
-      { name: "Venta en Mostrador", path: "/mostrador", icon: ShoppingBag },
-      { name: "Validación de Salida", path: "/validacion", icon: ShieldCheck },
+      { name: "Venta en Mostrador", path: "/mostrador", icon: Store },
+      { name: "Validación de Salida", path: "/validacion", icon: ScanLine },
     ],
   },
   {
     label: "DOCUMENTOS",
     items: [
       { name: "Vouchers / Referencias", path: "/vouchers", icon: Ticket },
-      { name: "Tickets", path: "/tickets", icon: FileText },
+      { name: "Tickets", path: "/tickets", icon: ReceiptText },
     ],
   },
   {
     label: "CATÁLOGOS",
     items: [
       { name: "Materiales", path: "/catalogos/materiales", icon: Pickaxe },
-      { name: "Categorías", path: "/catalogos/categorias", icon: Tag },
+      { name: "Categorías", path: "/catalogos/categorias", icon: Tags },
       { name: "Clientes", path: "/catalogos/clientes", icon: Users },
-      { name: "Choferes", path: "/catalogos/choferes", icon: UserSquare2 },
+      { name: "Choferes", path: "/catalogos/choferes", icon: Contact },
       { name: "Camiones", path: "/catalogos/camiones", icon: Truck },
-      { name: "Plantas", path: "/catalogos/plantas", icon: Droplet },
+      { name: "Plantas", path: "/catalogos/plantas", icon: Mountain },
     ],
   },
   {
@@ -72,7 +72,7 @@ const navGroups = [
   },
   {
     label: "REPORTES",
-    items: [{ name: "Reportes", path: "/reportes", icon: BarChart2 }],
+    items: [{ name: "Reportes", path: "/reportes", icon: BarChart3 }],
   },
   {
     label: "SISTEMA",
@@ -184,7 +184,7 @@ export default function MainLayout() {
 
       {/* Footer */}
       <div
-        className={`p-2 border-t border-slate-200 dark:border-slate-800 space-y-0.5 shrink-0 ${isCollapsed ? "flex flex-col items-center" : ""}`}
+        className={`p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] border-t border-slate-200 dark:border-slate-800 space-y-0.5 shrink-0 ${isCollapsed ? "flex flex-col items-center" : ""}`}
       >
         {/* User info */}
         {!isCollapsed && (
@@ -241,7 +241,7 @@ export default function MainLayout() {
   );
 
   return (
-    <div className="flex h-dvh h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
       <aside
         className={`hidden lg:flex flex-col shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 relative

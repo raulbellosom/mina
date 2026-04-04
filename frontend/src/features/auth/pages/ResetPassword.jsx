@@ -53,7 +53,7 @@ export default function ResetPassword() {
 
   if (status === "invalid") {
     return (
-      <div className="min-h-dvh min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+      <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
         <div className="w-full max-w-md text-center bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
           <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
@@ -75,7 +75,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-dvh min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+    <div className="min-h-dvh flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="flex flex-col items-center mb-8 text-center">
           <h1 className="text-2xl font-bold tracking-tight">
